@@ -1,0 +1,48 @@
+# Python
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# Virtual environments
+
+venv/
+.env/
+.venv/
+
+# IDE
+
+.vscode/
+.idea/
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# Build
+
+build/
+dist/
+*.egg-info/
+
+# Logs
+
+*.log
+
+# Chroma
+
+chroma_db/
+
+# Temporary
+
+*.tmp
+
+# Testing
+
+.pytest_cache/
+.coverage

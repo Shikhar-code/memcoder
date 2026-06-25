@@ -1,0 +1,163 @@
+[
+  {
+    "task": "Git merge conflict",
+    "files": [
+      "main.py"
+    ],
+    "summary": "Pulling changes from the remote branch caused a conflict in a file both developers edited.",
+    "solution": "Open the file, manually resolve the differences between the markers, remove the markers, and commit."
+  },
+  {
+    "task": "Code formatter breaking builds",
+    "files": [
+      ".prettierrc"
+    ],
+    "summary": "Different developers committing code with different spacing caused massive, unreadable diffs.",
+    "solution": "Add a .prettierrc or .editorconfig file to the repo and enforce formatting checks in a pre-commit hook."
+  },
+  {
+    "task": "Unit tests not found by runner",
+    "files": [
+      "test.py"
+    ],
+    "summary": "Running pytest reported 'collected 0 items' despite tests existing in the directory.",
+    "solution": "Ensure the test file names follow the required framework pattern, such as prefixing the file with test_."
+  },
+  {
+    "task": "Null pointer exception",
+    "files": [
+      "utils.py"
+    ],
+    "summary": "The application crashed when trying to access a property of an object that hadn't been initialized.",
+    "solution": "Add a null check before attempting to access properties or methods on the object."
+  },
+  {
+    "task": "Script hangs on input",
+    "files": [
+      "script.py"
+    ],
+    "summary": "A background script froze indefinitely because it hit an input() prompt expecting user interaction.",
+    "solution": "Remove hardcoded input() calls in non-interactive environments or pass arguments via the command line instead."
+  },
+  {
+    "task": "Complex regex failing edge cases",
+    "files": [
+      "parser.py"
+    ],
+    "summary": "A massive one-line regular expression for email validation was impossible to debug.",
+    "solution": "Break the regex into smaller, readable parts using verbose mode and add inline comments explaining each segment."
+  },
+  {
+    "task": "Integration test flaky due to network",
+    "files": [
+      "api_test.py"
+    ],
+    "summary": "Tests failed randomly depending on the availability of a third-party API.",
+    "solution": "Mock the external network calls using a library like responses to return deterministic JSON payloads."
+  },
+  {
+    "task": "Timezone calculation wrong",
+    "files": [
+      "dates.py"
+    ],
+    "summary": "Users in different countries saw incorrect event start times due to server local time processing.",
+    "solution": "Always store dates in UTC in the database, and only format them to the specific local timezone on the client UI."
+  },
+  {
+    "task": "Memory leak in custom cache",
+    "files": [
+      "cache.py"
+    ],
+    "summary": "A simple dictionary used as an in-memory cache grew indefinitely until it crashed the server.",
+    "solution": "Implement an LRU (Least Recently Used) cache with a strict maximum size limit to evict old items."
+  },
+  {
+    "task": "Deep object copy issues",
+    "files": [
+      "state.py"
+    ],
+    "summary": "Modifying a copied configuration object accidentally mutated the original object as well.",
+    "solution": "Use a deep clone function instead of standard assignment to avoid shared references."
+  },
+  {
+    "task": "Race condition in shared state",
+    "files": [
+      "workers.py"
+    ],
+    "summary": "Multiple threads updating a shared dictionary occasionally resulted in lost data.",
+    "solution": "Use thread-safe data structures like queue.Queue instead of sharing raw dictionaries across threads."
+  },
+  {
+    "task": "Generic type parameter constraints failing",
+    "files": [
+      "generics.ts"
+    ],
+    "summary": "A generic function threw compiler errors because it assumed the type had a specific property.",
+    "solution": "Use bounded type variables to enforce that the passed type implements the required interface."
+  },
+  {
+    "task": "Abstract syntax tree manipulation broken",
+    "files": [
+      "compiler.py"
+    ],
+    "summary": "Attempting to recursively modify code using an AST resulted in infinite loops.",
+    "solution": "Write a proper visitor pattern class to traverse and modify the AST safely without mutating the tree while iterating over it."
+  },
+  {
+    "task": "Custom garbage collector stalling",
+    "files": [
+      "gc.c"
+    ],
+    "summary": "A custom scripting language implementation paused periodically to clean up memory.",
+    "solution": "Implement an incremental sweeping algorithm instead of a naive stop-the-world approach to spread the cleanup work."
+  },
+  {
+    "task": "Circular dependencies crashing import",
+    "files": [
+      "module_a.py",
+      "module_b.py"
+    ],
+    "summary": "Module A imported B, and B imported A, causing an ImportError on startup.",
+    "solution": "Refactor the architecture to extract common interfaces and data structures into a separate shared module."
+  },
+  {
+    "task": "Business logic tied to database",
+    "files": [
+      "app.py"
+    ],
+    "summary": "Switching from MySQL to PostgreSQL required rewriting the entire application's core logic.",
+    "solution": "Refactor using Hexagonal Architecture to strictly isolate the business domain from database details."
+  },
+  {
+    "task": "Huge monolithic classes",
+    "files": [
+      "UserManager.java"
+    ],
+    "summary": "A massive class handled authentication, profile updates, and email sending.",
+    "solution": "Apply the Single Responsibility Principle to break the manager down into AuthManager, ProfileService, and EmailSender."
+  },
+  {
+    "task": "Hard to add new features",
+    "files": [
+      "core.py"
+    ],
+    "summary": "Adding a new payment provider required modifying numerous switch statements across the codebase.",
+    "solution": "Implement a Plugin architecture using the Strategy pattern to allow new providers to be added without modifying core code."
+  },
+  {
+    "task": "Inconsistent domain terminology",
+    "files": [
+      "models.py"
+    ],
+    "summary": "Marketing called them 'clients', engineering called them 'users', causing communication errors.",
+    "solution": "Implement Domain-Driven Design (DDD) principles and enforce a strict Ubiquitous Language across all code and documentation."
+  },
+  {
+    "task": "Breaking changes affecting clients",
+    "files": [
+      "api.py"
+    ],
+    "summary": "Changing a JSON response field broke thousands of mobile app installations instantly.",
+    "solution": "Implement strict API versioning from the very beginning to allow backward-compatible evolution."
+  }
+]

@@ -1,0 +1,163 @@
+[
+  {
+    "task": "CORS error fetching data",
+    "files": [
+      "api.js"
+    ],
+    "summary": "The browser blocked an API request to the backend due to missing CORS headers.",
+    "solution": "Add proper Access-Control-Allow-Origin headers on the backend server response."
+  },
+  {
+    "task": "Button click not updating UI",
+    "files": [
+      "app.js"
+    ],
+    "summary": "State was mutated directly without using the framework's state update functions.",
+    "solution": "Use setState or the useState hook properly to trigger a re-render when data changes."
+  },
+  {
+    "task": "CSS flexbox alignment failing",
+    "files": [
+      "styles.css"
+    ],
+    "summary": "Child elements did not align horizontally because the parent lacked proper display properties.",
+    "solution": "Add display: flex and justify-content: space-between to the parent container's CSS class."
+  },
+  {
+    "task": "404 on page refresh in SPA",
+    "files": [
+      "nginx.conf"
+    ],
+    "summary": "Refreshing a React Router page returned a 404 because the server looked for a physical file.",
+    "solution": "Configure the web server to fallback to index.html for all unknown routes."
+  },
+  {
+    "task": "Form submitting reloads page",
+    "files": [
+      "form.js"
+    ],
+    "summary": "Clicking submit on a form caused the browser to execute its default reload behavior.",
+    "solution": "Call event.preventDefault() inside the form's submit event handler before processing data."
+  },
+  {
+    "task": "JWT token expiring silently",
+    "files": [
+      "auth.js"
+    ],
+    "summary": "Users were unexpectedly logged out when their short-lived access token expired.",
+    "solution": "Implement an axios interceptor to automatically catch 401s, request a new token using the refresh token, and retry the request."
+  },
+  {
+    "task": "Deeply nested props management",
+    "files": [
+      "app.jsx",
+      "child.jsx"
+    ],
+    "summary": "Passing state down through layers of components became impossible to maintain.",
+    "solution": "Migrate to a global state management solution like Redux or Zustand to access state directly from child components."
+  },
+  {
+    "task": "Flash of Unstyled Content (FOUC)",
+    "files": [
+      "index.html"
+    ],
+    "summary": "Users saw raw HTML before the external CSS bundle finished downloading.",
+    "solution": "Move critical CSS directly into the HTML <head> or implement Server-Side Rendering (SSR)."
+  },
+  {
+    "task": "Heavy JavaScript bundle size",
+    "files": [
+      "webpack.config.js"
+    ],
+    "summary": "The initial page load was slow because all routes were bundled into a single massive JS file.",
+    "solution": "Implement code splitting using React.lazy() and Suspense to load route components only when visited."
+  },
+  {
+    "task": "Third-party script blocking main thread",
+    "files": [
+      "index.html"
+    ],
+    "summary": "An analytics script halted the rendering of the DOM until it finished executing.",
+    "solution": "Add the defer or async attribute to the script tag, or move heavy logic to a WebWorker."
+  },
+  {
+    "task": "WebSockets dropping connections",
+    "files": [
+      "socket.js"
+    ],
+    "summary": "Mobile clients frequently lost WebSocket connections when switching networks.",
+    "solution": "Implement exponential backoff reconnection logic and send periodic heartbeat pings to keep the connection alive."
+  },
+  {
+    "task": "Animations lagging",
+    "files": [
+      "animate.css"
+    ],
+    "summary": "Animating the width and height properties triggered expensive browser layout recalculations.",
+    "solution": "Move animations to the compositor thread by using only transform and opacity CSS properties."
+  },
+  {
+    "task": "React Context causing excessive re-renders",
+    "files": [
+      "context.jsx"
+    ],
+    "summary": "Updating a single value in a massive Context caused the entire application to re-render.",
+    "solution": "Split the giant context into multiple smaller contexts and use useMemo to memoize child components."
+  },
+  {
+    "task": "Client-side memory leak",
+    "files": [
+      "component.jsx"
+    ],
+    "summary": "Navigating between pages slowly increased memory usage until the browser tab crashed.",
+    "solution": "Clean up DOM event listeners and clear setInterval timers in the component's unmount cleanup function."
+  },
+  {
+    "task": "High Cumulative Layout Shift (CLS)",
+    "files": [
+      "layout.css"
+    ],
+    "summary": "Images loading slowly caused the page content to jump around, ruining the user experience.",
+    "solution": "Reserve space for dynamic images by setting an aspect-ratio in CSS before the image loads."
+  },
+  {
+    "task": "Monolithic frontend scaling issues",
+    "files": [
+      "package.json"
+    ],
+    "summary": "Multiple teams working on one large React app caused deployment bottlenecks and conflicts.",
+    "solution": "Split the frontend into Micro-frontends using Webpack Module Federation, allowing teams to deploy independently."
+  },
+  {
+    "task": "Complex API aggregations on client",
+    "files": [
+      "api.js"
+    ],
+    "summary": "The frontend had to make multiple REST calls to build a single dashboard, making it slow.",
+    "solution": "Introduce a BFF (Backend for Frontend) using GraphQL to aggregate data server-side and return exactly what the UI needs."
+  },
+  {
+    "task": "Inconsistent UI across projects",
+    "files": [
+      "components.js"
+    ],
+    "summary": "Different products in the company used slightly different buttons and colors.",
+    "solution": "Build, document, and publish a centralized Design System component library via an internal npm registry."
+  },
+  {
+    "task": "SEO requirements for dynamic SPA",
+    "files": [
+      "app.js"
+    ],
+    "summary": "Search engine crawlers indexed blank pages because the React app rendered fully client-side.",
+    "solution": "Migrate the Single Page Application to Next.js to enable Server-Side Rendering (SSR) for static content pages."
+  },
+  {
+    "task": "Adding offline support",
+    "files": [
+      "service-worker.js"
+    ],
+    "summary": "The application showed an offline error when network connectivity was lost.",
+    "solution": "Implement Service Workers and IndexedDB to cache critical assets and allow offline read access to recent data."
+  }
+]

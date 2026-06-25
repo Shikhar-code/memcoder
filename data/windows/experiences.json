@@ -1,0 +1,136 @@
+[
+    {
+        "task": "C drive became full",
+        "files": [
+            "unknown"
+        ],
+        "summary": "The C drive storage reached its capacity limit, leading to disk space issues.",
+        "solution": "Identify unnecessary files or delete them, consider using a cloud-based backup system for future reference."
+    },
+    {
+        "task": "Explorer.exe stopped responding",
+        "files": [
+            "Unknown"
+        ],
+        "summary": "Explorer.exe became unresponsive due to a bug or issue with the operating system.",
+        "solution": "Perform a Windows System Restore to a known working state, check for any recent updates or patches that could have affected Explorer, and run antivirus software to scan for malware."
+    },
+    {
+        "task": "NVIDIA GPU not detected",
+        "files": [],
+        "summary": "Unable to detect NVIDIA GPU, which is required for proper operation.",
+        "solution": "Ensure the system has a compatible NVIDIA GPU and update drivers if necessary."
+    },
+    {
+        "task": "Hibernate caused disk usage",
+        "files": [
+            "System settings or Powercfg configuration"
+        ],
+        "summary": "Hibernate function was consuming excessive disk space due to improper configuration.",
+        "solution": "Review and adjust Hibernate settings to minimize disk usage."
+    },
+    {
+        "task": "Windows Update Failed",
+        "files": [],
+        "summary": "Windows Update encountered an error during installation.",
+        "solution": "Review the Windows Update log for more details and try updating again or manually download the updates."
+    },
+    {
+        "task": "Driver installation failed",
+        "files": [],
+        "summary": "Failed to install graphics driver.",
+        "solution": "Reinstall the graphics driver or check for compatibility issues with the current hardware configuration."
+    },
+    {
+        "task": "Blue screen appeared",
+        "files": [],
+        "summary": "A blue screen occurred without specifying which files were affected or why.",
+        "solution": "Review the system logs for error messages to determine the cause of the blue screen and take appropriate corrective actions."
+    },
+    {
+        "task": "Startup applications slowed system",
+        "files": [
+            "system settings"
+        ],
+        "summary": "Slow startup due to numerous applications running on boot.",
+        "solution": "Optimize startup by disabling or rearranging unnecessary startup applications."
+    },
+    {
+        "task": "Temporary files consuming storage",
+        "files": [],
+        "summary": "Storage usage increased due to the accumulation of temporary files.",
+        "solution": "Implement a file management strategy that deletes or archives old temporary files periodically."
+    },
+    {
+        "task": "High CPU usage",
+        "files": [],
+        "summary": "The Task Manager is showing high CPU usage, but no specific file or task was mentioned in the JSON.",
+        "solution": "Analyze the process and identify which program is using excessive CPU. Then, try updating drivers or reinstalling relevant software."
+    },
+    {
+        "task": "Network adapter stopped working",
+        "files": [],
+        "summary": "The network adapter failed to work as expected, possibly due to hardware or driver issues.",
+        "solution": "Check if the device is recognized by the system and update drivers if necessary."
+    },
+    {
+        "task": "System Restore Failed",
+        "files": [
+            "system_restore.log"
+        ],
+        "summary": "System Restore failed due to an unknown error or corruption.",
+        "solution": "Check system logs for more details, consider using a recovery tool if available."
+    },
+    {
+        "task": "Disk fragmentation affecting performance",
+        "files": [],
+        "summary": "File system disk fragmentation can significantly reduce read/write speeds, leading to degraded application performance.",
+        "solution": "Optimize file allocation tables (FATs) by defragmenting the disk."
+    },
+    {
+        "task": "Permission issue preventing deletion",
+        "files": [
+            "directory_name"
+        ],
+        "summary": "Deletion operation failed due to permission restrictions.",
+        "solution": "Ensure the user has the appropriate permissions to delete the specified directory."
+    },
+    {
+        "task": "USB device not recognized",
+        "files": [],
+        "summary": "Device did not connect as expected, leading to unavailability.",
+        "solution": "Check USB port for compatibility, ensure the correct cable is used, and reboot the computer."
+    },
+    {
+        "task": "Windows Search service stopped",
+        "files": [],
+        "summary": "Windows Search stopped working due to a system component failure or misconfiguration.",
+        "solution": "Check for any recent updates that may have affected the Windows Search service, and ensure all necessary components are installed."
+    },
+    {
+        "task": "Application blocked by antivirus",
+        "files": [],
+        "summary": "The antivirus software was blocking the application from running.",
+        "solution": "Exclude the application from the antivirus scan or update the antivirus software to support the latest security features."
+    },
+    {
+        "task": "Registry corruption suspected",
+        "files": [],
+        "summary": "Registry corruption has been detected but no specific files or issues are currently identified.",
+        "solution": "Run a registry scan to identify any potential issues and repair them if necessary."
+    },
+    {
+        "task": "Sleep mode malfunctioned",
+        "files": [],
+        "summary": "The sleep mode function did not work as expected.",
+        "solution": "Check the sleep mode settings or update the device's firmware if necessary."
+    },
+    {
+        "task": "Display driver crash",
+        "files": [
+            "unknown"
+        ],
+        "summary": "The display driver experienced a crash.",
+        "solution": "Update or reinstall the display driver to resolve this issue."
+    }
+]

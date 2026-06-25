@@ -1,0 +1,135 @@
+[
+    {
+        "task": "durationInFrames became zero",
+        "files": [
+            "composition.tsx"
+        ],
+        "summary": "Composition duration became zero due to incorrect logic in composition.tsx.",
+        "solution": "Review the code for correct logic around duration calculation and validation."
+    },
+    {
+        "task": "Multiple composition IDs registered",
+        "files": [
+            ""
+        ],
+        "summary": "The code attempted to register multiple compositions with the same ID, leading to conflicts.",
+        "solution": "Ensure each composition has a unique ID by generating or modifying the code accordingly."
+    },
+    {
+        "task": "Unexpected closing div tag",
+        "files": [],
+        "summary": "An unexpected closing `</div>` tag was found in the code, which could disrupt the HTML structure.",
+        "solution": "Review the code to ensure that every opening `<div>` tag has a corresponding closing `</div>`. Check for any conditions or loops where a div might not be properly closed."
+    },
+    {
+        "task": "Unterminated regex error",
+        "files": [],
+        "summary": "Regex expression was not properly terminated, causing an error.",
+        "solution": "Ensure that all regex patterns are correctly terminated with a closing bracket or character."
+    },
+    {
+        "task": "Scene duration mismatch",
+        "files": [],
+        "summary": "Duration of scene does not match expected value.",
+        "solution": "Review and correct the duration settings for each scene."
+    },
+    {
+        "task": "Animation timing incorrect",
+        "files": [],
+        "summary": "The animation's timing was not functioning as expected.",
+        "solution": "Review the animation code, especially related to timing logic, and ensure that all animations are correctly set."
+    },
+    {
+        "task": "Diagram desynchronized from narration",
+        "files": [],
+        "summary": "The diagram did not align with the narration, causing confusion or misunderstanding.",
+        "solution": "Review the sequence of steps and ensure that each step in the diagram corresponds accurately to the corresponding point in the narration."
+    },
+    {
+        "task": "FPS conversion wrong",
+        "files": [
+            "fps_conversion.py"
+        ],
+        "summary": "Incorrect FPS conversion logic in fps_conversion.py.",
+        "solution": "Review and correct the FPS conversion formula or function."
+    },
+    {
+        "task": "Text appeared too early",
+        "files": [],
+        "summary": "Text did not display as expected due to timing issue or incorrect rendering logic.",
+        "solution": "Review text rendering code and ensure it handles the timing correctly."
+    },
+    {
+        "task": "Text appeared too late",
+        "files": [],
+        "summary": "The text did not appear when expected due to timing issues.",
+        "solution": "Review the code or configuration for any delays or timeouts."
+    },
+    {
+        "task": "Component rendered undefined array",
+        "files": [
+            "component.js"
+        ],
+        "summary": "Component was rendering an undefined array, leading to rendering issues.",
+        "solution": "Check for empty or undefined arrays in the component's data and handle them appropriately."
+    },
+    {
+        "task": "Composition registration failed",
+        "files": [],
+        "summary": "",
+        "solution": ""
+    },
+    {
+        "task": "Scene total duration incorrect",
+        "files": [],
+        "summary": "The total duration of the scene was incorrectly set.",
+        "solution": "Check and update the calculation of the scene's total duration to ensure it is accurate."
+    },
+    {
+        "task": "Circular diagram transition failed",
+        "files": [],
+        "summary": "Circular diagram transition failed due to undefined behavior or logic issue.",
+        "solution": "Debug the circular diagram transition logic to ensure proper handling of circular transitions."
+    },
+    {
+        "task": "Frame calculations incorrect",
+        "summary": "Incorrect frame calculations leading to rendering errors.",
+        "solution": "Review and debug the frame calculation logic."
+    },
+    {
+        "task": "T object inconsistent",
+        "files": [
+            "unknown_file"
+        ],
+        "summary": "T object is not consistent, the file where it was instantiated or used is unknown.",
+        "solution": "Review all files and classes to find where T is defined and ensure it adheres to expected properties."
+    },
+    {
+        "task": "Diagram state corrupted",
+        "summary": "Diagram state became corrupted due to an unspecified issue.",
+        "solution": "Review the code for any changes that might affect the diagram's state, especially related to dependencies or initialization logic."
+    },
+    {
+        "task": "Video export failed",
+        "files": [],
+        "summary": "",
+        "solution": ""
+    },
+    {
+        "task": "Audio synchronization drift",
+        "files": [
+            "audio_processing.py",
+            "audio_streaming_backend.py"
+        ],
+        "summary": "Audio synchronization issues were identified as the audio processing module was not accurately capturing real-time timestamps.",
+        "solution": "Review and optimize the audio capture logic in `audio_processing.py` to ensure accurate timestamp tracking. Also, enhance the synchronization algorithm in `audio_streaming_backend.py` to mitigate drift."
+    },
+    {
+        "task": "Composition duration became negative",
+        "files": [
+            "composition.tsx"
+        ],
+        "summary": "Composition duration became negative due to incorrect logic or data handling.",
+        "solution": "Review the code to ensure that the duration is always non-negative and handle edge cases appropriately."
+    }
+]

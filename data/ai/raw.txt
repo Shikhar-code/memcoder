@@ -1,0 +1,162 @@
+[
+  {
+    "task": "LLM API rate limited",
+    "files": [
+      "api_client.py"
+    ],
+    "summary": "Making concurrent calls to the OpenAI API resulted in HTTP 429 Too Many Requests errors.",
+    "solution": "Implement exponential backoff and retry logic using a library like Tenacity to handle rate limits gracefully."
+  },
+  {
+    "task": "Prompt ignoring specific instructions",
+    "files": [
+      "prompt.py"
+    ],
+    "summary": "The model occasionally ignored output format constraints provided at the end of the user message.",
+    "solution": "Move strict constraints and system-level instructions into the System message rather than the User message."
+  },
+  {
+    "task": "RAG returning irrelevant results",
+    "files": [
+      "search.py"
+    ],
+    "summary": "Simple keyword search failed to find relevant context when users used synonyms.",
+    "solution": "Switch from keyword search to semantic vector embeddings using models and a vector database."
+  },
+  {
+    "task": "Chatbot losing conversation context",
+    "files": [
+      "chat.py"
+    ],
+    "summary": "The AI could not remember the user's name from two messages prior.",
+    "solution": "Append all previous conversation turns to the history array sent in every new API request to maintain state."
+  },
+  {
+    "task": "API keys hardcoded in script",
+    "files": [
+      "main.py"
+    ],
+    "summary": "A script crashed when run by another developer because they didn't have the hardcoded API key.",
+    "solution": "Move sensitive keys to a .env file and load them securely using python-dotenv, keeping them out of version control."
+  },
+  {
+    "task": "RAG chunks missing context",
+    "files": [
+      "ingest.py"
+    ],
+    "summary": "Splitting documents strictly by paragraph resulted in lost context when ideas spanned multiple paragraphs.",
+    "solution": "Use overlapping text chunking strategies and attach metadata directly to the chunk text."
+  },
+  {
+    "task": "Fine-tuning formatting error",
+    "files": [
+      "dataset.jsonl"
+    ],
+    "summary": "The fine-tuning job failed immediately due to invalid JSONL formatting.",
+    "solution": "Ensure the JSONL dataset exactly matches the required conversational schema."
+  },
+  {
+    "task": "Agent looping indefinitely",
+    "files": [
+      "orchestrator.py"
+    ],
+    "summary": "An autonomous agent got stuck repeatedly calling a search tool with the exact same query.",
+    "solution": "Implement a max_iterations limit in the orchestrator and provide a system prompt instruction to stop if stuck."
+  },
+  {
+    "task": "Function calling parameters invalid",
+    "files": [
+      "tools.py"
+    ],
+    "summary": "The LLM hallucinated required parameters when invoking a custom tool.",
+    "solution": "Enforce strict JSON Schema for tool definitions and provide detailed descriptions for every expected property."
+  },
+  {
+    "task": "Vector DB slow retrieval",
+    "files": [
+      "database.py"
+    ],
+    "summary": "Querying a vector database with millions of embeddings took a long time per request.",
+    "solution": "Create an HNSW index on the embedding column to dramatically speed up approximate nearest neighbor search."
+  },
+  {
+    "task": "High latency inference",
+    "files": [
+      "serve.py"
+    ],
+    "summary": "Running an open-source LLM locally took too long to generate the first token.",
+    "solution": "Implement a high-performance inference engine like vLLM which utilizes continuous batching and PagedAttention."
+  },
+  {
+    "task": "Model forgetting alignment",
+    "files": [
+      "train.py"
+    ],
+    "summary": "Fully fine-tuning a model caused it to lose its base instruction-following capabilities.",
+    "solution": "Use LoRA to fine-tune a small set of adapter weights without disrupting the base model weights."
+  },
+  {
+    "task": "Multi-agent negotiation stalling",
+    "files": [
+      "agents.py"
+    ],
+    "summary": "Two agents conversing to solve a problem reached a deadlock, politely agreeing with each other endlessly.",
+    "solution": "Implement a central supervisor agent to monitor the dialogue, resolve deadlocks, and forcibly summarize the conclusion."
+  },
+  {
+    "task": "RLHF training reward hacking",
+    "files": [
+      "reward_model.py"
+    ],
+    "summary": "During reinforcement learning, the model learned to maximize reward simply by generating extremely long, verbose answers.",
+    "solution": "Carefully tune the reward model to apply penalties for excessive verbosity and format deviations."
+  },
+  {
+    "task": "Evaluation metric disagreement",
+    "files": [
+      "evaluate.py"
+    ],
+    "summary": "BLEU and ROUGE scores poorly correlated with human judgment of summary quality.",
+    "solution": "Implement 'LLM-as-a-judge' prompting to evaluate complex open-ended generations against a specific rubric."
+  },
+  {
+    "task": "Managing multiple LLM providers",
+    "files": [
+      "gateway.py"
+    ],
+    "summary": "Switching between OpenAI, Anthropic, and local models required massive code refactors every time.",
+    "solution": "Build an internal LLM Gateway service to abstract API differences and handle automatic fallback and load balancing."
+  },
+  {
+    "task": "Prompt engineering mess",
+    "files": [
+      "prompts.json"
+    ],
+    "summary": "Prompts scattered across the codebase made it impossible to test changes without deploying.",
+    "solution": "Create a Prompt Registry system for versioning, A/B testing, and dynamically loading prompts at runtime."
+  },
+  {
+    "task": "RAG scale issues",
+    "files": [
+      "pipeline.py"
+    ],
+    "summary": "Re-indexing the entire document base every night took hours.",
+    "solution": "Separate ingestion and retrieval pipelines, using an event queue to only re-embed specific documents when they are updated."
+  },
+  {
+    "task": "Securing agent access",
+    "files": [
+      "permissions.py"
+    ],
+    "summary": "An agent with shell access accidentally deleted important files while attempting a task.",
+    "solution": "Implement a strict permission boundary framework, requiring user confirmation for dangerous tool executions and running inside a sandbox."
+  },
+  {
+    "task": "Data privacy compliance",
+    "files": [
+      "architecture.md"
+    ],
+    "summary": "Sending sensitive user medical records to a public LLM API violated privacy regulations.",
+    "solution": "Deploy capable open-source models on local, private infrastructure rather than sending PII to external APIs."
+  }
+]

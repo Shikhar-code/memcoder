@@ -1,0 +1,120 @@
+[
+    {
+        "task": "MongoDB Atlas Connection Failed",
+        "files": [],
+        "summary": "Failed to establish a MongoDB Atlas connection due to an unspecified issue.",
+        "solution": "Check network connectivity, verify credentials, and ensure the cluster is accessible."
+    },
+    {
+        "task": "Incorrect URI format",
+        "files": [],
+        "summary": "An incorrect URI format was detected during web development or application deployment.",
+        "solution": "Ensure the URI follows the correct URL scheme, including protocol (e.g., http://, https://), domain, and path."
+    },
+    {
+        "task": "SQL deadlock detected",
+        "files": [],
+        "summary": "Deadlock occurred in the SQL database due to concurrent transactions accessing shared resources.",
+        "solution": "Review and optimize the SQL queries, consider using locking hints or transaction isolation levels."
+    },
+    {
+        "task": "Primary key violation",
+        "files": [],
+        "summary": "An error occurred while attempting to insert or update data due to a primary key constraint being violated.",
+        "solution": "Ensure that the values provided for the primary key columns are unique."
+    },
+    {
+        "task": "Foreign key constraint failed",
+        "files": [],
+        "summary": "Database operation failed due to a foreign key constraint failure.",
+        "solution": "Review the database schema and ensure that all referenced keys exist in the related tables."
+    },
+    {
+        "task": "Duplicate records inserted",
+        "files": [],
+        "summary": "A duplicate record was detected and not handled properly.",
+        "solution": "Check for duplicates before inserting data into the database or collection."
+    },
+    {
+        "task": "Transaction rollback occurred",
+        "files": [],
+        "summary": "Transaction was rolled back due to an error or issue within the system.",
+        "solution": "Review transaction logic, identify the root cause of the rollback, and address it accordingly."
+    },
+    {
+        "task": "Connection pool exhausted",
+        "files": [],
+        "summary": "The application's connection pool ran out of available connections, leading to errors when attempting to establish new connections.",
+        "solution": "Increase the size of the connection pool or optimize existing connections."
+    },
+    {
+        "task": "Query extremely slow",
+        "files": [],
+        "summary": "Queries are taking an unusually long time, likely due to indexing or data retrieval issues.",
+        "solution": "Check database indexes, optimize queries, and ensure data is properly indexed."
+    },
+    {
+        "task": "Missing database index",
+        "summary": "Database indexing was not properly set up, leading to slower query performance.",
+        "solution": "Create or recreate the necessary database indices."
+    },
+    {
+        "task": "Schema mismatch error",
+        "files": [],
+        "summary": "Error occurred during schema validation.",
+        "solution": "Ensure the data adheres to the expected schema format."
+    },
+    {
+        "task": "Database timeout occurred",
+        "files": [],
+        "summary": "The database operation exceeded the set timeout limit.",
+        "solution": "Increase the database connection timeout or optimize the query to reduce execution time."
+    },
+    {
+        "task": "Null values caused issues",
+        "files": [],
+        "summary": "Null values were introduced into the data, leading to incorrect calculations or errors during processing.",
+        "solution": "Validate and handle null values in the dataset before further analysis."
+    },
+    {
+        "task": "Join query returned duplicates",
+        "files": [],
+        "summary": "Join query did not handle duplicate entries properly, resulting in duplicate data in the output.",
+        "solution": "Review the join operation to ensure it correctly handles duplicate keys or values."
+    },
+    {
+        "task": "Migration script failed",
+        "files": [],
+        "summary": "Database migration failed because schema changes were incompatible.",
+        "solution": "Rollback and update the migration script."
+    },
+    {
+        "task": "Collection missing",
+        "files": [],
+        "summary": "Collection was not found or has been deleted.",
+        "solution": "Check the collection name, ensure it exists in your data source, and verify that you have the necessary permissions to access it."
+    },
+    {
+        "task": "Data inconsistency detected",
+        "files": [],
+        "summary": "Inconsistency found in dataset or source data.",
+        "solution": "Review the data sources, schemas, and validation processes to ensure consistency."
+    },
+    {
+        "task": "Incorrect aggregation pipeline",
+        "summary": "The aggregation pipeline was written incorrectly, resulting in incorrect data processing results.",
+        "solution": "Review the aggregation pipeline to ensure it correctly processes data according to requirements."
+    },
+    {
+        "task": "Database credentials invalid",
+        "files": null,
+        "summary": "The database connection failed due to invalid username or password.",
+        "solution": "Verify the database credentials are correct."
+    },
+    {
+        "task": "Race condition corrupted data",
+        "files": [],
+        "summary": "A race condition occurred, leading to corrupted data.",
+        "solution": "Implement proper synchronization or use thread-safe methods to prevent data corruption."
+    }
+]

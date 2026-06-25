@@ -1,0 +1,162 @@
+[
+  {
+    "task": "Jupyter notebook kernel dying",
+    "files": [
+      "analysis.ipynb"
+    ],
+    "summary": "The notebook crashed unexpectedly while attempting to load a massive CSV file.",
+    "solution": "The process ran out of memory. Load a smaller sample of the dataset or use a library designed for large files like Dask."
+  },
+  {
+    "task": "Pandas merge failing",
+    "files": [
+      "data_prep.py"
+    ],
+    "summary": "Merging two dataframes on an ID column resulted in an empty dataframe.",
+    "solution": "The column names or string values had trailing spaces. Strip them using df['id'] = df['id'].str.strip() before merging."
+  },
+  {
+    "task": "Matplotlib plot not showing",
+    "files": [
+      "plot.py"
+    ],
+    "summary": "Running a script that generates a plot finished successfully but no window appeared.",
+    "solution": "Ensure plt.show() is called at the end of the script, or use %matplotlib inline if working inside a notebook."
+  },
+  {
+    "task": "Pip install conflicting versions",
+    "files": [
+      "requirements.txt"
+    ],
+    "summary": "Installing a new package downgraded key dependencies, breaking the rest of the code.",
+    "solution": "Create a fresh, isolated virtual environment for the specific project to avoid global conflicts."
+  },
+  {
+    "task": "Scraping script blocked",
+    "files": [
+      "scraper.py"
+    ],
+    "summary": "Requests to a public data portal consistently returned HTTP 403 Forbidden.",
+    "solution": "Add valid User-Agent headers to the HTTP request to mimic a standard web browser rather than a python script."
+  },
+  {
+    "task": "Code works on laptop but not server",
+    "files": [
+      "train.py"
+    ],
+    "summary": "A model trained perfectly locally but threw OS-level errors on the university computing cluster.",
+    "solution": "Containerize the research environment using Docker to ensure identical system dependencies across all machines."
+  },
+  {
+    "task": "Grid search taking too long",
+    "files": [
+      "hyperparams.py"
+    ],
+    "summary": "Exhaustively searching hyperparameters for an SVM was estimated to take weeks.",
+    "solution": "Parallelize the search using joblib across multiple CPU cores, or switch to a RandomizedSearchCV for faster convergence."
+  },
+  {
+    "task": "Unreproducible random seeds",
+    "files": [
+      "experiment.py"
+    ],
+    "summary": "Running the exact same script twice yielded slightly different accuracy metrics.",
+    "solution": "Explicitly set the random seeds for numpy, core python, and the ML framework at the very start of the script."
+  },
+  {
+    "task": "High dimensionality causing slow models",
+    "files": [
+      "model.py"
+    ],
+    "summary": "Training a classifier on a dataset with massive sparse features was computationally unfeasible.",
+    "solution": "Apply Principal Component Analysis (PCA) or t-SNE to aggressively reduce the feature space before training."
+  },
+  {
+    "task": "Outliers skewing evaluation metrics",
+    "files": [
+      "eval.py"
+    ],
+    "summary": "The Mean Squared Error (MSE) looked terrible because of extreme anomalous data points.",
+    "solution": "Use more robust evaluation metrics like Median Absolute Error (MedAE) that are less sensitive to extreme outliers."
+  },
+  {
+    "task": "Pytorch dataloader bottleneck",
+    "files": [
+      "loader.py"
+    ],
+    "summary": "Complex real-time spectrogram generation during data loading starved the GPU of data.",
+    "solution": "Write a custom C++ extension for the data pre-processing logic to bypass Python's Global Interpreter Lock (GIL)."
+  },
+  {
+    "task": "Reinforcement learning agent diverging",
+    "files": [
+      "ppo.py"
+    ],
+    "summary": "During late-stage training, the agent's policy suddenly collapsed and rewards plummeted.",
+    "solution": "Implement reward clipping and strict gradient norm scaling to prevent massive catastrophic updates to the policy network."
+  },
+  {
+    "task": "Complex probabilistic model inference slow",
+    "files": [
+      "mcmc.py"
+    ],
+    "summary": "Markov Chain Monte Carlo (MCMC) sampling took days to converge on a hierarchical model.",
+    "solution": "Switch from MCMC to Variational Inference (VI) to approximate the posterior distribution much faster."
+  },
+  {
+    "task": "Spark cluster out of memory",
+    "files": [
+      "spark_job.py"
+    ],
+    "summary": "A massive group-by operation caused Spark executors to crash with Java Heap Space errors.",
+    "solution": "Increase the executor memory allocation and explicitly repartition the DataFrame based on the grouping key."
+  },
+  {
+    "task": "Novel architecture exploding gradients",
+    "files": [
+      "custom_transformer.py"
+    ],
+    "summary": "A newly designed deep network produced NaN outputs after just several epochs.",
+    "solution": "Add Layer Normalization after key transformations and introduce residual connections to stabilize gradient flow."
+  },
+  {
+    "task": "Messy experiment tracking",
+    "files": [
+      "train.py"
+    ],
+    "summary": "Tracking different model variations using folders became unmanageable.",
+    "solution": "Integrate Weights & Biases (WandB) or MLflow to centrally log metrics, hyperparameters, and artifacts automatically."
+  },
+  {
+    "task": "Compute resources underutilized",
+    "files": [
+      "run.sh"
+    ],
+    "summary": "Researchers were manually SSHing into GPU nodes, causing conflicts and idle hardware.",
+    "solution": "Setup the Slurm workload manager to automatically queue, allocate, and schedule batch jobs across the cluster."
+  },
+  {
+    "task": "Data versioning issues",
+    "files": [
+      "dataset.csv"
+    ],
+    "summary": "Changes to the training dataset were not tracked, making older experiments impossible to reproduce.",
+    "solution": "Use DVC (Data Version Control) alongside git to version control large binary files and datasets efficiently."
+  },
+  {
+    "task": "Moving code from notebook to production",
+    "files": [
+      "analysis.ipynb"
+    ],
+    "summary": "A complex Jupyter notebook was impossible to integrate into a web API.",
+    "solution": "Refactor the notebook code into modular, tested Python packages, keeping the notebook only for high-level visualization."
+  },
+  {
+    "task": "Evaluation inconsistency",
+    "files": [
+      "eval.py"
+    ],
+    "summary": "Different researchers reported conflicting baseline results because they evaluated models differently.",
+    "solution": "Build a standardized, immutable evaluation pipeline that automatically runs against every new model using a fixed test set."
+  }
+]

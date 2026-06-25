@@ -1,0 +1,132 @@
+[
+    {
+        "task": "Permission denied",
+        "files": [],
+        "summary": "Access was restricted due to insufficient permissions.",
+        "solution": "Ensure the user has the necessary permissions to perform the operation."
+    },
+    {
+        "task": "Segmentation fault",
+        "files": [
+            "unknown file or module"
+        ],
+        "summary": "Program encountered a segmentation fault during execution. The error could be due to memory corruption, accessing invalid memory addresses, or undefined behavior.",
+        "solution": "Check for memory leaks or improper memory management in the program. Debug and fix any potential issues related to memory usage."
+    },
+    {
+        "task": "Memory Leak Detected",
+        "files": [],
+        "summary": "A memory leak was detected in the application.",
+        "solution": "Review code for memory management, use efficient data structures, implement proper resource cleanup, and consider using tools like Chrome DevTools to identify the leaking objects."
+    },
+    {
+        "task": "Disk space exhausted",
+        "files": [],
+        "summary": "The system is out of disk space, which may lead to data loss or performance issues.",
+        "solution": "Identify the source of the increased usage and free up space by deleting unnecessary files or optimizing existing ones."
+    },
+    {
+        "task": "Race condition",
+        "files": [],
+        "summary": "A race condition was detected where two or more processes or threads are accessing a shared resource simultaneously, leading to unpredictable behavior or incorrect results.",
+        "solution": "Implement synchronization mechanisms (e.g., locks, semaphores) to ensure that only one process can access the shared resource at a time."
+    },
+    {
+        "task": "Deadlock between threads",
+        "files": [
+            "main.py"
+        ],
+        "summary": "Threads are stuck waiting for each other, causing a deadlock.",
+        "solution": "Analyze thread dependencies to identify potential deadlocks and implement synchronization mechanisms like mutexes or semaphores."
+    },
+    {
+        "task": "Process unexpectedly terminated",
+        "files": [],
+        "summary": "The process terminated without a clear error message or stack trace, making it difficult to diagnose the issue.",
+        "solution": "Check system logs for any additional error messages that may provide more context. Also, ensure that all resources are properly released and no memory leaks exist."
+    },
+    {
+        "task": "File lock prevented access",
+        "files": [],
+        "summary": "The file was locked, preventing access.",
+        "solution": "Check for any processes holding locks on the file or consider using a different method to access it if necessary."
+    },
+    {
+        "task": "Stack Overflow Error",
+        "files": [],
+        "summary": "An unexpected stack overflow occurred, which might be due to excessive recursion or memory usage.",
+        "solution": "Review the code for any recursive functions that could lead to stack overflow. Consider optimizing the function by using iterative solutions if necessary."
+    },
+    {
+        "task": "Infinite loop consumed CPU",
+        "files": [],
+        "summary": "Program entered an infinite loop, causing high CPU usage.",
+        "solution": "Review the code to identify the cause of the infinite loop."
+    },
+    {
+        "task": "Resource exhaustion",
+        "files": [],
+        "summary": "Application encountered a resource limitation error, leading to system unresponsiveness.",
+        "solution": "Review application configuration settings, optimize resource usage, or upgrade hardware resources if necessary."
+    },
+    {
+        "task": "Incorrect environment variables",
+        "files": [],
+        "summary": "Environment variables were not set correctly, causing the application to malfunction or fail.",
+        "solution": "Ensure that all necessary environment variables are properly configured before running the application."
+    },
+    {
+        "task": "Path not found",
+        "files": [],
+        "summary": "No path was provided or the specified path could not be accessed.",
+        "solution": "Check if the file path is correct and ensure that the necessary permissions are set for accessing the location."
+    },
+    {
+        "task": "Thread synchronization failure",
+        "files": [],
+        "summary": "Threads were unable to synchronize due to a race condition or mutex conflict.",
+        "solution": "Review the code for any potential race conditions and ensure proper use of mutexes."
+    },
+    {
+        "task": "Shared memory corruption",
+        "files": [],
+        "summary": "Unknown error occurred while accessing shared memory.",
+        "solution": "Check the implementation of shared memory usage to ensure there are no race conditions or improper cleanup."
+    },
+    {
+        "task": "Cache inconsistency detected",
+        "files": [],
+        "summary": "Cache inconsistency has been identified during application execution.",
+        "solution": "Review cache mechanisms and ensure consistency across the system."
+    },
+    {
+        "task": "Binary incompatibility",
+        "files": [
+            "unknown"
+        ],
+        "summary": "The binary being used is incompatible with the current system configuration or dependencies.",
+        "solution": "Check for updates to both the binary and any related libraries. Rebuild if necessary."
+    },
+    {
+        "task": "process killed by OS",
+        "files": [
+            "NA"
+        ],
+        "summary": "The process was terminated unexpectedly by the operating system without any specific error message.",
+        "solution": "Review the underlying system logs or configurations to identify why the process is being terminated. Ensure that there are no resource constraints (CPU, memory) that might be causing the termination."
+    },
+    {
+        "task": "Socket communication failed",
+        "files": [],
+        "summary": "",
+        "solution": ""
+    },
+    {
+        "task": "File descriptor exhausted",
+        "files": [
+            "unknown"
+        ],
+        "summary": "Exceeded maximum number of file descriptors available to the process.",
+        "solution": "Increase the number of available file descriptors or optimize resource usage by closing unnecessary files and handles."
+    }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "task": "Docker build failing",
+    "files": [
+      "Dockerfile"
+    ],
+    "summary": "Building an image threw a 'command not found' error for curl.",
+    "solution": "Add the missing dependencies in the RUN apt-get install step at the beginning of the Dockerfile."
+  },
+  {
+    "task": "GitHub action not triggering",
+    "files": [
+      "github_actions.yml"
+    ],
+    "summary": "Pushing to the main branch did not start the CI pipeline as expected.",
+    "solution": "Check the YAML configuration to ensure the branch name matches exactly in the 'on: push: branches:' section."
+  },
+  {
+    "task": "Nginx returning 502 Bad Gateway",
+    "files": [
+      "nginx.conf"
+    ],
+    "summary": "Accessing the website returned a 502 error instead of the web application.",
+    "solution": "Verify that the backend service is actually running and that the port configured in proxy_pass exactly matches the service port."
+  },
+  {
+    "task": "SSH connection refused",
+    "files": [
+      "config"
+    ],
+    "summary": "Attempting to SSH into a new instance was rejected by the server.",
+    "solution": "Ensure your public key is properly added to ~/.ssh/authorized_keys on the server and that the file permissions are strictly set to 600."
+  },
+  {
+    "task": "Disk full on server",
+    "files": [
+      "monitoring.sh"
+    ],
+    "summary": "The server ran out of disk space entirely due to hundreds of dangling docker images.",
+    "solution": "Setup a cron job to periodically run 'docker image prune -a --force' to clear out old, unused images."
+  },
+  {
+    "task": "Docker Compose services starting out of order",
+    "files": [
+      "docker-compose.yml"
+    ],
+    "summary": "The backend API crashed on startup because the database container wasn't fully initialized yet.",
+    "solution": "Use the depends_on directive with a 'condition: service_healthy' check to ensure the DB is ready before the API starts."
+  },
+  {
+    "task": "Terraform state locked",
+    "files": [
+      "main.tf"
+    ],
+    "summary": "Running terraform apply failed with an error saying the state is locked by another process.",
+    "solution": "Manually remove the stale lock from the DynamoDB table or S3 bucket if a previous Terraform run crashed unexpectedly."
+  },
+  {
+    "task": "Ansible playbook failing on one host",
+    "files": [
+      "playbook.yml"
+    ],
+    "summary": "A playbook configuring multiple servers failed on just one, and re-running it hit all servers again.",
+    "solution": "Use the --limit flag when running ansible-playbook to retry the execution only on the specific failed host."
+  },
+  {
+    "task": "CI/CD pipeline slow",
+    "files": [
+      "ci.yml"
+    ],
+    "summary": "The deployment pipeline took a long time because it downloaded dependencies from scratch every time.",
+    "solution": "Implement dependency caching across runs using actions/cache for GitHub Actions or equivalent for your CI provider."
+  },
+  {
+    "task": "Kubernetes Pod in CrashLoopBackOff",
+    "files": [
+      "deployment.yaml"
+    ],
+    "summary": "A newly deployed pod repeatedly crashed and restarted immediately.",
+    "solution": "Check the pod logs using kubectl logs; the issue is usually a missing environment variable or a malformed startup command."
+  },
+  {
+    "task": "Kubernetes zero-downtime deployment failing",
+    "files": [
+      "deployment.yaml"
+    ],
+    "summary": "Rolling out a new image dropped live user traffic for several seconds.",
+    "solution": "Configure readiness probes properly so Kubernetes doesn't route traffic to new pods until they are fully initialized."
+  },
+  {
+    "task": "Service Mesh routing issues",
+    "files": [
+      "virtualservice.yaml"
+    ],
+    "summary": "Canary deployments failed because all traffic still routed to the old version of the service.",
+    "solution": "Fix the Istio VirtualService rules and DestinationRules that were misconfigured, preventing proper traffic splitting."
+  },
+  {
+    "task": "Infrastructure drift",
+    "files": [
+      "main.tf"
+    ],
+    "summary": "Manual changes made via the AWS Console conflicted with the Infrastructure as Code definitions.",
+    "solution": "Run 'terraform plan' regularly via an automated cron job to detect drift and alert the team of manual cloud changes."
+  },
+  {
+    "task": "Secrets exposed in logs",
+    "files": [
+      "ci.yml"
+    ],
+    "summary": "Database passwords were accidentally printed in plain text in the CI/CD build logs.",
+    "solution": "Implement a secret scanning tool in the repo and use HashiCorp Vault to inject secrets dynamically at runtime."
+  },
+  {
+    "task": "Custom GitLab runner scaling",
+    "files": [
+      "config.toml"
+    ],
+    "summary": "During peak hours, CI jobs queued for hours because the single runner was overloaded.",
+    "solution": "Configure auto-scaling GitLab runners using AWS spot instances to spin up temporary compute nodes based on queue depth."
+  },
+  {
+    "task": "Disaster recovery is complex and manual",
+    "files": [
+      "recovery.md"
+    ],
+    "summary": "Rebuilding the infrastructure after an outage required manual steps documented in a wiki.",
+    "solution": "Adopt fully immutable infrastructure practices to rebuild the entire environment entirely from Terraform code with zero manual intervention."
+  },
+  {
+    "task": "Manual deployments are risky and undocumented",
+    "files": [
+      "deploy.sh"
+    ],
+    "summary": "Applying Kubernetes manifests manually from laptops caused version mismatches in production.",
+    "solution": "Adopt a GitOps workflow using ArgoCD or Flux to automatically synchronize the cluster state directly with the git repository."
+  },
+  {
+    "task": "Poor observability across the cluster",
+    "files": [
+      "logging.yaml"
+    ],
+    "summary": "Debugging errors required SSHing into different machines to grep log files.",
+    "solution": "Deploy the Prometheus/Grafana stack combined with Promtail/Loki to centralize and visualize structured JSON logs."
+  },
+  {
+    "task": "Single region failure took down app",
+    "files": [
+      "aws_cdk.ts"
+    ],
+    "summary": "An AWS region outage caused total platform unavailability for hours.",
+    "solution": "Architect a multi-region active-active setup using Route53 DNS failover and cross-region database replication."
+  },
+  {
+    "task": "Monorepo CI/CD complexity",
+    "files": [
+      "gitlab-ci.yml"
+    ],
+    "summary": "Changing a single markdown file triggered a massive rebuild of all microservices.",
+    "solution": "Implement path-based triggering in the CI pipeline to only build, test, and deploy the specific services that had code changes."
+  }
+]

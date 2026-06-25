@@ -1,0 +1,137 @@
+[
+    {
+        "task": "401 Unauthorized",
+        "files": [],
+        "summary": "Access was denied due to insufficient privileges or invalid credentials.",
+        "solution": "Check credentials, ensure the user has the necessary permissions, and try again."
+    },
+    {
+        "task": "Bearer token missing",
+        "files": [],
+        "summary": "API request failed due to missing Bearer token.",
+        "solution": "Include a valid Bearer token in the API request headers."
+    },
+    {
+        "task": "CORS error blocking requests",
+        "files": [],
+        "summary": "Requests to a different origin are being blocked due to CORS (Cross-Origin Resource Sharing) policies.",
+        "solution": "Configure your server to include the necessary CORS headers."
+    },
+    {
+        "task": "JWT expired",
+        "files": [
+            "app.tsx",
+            "auth.service.ts"
+        ],
+        "summary": "JWT token has expired, causing the application to not function correctly.",
+        "solution": "Check current JWT expiration date and refresh or update the token as needed."
+    },
+    {
+        "task": "API endpoint returned 404",
+        "files": [],
+        "summary": "API request failed with 404 status code.",
+        "solution": "Check the URL and parameters for any typos or incorrect values."
+    },
+    {
+        "task": "Request payload validation failed",
+        "files": [
+            "request_payload.js"
+        ],
+        "summary": "The request payload did not meet the expected format or constraints.",
+        "solution": "Ensure that the payload adheres to all defined schemas and validators."
+    },
+    {
+        "task": "Swagger Authorization Failed",
+        "files": [
+            "swagger.js",
+            "server.ts"
+        ],
+        "summary": "Authorization failed during Swagger API calls.",
+        "solution": "Check and update authorization headers or ensure correct credentials are provided in the request."
+    },
+    {
+        "task": "Session timed out",
+        "files": [],
+        "summary": "Session did not complete within the set time limit.",
+        "solution": "Optimize code or extend session timeout as necessary."
+    },
+    {
+        "task": "Cookie configuration incorrect",
+        "files": [],
+        "summary": "The cookie configuration was not set up correctly, leading to issues with accessing the site or application.",
+        "solution": "Review and update the cookie settings in the application's configuration files."
+    },
+    {
+        "task": "Rate limiting triggered",
+        "files": [],
+        "summary": "A rate limit was encountered, potentially due to too many requests or server overload.",
+        "solution": "Increase the rate limit settings or check for server issues."
+    },
+    {
+        "task": "POST request malformed",
+        "files": [
+            "client.js"
+        ],
+        "summary": "POST request had incorrect format or missing required fields.",
+        "solution": "Validate the POST request data before sending it to the server."
+    },
+    {
+        "task": "environment variables missing",
+        "files": [],
+        "summary": "Missing necessary environment variables that are required for the application to function correctly.",
+        "solution": "Check and set up all required environment variables in the configuration file or system settings."
+    },
+    {
+        "task": "FastAPI dependency conflict",
+        "files": [],
+        "summary": "FastAPI encountered a conflict between dependencies.",
+        "solution": "Resolve the dependency conflicts by using tools like `pip check` or updating package versions."
+    },
+    {
+        "task": "Duplicate route definitions",
+        "files": [],
+        "summary": "Duplicate routes were defined in the application code.",
+        "solution": "Review the routing configuration to ensure each route is unique."
+    },
+    {
+        "task": "Frontend API mismatch",
+        "files": [
+            "index.html",
+            "app.js"
+        ],
+        "summary": "The frontend application uses an outdated or incompatible version of the frontend API.",
+        "solution": "Update or replace the frontend API to match the current standards."
+    },
+    {
+        "task": "JSON serialization error",
+        "files": [],
+        "summary": "Failed to serialize JSON due to an internal issue with the library.",
+        "solution": "Check for any errors in data structures or syntax within your JSON. Ensure that all keys and values are correctly formatted."
+    },
+    {
+        "task": "Timeout during request",
+        "files": [],
+        "summary": "A request timed out before completing.",
+        "solution": "Check network conditions, increase timeout settings, or ensure the server is responsive."
+    },
+    {
+        "task": "Incorrect HTTP method",
+        "files": [
+            "api-endpoint.js"
+        ],
+        "summary": "HTTP request was made using the wrong method, leading to 405 errors.",
+        "solution": "Review the API documentation and use the correct HTTP method for the requested operation."
+    },
+    {
+        "task": "Headers incorrectly configured",
+        "files": [],
+        "summary": "HTTP headers were incorrectly set, leading to issues with request/response processing.",
+        "solution": "Verify and correct the HTTP header settings in your application code."
+    },
+    {
+        "task": "File Upload Failed",
+        "files": [],
+        "summary": "File upload operation did not complete successfully.",
+        "solution": "Check network connectivity, server status, and file size constraints."
+    }
+]

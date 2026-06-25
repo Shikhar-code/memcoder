@@ -1,0 +1,162 @@
+[
+  {
+    "task": "PowerShell script execution blocked",
+    "files": [
+      "script.ps1"
+    ],
+    "summary": "Running a script returned an error stating that execution of scripts is disabled on this system.",
+    "solution": "Open an elevated PowerShell prompt and change the execution policy by running Set-ExecutionPolicy RemoteSigned."
+  },
+  {
+    "task": "Path not recognized",
+    "files": [
+      "env_vars.txt"
+    ],
+    "summary": "A newly installed command line tool returned 'is not recognized as an internal or external command'.",
+    "solution": "Append the directory containing the executable to the system PATH environment variable and restart the terminal."
+  },
+  {
+    "task": "Windows Service fails to start",
+    "files": [
+      "service.cs"
+    ],
+    "summary": "A custom .NET service immediately stopped after starting without printing to the console.",
+    "solution": "Check the Windows Event Viewer under Windows Logs > Application to find the specific exception stack trace."
+  },
+  {
+    "task": "Access denied deleting file",
+    "files": [
+      "cleanup.bat"
+    ],
+    "summary": "Attempting to delete an old log file returned an 'Access Denied' error even as administrator.",
+    "solution": "Take ownership of the file via the Security tab in properties or use the command line tool takeown."
+  },
+  {
+    "task": "Batch script exits immediately",
+    "files": [
+      "run.bat"
+    ],
+    "summary": "Double clicking a batch file opened a terminal window that immediately vanished.",
+    "solution": "Add the 'pause' command at the very end of the batch script to force the window to stay open."
+  },
+  {
+    "task": "WMI query too slow",
+    "files": [
+      "wmi_query.vbs"
+    ],
+    "summary": "Querying Win32_Product took several minutes and spiked CPU usage.",
+    "solution": "Avoid querying Win32_Product, which triggers reconfigurations, and read registry uninstall keys directly instead."
+  },
+  {
+    "task": "DLL missing error on run",
+    "files": [
+      "app.exe"
+    ],
+    "summary": "Distributing a C++ executable to a fresh Windows install failed with missing DLL.",
+    "solution": "Package the required Visual C++ redistributable with the installer or statically link the runtime library."
+  },
+  {
+    "task": "C# app high memory usage",
+    "files": [
+      "app.cs"
+    ],
+    "summary": "A WPF application continuously consumed memory over time.",
+    "solution": "Profile the application with dotMemory and fix un-disposed IDisposable objects like Bitmaps and FileStreams."
+  },
+  {
+    "task": "Registry keys not saving",
+    "files": [
+      "registry.cs"
+    ],
+    "summary": "Writing to HKEY_LOCAL_MACHINE silently failed or threw an unauthorized access exception.",
+    "solution": "Ensure the application is running with Administrator privileges by adding an app.manifest requiring requireAdministrator."
+  },
+  {
+    "task": "COM object access denied",
+    "files": [
+      "com.ps1"
+    ],
+    "summary": "Instantiating a COM object from a background service threw a permission error.",
+    "solution": "Adjust the DCOM configuration permissions using dcomcnfg.exe to allow the specific service account access."
+  },
+  {
+    "task": "Application hanging in user mode",
+    "files": [
+      "app.exe"
+    ],
+    "summary": "The UI thread froze permanently, requiring a task manager kill.",
+    "solution": "Capture a full memory minidump via Task Manager and analyze it with WinDbg using !locks to find the deadlock."
+  },
+  {
+    "task": "ETW tracing missing events",
+    "files": [
+      "etw.cs"
+    ],
+    "summary": "A custom Event Tracing provider did not emit any logs to the listening session.",
+    "solution": "Ensure the provider GUID is correctly registered using wevtutil and that the consumer session is actively enabling it."
+  },
+  {
+    "task": "Custom filter driver causing BSOD",
+    "files": [
+      "driver.c"
+    ],
+    "summary": "A file system minifilter caused a Blue Screen of Death.",
+    "solution": "Fix an issue where pageable memory was accessed while running at an elevated IRQL."
+  },
+  {
+    "task": "API Hooking crashing target process",
+    "files": [
+      "hook.cpp"
+    ],
+    "summary": "Injecting a DLL and hooking an API caused the target process to crash upon returning.",
+    "solution": "Update the trampoline assembly function to correctly preserve and restore the stack registers before returning."
+  },
+  {
+    "task": "TLS (Thread Local Storage) exhaustion",
+    "files": [
+      "tls.c"
+    ],
+    "summary": "A massive application loading hundreds of DLLs failed due to TLS slot limits.",
+    "solution": "Switch from using static variables to dynamically allocating TLS indices using TlsAlloc()."
+  },
+  {
+    "task": "Application deployment complex",
+    "files": [
+      "installer.wxs"
+    ],
+    "summary": "Writing custom MSI installers resulted in fragmented uninstalls and registry bloat.",
+    "solution": "Package the application using the modern MSIX format for clean virtualized installs, updates, and removals."
+  },
+  {
+    "task": "IPC bottleneck",
+    "files": [
+      "ipc.cs"
+    ],
+    "summary": "Using Named Pipes to transfer massive amounts of data maxed out the CPU.",
+    "solution": "Switch from Named Pipes to ALPC or Memory Mapped Files for zero-copy data transfer."
+  },
+  {
+    "task": "Privilege escalation risk",
+    "files": [
+      "service.cs"
+    ],
+    "summary": "A web-facing Windows Service running as LocalSystem was a massive security vulnerability.",
+    "solution": "Redesign the service to run under the restricted NetworkService or a dedicated Virtual Service Account."
+  },
+  {
+    "task": "Inconsistent configuration management",
+    "files": [
+      "config.ps1"
+    ],
+    "summary": "Manually configuring registry keys across servers led to configuration drift.",
+    "solution": "Move configuration settings to Group Policy Objects (GPO) applied at the Active Directory domain level."
+  },
+  {
+    "task": "Authentication limits",
+    "files": [
+      "auth.cs"
+    ],
+    "summary": "Using NTLM authentication across domains resulted in failed logins and security warnings.",
+    "solution": "Integrate the application properly with Active Directory using Kerberos authentication and configuring SPNs."
+  }
+]

@@ -1,0 +1,138 @@
+[
+    {
+        "task": "LLM hallucinated solution",
+        "files": [
+            "unknown"
+        ],
+        "summary": "The LLM provided an incorrect or incomplete solution to the problem.",
+        "solution": "Review the model's training data, ensure it is accurate and relevant, and provide more context for the problem."
+    },
+    {
+        "task": "Prompt was too vague",
+        "files": [],
+        "summary": "The prompt provided was insufficient for the system to understand what it should generate or accomplish.",
+        "solution": "Ensure prompts are clear, specific, and well-defined."
+    },
+    {
+        "task": "Context window exceeded",
+        "files": [],
+        "summary": "The context window exceeded its limit, causing memory overflow or other performance issues.",
+        "solution": "Optimize the context window settings to ensure efficient use of resources."
+    },
+    {
+        "task": "Embeddings inaccurate",
+        "files": [],
+        "summary": "Embeddings output was not as expected, likely due to model configuration or data preprocessing issues.",
+        "solution": "Review model configuration and ensure that the input data is preprocessed correctly. Check for any inconsistencies in the embedding algorithm."
+    },
+    {
+        "task": "Irrelevant retrieval",
+        "files": [
+            "retrieval.py"
+        ],
+        "summary": "Retrieval system returned irrelevant results due to incorrect query formulation.",
+        "solution": "Refine the query to focus on specific keywords or phrases."
+    },
+    {
+        "task": "Duplicate memories stored",
+        "files": [
+            "<list_of_duplicate_files>"
+        ],
+        "summary": "Memory duplicates were detected and recorded.",
+        "solution": "Remove duplicate records from the database."
+    },
+    {
+        "task": "Reflection content too general",
+        "files": [],
+        "summary": "The reflection content was found to be overly broad or unhelpful, lacking specific details that could guide improvement.",
+        "solution": "Ensure reflections are detailed and provide concrete examples to aid in learning."
+    },
+    {
+        "task": "Skill extraction failed",
+        "files": [
+            "skill_extraction.py",
+            "skills.txt"
+        ],
+        "summary": "Skill extraction process encountered an issue, likely due to incorrect data structure or missing required fields.",
+        "solution": "Review the skill extraction logic and ensure that it correctly handles various data formats and requirements."
+    },
+    {
+        "task": "Meta-skill overfitting",
+        "files": [
+            "meta-skill_model.py"
+        ],
+        "summary": "The meta-skill model trained on a specific domain performed poorly on unseen tasks.",
+        "solution": "Increase the diversity of training data, add more complex scenarios, or use regularization techniques to prevent overfitting."
+    },
+    {
+        "task": "Generated generic steps",
+        "files": [],
+        "summary": "Planner created a set of general steps without specific details.",
+        "solution": "Review the planner's logic to generate more detailed, context-specific steps."
+    },
+    {
+        "task": "Model response too slow",
+        "files": [
+            "model.py"
+        ],
+        "summary": "The model's response times are significantly longer than expected, potentially due to inefficient code or resource allocation issues.",
+        "solution": "Review the model's code for bottlenecks and optimize performance by optimizing loops, reducing memory usage, and ensuring efficient use of resources."
+    },
+    {
+        "task": "Local model timed out",
+        "files": [],
+        "summary": "Local model execution timed out without any specific error message or logs provided for further analysis.",
+        "solution": "Check if the local environment is configured correctly, ensure that there are no network issues hindering communication, and consider increasing the timeout settings if necessary."
+    },
+    {
+        "task": "JSON parsing failed",
+        "files": [
+            "<filename>"
+        ],
+        "summary": "Failed to parse JSON due to incorrect formatting or missing required fields.",
+        "solution": "Ensure the JSON structure is correct and all required fields are present."
+    },
+    {
+        "task": "Model ignored instructions",
+        "summary": "The model was not following the provided instructions correctly.",
+        "solution": "Check if the instructions are well-defined and ensure that the model understands them. Review the code or parameters involved in handling these instructions."
+    },
+    {
+        "task": "Long prompts reduced quality",
+        "files": [],
+        "summary": "Long prompts led to reduced text generation quality due to processing limitations.",
+        "solution": "Optimize prompt length, consider using shorter sentences or phrases."
+    },
+    {
+        "task": "Token limits reached",
+        "files": [],
+        "summary": "Reached maximum token limit for the current operation or service usage.",
+        "solution": "Review and optimize code to reduce token usage, consider using pagination or other efficient methods."
+    },
+    {
+        "task": "Memory deduplication failed",
+        "files": [],
+        "summary": "Memory deduplication process encountered an issue.",
+        "solution": "Review the memory deduplication code for any potential errors or misconfigurations. Ensure that all necessary data structures and algorithms are correctly implemented."
+    },
+    {
+        "task": "Similarity threshold incorrect",
+        "files": [],
+        "summary": "Similarity threshold setting was not correctly defined or applied.",
+        "solution": "Verify the similarity threshold settings to ensure they align with the intended criteria for determining similar items."
+    },
+    {
+        "task": "Reasoning chain drift",
+        "files": [],
+        "summary": "The reasoning process was not following the expected flow or logic, leading to incorrect results.",
+        "solution": "Review the reasoning process and ensure it aligns with established standards or guidelines."
+    },
+    {
+        "task": "Tool call malformed",
+        "files": [
+            "<tool_name>.py"
+        ],
+        "summary": "The tool call was incorrectly formatted, resulting in an error.",
+        "solution": "Review the tool call syntax for proper formatting and ensure all required arguments are included."
+    }
+]

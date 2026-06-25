@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memcoder"
+version = "0.1.0-alpha"
+description = "Persistent semantic memory for AI agents."
+readme = "README.md"
+requires-python = ">=3.10"
+
+authors = [
+    {name = "Shikhar"}
+]
+
+license = {text = "MIT"}
+
+keywords = [
+    "ai",
+    "llm",
+    "memory",
+    "agent",
+    "rag",
+    "semantic-search",
+    "vector-database",
+    "chromadb"
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+dependencies = [
+    "chromadb",
+    "sentence-transformers",
+    "ollama",
+    "numpy"
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]

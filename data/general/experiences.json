@@ -1,0 +1,129 @@
+[
+    {
+        "task": "Inputs not validated",
+        "files": [
+            "inputValidator.tsx"
+        ],
+        "summary": "Application crashed due to invalid input values.",
+        "solution": "Add validation logic before processing inputs."
+    },
+    {
+        "task": "Hardcoded values caused bugs",
+        "files": [],
+        "summary": "Bugs were introduced due to hardcoded values in the codebase.",
+        "solution": "Replace hardcoded values with dynamic, configurable settings."
+    },
+    {
+        "task": "Single source of truth violated",
+        "files": [],
+        "summary": "Data integrity compromised due to the violation of a single source of truth.",
+        "solution": "Identify, document, and enforce a clear single source of truth for all data sources and processes."
+    },
+    {
+        "task": "Duplicate logic introduced errors",
+        "files": [
+            "file1.ts",
+            "file2.js"
+        ],
+        "summary": "Duplicate code blocks were inadvertently added, leading to logical inconsistencies.",
+        "solution": "Review and remove duplicate sections of code."
+    },
+    {
+        "task": "Assumptions cause failures",
+        "files": [],
+        "summary": "The failure was due to incorrect assumptions made during the development process.",
+        "solution": "Review and validate assumptions thoroughly."
+    },
+    {
+        "task": "Configuration drift",
+        "summary": "The application's configuration settings have drifted from the intended configuration.",
+        "solution": "Review and update the configuration settings to match the expected requirements."
+    },
+    {
+        "task": "Dependency mismatch",
+        "files": [],
+        "summary": "The software encountered issues due to a mismatch between its dependencies.",
+        "solution": "Identify the conflicting dependencies, update or uninstall them as needed."
+    },
+    {
+        "task": "Edge cases not considered",
+        "files": [],
+        "summary": "Code did not handle edge cases adequately.",
+        "solution": "Add comprehensive testing for different edge cases."
+    },
+    {
+        "task": "Insufficient logging",
+        "files": [],
+        "summary": "No specific files or modules mentioned, only a description of the issue.",
+        "solution": "Improve logging by adding more detailed logs throughout the application to help with debugging."
+    },
+    {
+        "task": "Error messages ignored",
+        "files": [],
+        "summary": "No detailed files or error codes provided for analysis. Error messages need further investigation to identify the root cause.",
+        "solution": "Review logs and console outputs more thoroughly, capturing all relevant error messages and stack traces."
+    },
+    {
+        "task": "testing missed failures",
+        "files": [],
+        "summary": "There were test cases that did not identify all potential failure scenarios.",
+        "solution": "Review and expand the test suite to cover more edge cases."
+    },
+    {
+        "task": "Bugs introduced during refactoring",
+        "files": null,
+        "summary": "During the process of refactoring, some bugs were unintentionally introduced into the codebase.",
+        "solution": "Review the changes thoroughly to identify and fix any errors."
+    },
+    {
+        "task": "state management inconsistent",
+        "files": [],
+        "summary": "State management across components is not consistent, leading to bugs or unexpected behavior.",
+        "solution": "Review state management practices to ensure consistency and manage states effectively in the application."
+    },
+    {
+        "task": "Hidden dependencies complicated debugging",
+        "files": [],
+        "summary": "Complexity introduced by hidden dependencies made the process of debugging more challenging.",
+        "solution": "Identify and expose all dependencies to make debugging easier and traceability clearer."
+    },
+    {
+        "task": "Race conditions appeared unexpectedly",
+        "files": [],
+        "summary": "Unexpected race condition issues were detected during runtime.",
+        "solution": "Review the code for potential race conditions, such as shared mutable state or concurrent access to resources."
+    },
+    {
+        "task": "Documentation outdated",
+        "summary": "Documentation is out of date and does not reflect current system requirements or features.",
+        "solution": "Review and update documentation to ensure it accurately reflects the latest system specifications and features."
+    },
+    {
+        "task": "Version incompatibility",
+        "files": [
+            "unknown"
+        ],
+        "summary": "Application encountered runtime errors due to version mismatch between dependencies.",
+        "solution": "Verify compatibility of all packages and update them if necessary."
+    },
+    {
+        "task": "Manual processes became unreliable",
+        "files": [
+            "unknown"
+        ],
+        "summary": "Manual processes are no longer functioning as intended.",
+        "solution": "Review and automate manual processes where possible."
+    },
+    {
+        "task": "Complexity increase",
+        "files": [],
+        "summary": "The codebase complexity has grown, making it more difficult to maintain.",
+        "solution": "Refactor the codebase to reduce complexity and improve readability."
+    },
+    {
+        "task": "Small bug causing cascading failures",
+        "files": [],
+        "summary": "A small bug was introduced into the system, leading to a chain of related errors.",
+        "solution": "Identify and fix the root cause of the bug to prevent future occurrences."
+    }
+]

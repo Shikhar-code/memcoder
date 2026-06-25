@@ -1,0 +1,164 @@
+[
+  {
+    "task": "Data loading path error",
+    "files": [
+      "train.py"
+    ],
+    "summary": "FileNotFoundError thrown during dataset loading because of relative paths.",
+    "solution": "Use absolute paths with os.path.abspath or os.path.join relative to the file location."
+  },
+  {
+    "task": "Loss not decreasing during training",
+    "files": [
+      "train.py"
+    ],
+    "summary": "The model loss stayed constant because the learning rate was too high, causing divergence.",
+    "solution": "Lower the learning rate by a factor of 10 and verify if the loss begins to decrease smoothly."
+  },
+  {
+    "task": "Shape mismatch in matrix multiplication",
+    "files": [
+      "model.py"
+    ],
+    "summary": "Linear layer threw an error because input dimensions did not match weights.",
+    "solution": "Check input dimensions and add a view() or reshape() to flatten the tensor before the fully connected layer."
+  },
+  {
+    "task": "Out of memory on GPU",
+    "files": [
+      "train.py"
+    ],
+    "summary": "CUDA out of memory error occurred during the forward pass due to large tensors.",
+    "solution": "Reduce the batch size in the DataLoader and clear GPU cache using torch.cuda.empty_cache()."
+  },
+  {
+    "task": "Accuracy always 0",
+    "files": [
+      "dataset.py"
+    ],
+    "summary": "Labels were parsed as strings from a CSV instead of being properly integer encoded.",
+    "solution": "Encode the string labels to integers using a LabelEncoder before passing them to the loss function."
+  },
+  {
+    "task": "Model overfitting to training data",
+    "files": [
+      "model.py",
+      "train.py"
+    ],
+    "summary": "Validation loss started increasing while training loss reached zero.",
+    "solution": "Add Dropout layers to the model architecture and implement data augmentation in the dataset loader."
+  },
+  {
+    "task": "Custom Dataset loading is slow",
+    "files": [
+      "dataset.py"
+    ],
+    "summary": "GPU utilization was low because the main thread was bottlenecked reading images.",
+    "solution": "Use num_workers=4 or 8 in the DataLoader to parallelize the data reading process."
+  },
+  {
+    "task": "Learning rate plateauing too early",
+    "files": [
+      "train.py"
+    ],
+    "summary": "The loss stopped decreasing halfway through the epochs without converging.",
+    "solution": "Implement a ReduceLROnPlateau scheduler to dynamically lower the learning rate when validation loss stagnates."
+  },
+  {
+    "task": "Imbalanced classes causing bias",
+    "files": [
+      "train.py"
+    ],
+    "summary": "The model only predicted the majority class because of a 90/10 class split.",
+    "solution": "Use a weighted CrossEntropyLoss to penalize errors on the minority class more heavily."
+  },
+  {
+    "task": "NaN loss during training",
+    "files": [
+      "train.py"
+    ],
+    "summary": "Loss suddenly turned to NaN due to exploding gradients in deep layers.",
+    "solution": "Add gradient clipping using torch.nn.utils.clip_grad_norm_ before the optimizer step."
+  },
+  {
+    "task": "Multi-GPU training stalling",
+    "files": [
+      "train.py"
+    ],
+    "summary": "DistributedDataParallel setup froze because processes were not syncing properly across nodes.",
+    "solution": "Ensure all tensors are pushed to the correct device and implement proper process group initialization."
+  },
+  {
+    "task": "Custom loss function not differentiable",
+    "files": [
+      "loss.py"
+    ],
+    "summary": "Backward pass failed because the custom loss used non-differentiable numpy operations.",
+    "solution": "Rewrite the loss function entirely using differentiable PyTorch primitives like torch.where."
+  },
+  {
+    "task": "Memory leak in training loop",
+    "files": [
+      "train.py"
+    ],
+    "summary": "RAM usage steadily increased until the process was killed by the OOM killer.",
+    "solution": "Detach the loss tensor from the compute graph using .item() before accumulating it for logging."
+  },
+  {
+    "task": "Slow inference in production",
+    "files": [
+      "inference.py"
+    ],
+    "summary": "PyTorch inference was too slow to handle real-time requests on standard GPUs.",
+    "solution": "Export the trained model to ONNX format and run inference using TensorRT for optimized latency."
+  },
+  {
+    "task": "Custom CUDA kernel failing",
+    "files": [
+      "kernel.cu"
+    ],
+    "summary": "A custom CUDA extension produced garbage outputs due to incorrect thread indexing.",
+    "solution": "Fix the block and grid thread indexing logic to correctly map to the input array dimensions."
+  },
+  {
+    "task": "Model versioning is a mess",
+    "files": [
+      "train.py"
+    ],
+    "summary": "Multiple team members were overwriting model weights without tracking hyperparameters.",
+    "solution": "Implement MLflow to centrally log parameters, metrics, and artifact files for every experiment."
+  },
+  {
+    "task": "Feature engineering logic duplicated",
+    "files": [
+      "dataset.py",
+      "inference.py"
+    ],
+    "summary": "Training and inference pipelines drifted because feature logic was duplicated.",
+    "solution": "Create a centralized Feature Store (like Feast) to serve identical features to both training and production."
+  },
+  {
+    "task": "Deployment downtime during updates",
+    "files": [
+      "deploy.py"
+    ],
+    "summary": "Updating the model caused 5 minutes of API downtime while weights loaded.",
+    "solution": "Implement a shadow deployment and A/B testing pipeline using an API gateway to route traffic smoothly."
+  },
+  {
+    "task": "Concept drift in production data",
+    "files": [
+      "monitor.py"
+    ],
+    "summary": "Model accuracy degraded over 6 months because real-world data distributions shifted.",
+    "solution": "Setup evidently.ai to continuously monitor incoming data drift and trigger automated retraining pipelines."
+  },
+  {
+    "task": "Real-time API bottlenecked by heavy ML",
+    "files": [
+      "api.py"
+    ],
+    "summary": "Synchronous HTTP endpoints timed out because inference took up to 10 seconds.",
+    "solution": "Switch from a real-time synchronous API to an asynchronous architecture using Kafka for queuing requests."
+  }
+]
