@@ -56,7 +56,7 @@ cd memcoder
 Install the package
 
 ```bash
-pip install memcoder
+pip install -e .
 ```
 
 ---
