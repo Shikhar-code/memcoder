@@ -81,80 +81,62 @@ python -m pip install "memcoder[ollama]"
 
 ## Use with Antigravity CLI (AGY)
 
-### Global MCP configuration
+### Install the plugin
 
-1. Install MemCoder in a virtual environment as above.
-2. Find that environment's Python executable:
-   - Windows: `<project>\memcoder-env\Scripts\python.exe`
-   - macOS/Linux: `<project>/memcoder-env/bin/python`
-3. Open AGY's global MCP configuration:
-   - Windows: `C:\Users\<you>\.gemini\config\mcp_config.json`
-   - macOS/Linux: `~/.gemini/config/mcp_config.json`
-4. Add or replace the `memcoder` entry, using your actual Python path.
+From the activated environment and repository folder used above, run:
 
-```json
-{
-  "mcpServers": {
-    "memcoder": {
-      "command": "C:\\absolute\\path\\to\\memcoder-env\\Scripts\\python.exe",
-      "args": ["-m", "adapters.mcp.server"]
-    }
-  }
-}
+```bash
+python scripts/configure_agy_plugin.py
+agy plugin install .
+agy plugin enable memcoder
 ```
 
-5. Fully restart Antigravity.
-6. Confirm its MCP Servers view exposes `memcoder_prepare` and
-   `memcoder_record`.
+Restart AGY, then check its MCP Servers view. You should see:
 
-Do not set `cwd` to the MemCoder repository for an installed-package test. It
-could make AGY import the checkout rather than the installed package.
+- `memcoder_prepare`
+- `memcoder_record`
 
-### Plugin installation
+That is the complete one-time setup. The helper writes a local ignored config
+with the correct Python path, so no JSON editing is required.
 
-This repository includes [plugin.json](plugin.json) and a portable
-[mcp_config.example.json](mcp_config.example.json).
+### First task with MemCoder
 
-1. Create `~/.gemini/config/plugins/memcoder/`.
-2. Copy `plugin.json` into that folder.
-3. Copy `mcp_config.example.json` there, rename it `mcp_config.json`, and
-   replace `<absolute-python-path>` with the installed environment's Python.
-4. Restart Antigravity and confirm the MemCoder plugin in its MCP Servers view.
-
-The template deliberately has no hard-coded local path.
-
-### Required AGY prompt template
-
-AGY may otherwise inspect MemCoder files or skip the tools. Start each task
-with this template, replacing bracketed values:
+Paste this into AGY for the first task in a project:
 
 ```text
-Use MemCoder's provider-free cognition workflow for this task.
+Use MemCoder for this task.
 
-Before inspecting, listing, reading, searching, or editing project files, call
-memcoder_prepare exactly once with:
-- problem: "[describe the task and expected result]"
-- agent_id: "[stable project-specific owner]"
-- include_shared: false
+Before working, call memcoder_prepare once for the task. Then solve the task,
+make the smallest correct change, and run the relevant test or render.
 
-Use returned memories as investigation guidance, never as proof. Do not inspect
-or edit MemCoder's source code, database, MCP configuration, tool manifests,
-or documentation unless the user explicitly asks to debug MemCoder itself.
+If verification passes, call memcoder_record once with what changed, why it
+failed, and how it was fixed. Do not record anything if verification failed.
 
-Solve only the requested project task. Make the smallest correct change and run
-the relevant test, render, or verification command.
-
-Only after verification passes, call memcoder_record once with the actual task,
-changed files, root-cause summary, solution, one genuine debugging-process
-reflection, and reusable principles. Do not record an outcome if verification
-failed.
-
-Finally report the MemCoder prepare result, files changed, verification result,
-and record result.
+Do not inspect MemCoder's own files unless I specifically ask you to debug
+MemCoder.
 ```
 
-Use a stable `agent_id` per project. Start with `include_shared: false` to
-avoid importing another project's shared memories. See the standalone
+On a first run, `memcoder_prepare` normally returns no memories. That is
+expected: the successful outcome you record becomes useful on related later
+tasks.
+
+### Later tasks in the same project
+
+Use this shorter prompt:
+
+```text
+Use MemCoder for this task: call memcoder_prepare before working, use relevant
+memories as guidance, verify the fix, then call memcoder_record if it passes.
+Do not inspect MemCoder itself.
+```
+
+For most people, that is enough. By default AGY stores memory under the
+`antigravity` owner. If you work on multiple unrelated projects, give each one
+a simple permanent name such as `remotion-trailer` or `client-dashboard` and
+ask AGY to use that name as `agent_id`. An `agent_id` is only a project label;
+reuse the same label on every task in that project.
+
+For stricter control or evaluation, use the detailed
 [AGY prompt template](docs/antigravity_prompt_template.md).
 
 ## MCP tools
