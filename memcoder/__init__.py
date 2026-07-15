@@ -1,6 +1,6 @@
 from client.agent import MemCoderAgent
 
-from memcoder.display import (
+from client.display import (
 
     banner,
 

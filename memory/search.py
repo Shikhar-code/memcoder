@@ -7,7 +7,8 @@ def search_memory(
         query_embedding=None,
         k=3,
         memory_type=None,
-        agent_id="human"):
+        agent_id="human",
+        include_shared=True):
 
     filters = []
 
@@ -21,23 +22,25 @@ def search_memory(
 
         )
 
-    filters.append(
-
-        {
-            "$or": [
-
-                {
-                    "owner": "shared"
-                },
-
-                {
-                    "owner": agent_id
-                }
-
-            ]
-        }
-
-    )
+    if include_shared:
+        filters.append(
+            {
+                "$or": [
+                    {
+                        "owner": "shared"
+                    },
+                    {
+                        "owner": agent_id
+                    }
+                ]
+            }
+        )
+    else:
+        filters.append(
+            {
+                "owner": agent_id
+            }
+        )
 
     if len(filters) == 1:
 
@@ -102,6 +105,12 @@ def search_memory(
                 memory.get(
                     "summary",
                     ""
+                ),
+
+            "verification":
+                 memory.get(
+                   "verification",
+                   ""
                 ),
 
             "solution":

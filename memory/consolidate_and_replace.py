@@ -17,12 +17,14 @@ from memory.store import add_memory
 def consolidate_and_replace(
         task,
         memory_type,
+        owner="human",
         execute=False,
         verbose=False):
 
     memories = find_similar_memories(
         task,
-        memory_type
+        memory_type,
+        owner=owner
     )
 
     if len(memories) <= 1:
@@ -38,7 +40,8 @@ def consolidate_and_replace(
 
     duplicate_ids = find_duplicate_ids(
         task,
-        memory_type
+        memory_type,
+        owner=owner
     )
 
     if verbose:

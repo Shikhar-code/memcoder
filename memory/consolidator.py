@@ -4,7 +4,8 @@ from memory.normalize import normalize_task
 
 def find_similar_memories(
         task,
-        memory_type=None):
+        memory_type=None,
+        owner=None):
 
     task = normalize_task(task)
 
@@ -29,6 +30,14 @@ def find_similar_memories(
             if metadata.get(
                     "type"
             ) != memory_type:
+
+                continue
+
+        if owner is not None:
+
+            if metadata.get(
+                    "owner"
+            ) != owner:
 
                 continue
 
@@ -140,6 +149,11 @@ def merge_memories(memories):
     )
 
     merged["type"] = memories[0]["type"]
+
+    merged["owner"] = memories[0].get(
+        "owner",
+        "shared"
+    )
 
     merged["frequency"] = len(memories)
 

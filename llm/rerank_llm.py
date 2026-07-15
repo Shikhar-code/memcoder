@@ -1,8 +1,8 @@
-import ollama
+from llm.optional_ollama import get_ollama
 import re
 
 
-def rerank_memories(problem_description, memories):
+def rerank_memories(problem_description, memories, verbose=False):
 
     prompt = f"""
 Current problem:
@@ -68,7 +68,7 @@ Example:
 No explanation.
 """
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen3:8b",
         messages=[
             {
@@ -84,10 +84,10 @@ No explanation.
     )
 
     text = response.message.content
-if verbose:
-    print("\n===== RERANKER RAW OUTPUT =====")
-    print(text)
-    print("===============================\n")
+    if verbose:
+        print("\n===== RERANKER RAW OUTPUT =====")
+        print(text)
+        print("===============================\n")
 
     numbers = re.findall(r"\d+", text)
 
@@ -101,7 +101,7 @@ if verbose:
             indices.append(idx)
 
     indices = list(dict.fromkeys(indices))
-    if verbose
+    if verbose:
         print("Parsed indices:", indices)
 
     if len(indices) == 0:
@@ -109,6 +109,6 @@ if verbose:
 
             print("FALLING BACK TO FIRST 5")
 
-            return memories[:5]
+        return memories[:5]
 
     return [memories[i] for i in indices[:5]]

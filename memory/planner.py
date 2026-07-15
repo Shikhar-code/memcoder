@@ -1,4 +1,4 @@
-import ollama
+from llm.optional_ollama import get_ollama
 
 
 def create_plan(problem,
@@ -45,7 +45,7 @@ Create a debugging plan.
 Return 5-10 numbered steps.
 """
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen2.5-coder:3b",
         think=False,
         messages=[

@@ -24,6 +24,9 @@ def add_memory(
     if not memory.get("solution"):
         memory["solution"] = "Unknown"
 
+    if not memory.get("verification"):
+        memory["verification"] = ""
+
     # -------------------------
     # Metadata
     # -------------------------

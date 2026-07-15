@@ -1,4 +1,4 @@
-import ollama
+from llm.optional_ollama import get_ollama
 
 
 def create_skill_llm(reflection):
@@ -27,7 +27,7 @@ Reflection:
 Skills:
 """
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen2.5-coder:3b",
         think=False,
         messages=[

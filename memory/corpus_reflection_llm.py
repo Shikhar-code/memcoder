@@ -1,4 +1,4 @@
-import ollama
+from llm.optional_ollama import get_ollama
 
 
 def reflect_corpus(reflections):
@@ -38,7 +38,7 @@ Reflections:
 {text}
 """
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen2.5-coder:3b",
         think=False,
         messages=[

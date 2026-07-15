@@ -1,11 +1,5 @@
 from memory.clear import clear_owner
 
-from agent.problem_solver import solve_problem
-
-from memory.conversation_learner import (
-    learn_from_conversation
-)
-
 from memory.search import search_memory
 
 from memory.stats import memory_stats
@@ -17,12 +11,17 @@ from memory.delete import delete_memory
 from memory.update import update_memory
 from memory.share import share_memory
 from memory.transfer import transfer_memory
+from memory.record_outcome import record_outcome
+
+
 def solve(
         query,
         session_context="",
         agent_id="human"):
 
-    return solve_problem(
+    from agent.solve_and_learn import solve_and_learn
+
+    return solve_and_learn(
         query,
         session_context=session_context,
         agent_id=agent_id
@@ -32,6 +31,8 @@ def solve(
 def learn(
         conversation,
         agent_id="human"):
+
+    from memory.conversation_learner import learn_from_conversation
 
     return learn_from_conversation(
         conversation,
@@ -100,9 +101,43 @@ def stats():
 
 def trace(
         query,
-        agent_id="human"):
+        agent_id="human",
+        include_shared=True):
 
     return hierarchical_search(
         query,
+        agent_id=agent_id,
+        include_shared=include_shared
+    )
+
+
+def prepare(
+        query,
+        agent_id="human",
+        include_shared=True):
+
+    return hierarchical_search(
+        query,
+        agent_id=agent_id,
+        include_shared=include_shared
+    )
+
+
+def record(
+        task,
+        files,
+        summary,
+        solution,
+        reflection=None,
+        principles=None,
+        agent_id="human"):
+
+    return record_outcome(
+        task=task,
+        files=files,
+        summary=summary,
+        solution=solution,
+        reflection=reflection,
+        principles=principles,
         agent_id=agent_id
     )

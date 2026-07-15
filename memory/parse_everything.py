@@ -2,179 +2,114 @@ import re
 
 
 def parse_numbered_section(section_text):
-
-    pattern = r"\d+\.\s*(.*)"
-
     matches = re.findall(
-        pattern,
+        r"\d+\.\s*(.*)",
         section_text
     )
 
     return [
-
-        x.strip()
-
-        for x in matches
-
-        if x.strip()
-
+        match.strip()
+        for match in matches
+        if match.strip()
     ]
 
 
-def parse_everything(text):
+def parse_labeled_memory(block):
+    fields = {}
 
-    # EXPERIENCE
+    for field in [
+            "TASK",
+            "FILES",
+            "SUMMARY",
+            "SOLUTION"]:
 
-    task = re.search(
-        r"EXPERIENCE.*?TASK:\s*(.*?)\n\s*FILES:",
-        text,
-        re.DOTALL
-    )
+        match = re.search(
+            rf"^\s*{field}:\s*(.*?)(?=^\s*(?:TASK|FILES|SUMMARY|SOLUTION):|\Z)",
+            block,
+            re.DOTALL | re.MULTILINE | re.IGNORECASE
+        )
 
-    files = re.search(
-        r"EXPERIENCE.*?FILES:\s*(.*?)\n\s*SUMMARY:",
-        text,
-        re.DOTALL
-    )
+        if not match:
+            return None
 
-    summary = re.search(
-        r"EXPERIENCE.*?SUMMARY:\s*(.*?)\n\s*SOLUTION:",
-        text,
-        re.DOTALL
-    )
+        fields[field.lower()] = match.group(1).strip()
 
-    solution = re.search(
-        r"EXPERIENCE.*?SOLUTION:\s*(.*?)-{5,}",
-        text,
-        re.DOTALL
-    )
-
-    experience = {
-
-        "task":
-            task.group(1).strip(),
-
-        "files":
-            [
-                x.strip()
-                for x in files.group(1).split(",")
-            ],
-
-        "summary":
-            summary.group(1).strip(),
-
-        "solution":
-            solution.group(1).strip()
-
+    return {
+        "task": fields["task"],
+        "files": [
+            file.strip()
+            for file in fields["files"].split(",")
+            if file.strip()
+        ],
+        "summary": fields["summary"],
+        "solution": fields["solution"]
     }
 
-    # REFLECTIONS
+
+def parse_everything(text):
+    experience_block = re.search(
+        r"EXPERIENCE\s*(.*?)(?:-{5,}|REFLECTIONS\b|\Z)",
+        text,
+        re.DOTALL | re.IGNORECASE
+    )
+
+    experience = None
+
+    if experience_block:
+        experience = parse_labeled_memory(
+            experience_block.group(1)
+        )
 
     reflection_block = re.search(
-
         r"REFLECTIONS(.*?)PRINCIPLES",
-
         text,
-
-        re.DOTALL
-
+        re.DOTALL | re.IGNORECASE
     )
 
     reflections = []
 
     if reflection_block:
-
         reflections = parse_numbered_section(
-
             reflection_block.group(1)
-
         )
 
-    # PRINCIPLES
-
     principle_block = re.search(
-
         r"PRINCIPLES(.*?)MISTAKES",
-
         text,
-
-        re.DOTALL
-
+        re.DOTALL | re.IGNORECASE
     )
 
     principles = []
 
     if principle_block:
-
         principles = parse_numbered_section(
-
             principle_block.group(1)
-
         )
 
-    # MISTAKES
-
     mistake_block = re.search(
-
         r"MISTAKES(.*)",
-
         text,
-
-        re.DOTALL
-
+        re.DOTALL | re.IGNORECASE
     )
 
     mistakes = []
 
     if mistake_block:
-
-        pattern = r"""
-TASK:\s*(.*?)\n
-FILES:\s*(.*?)\n
-SUMMARY:\s*(.*?)\n
-SOLUTION:\s*(.*?)
-(?=\n\s*TASK:|\Z)
-"""
-
-        matches = re.findall(
-
-            pattern,
-
+        blocks = re.split(
+            r"(?=^\s*TASK:)",
             mistake_block.group(1),
-
-            re.DOTALL | re.VERBOSE
-
+            flags=re.MULTILINE | re.IGNORECASE
         )
 
-        for task, files, summary, solution in matches:
+        for block in blocks:
+            memory = parse_labeled_memory(block)
 
-            mistakes.append({
-
-                "task":
-                    task.strip(),
-
-                "files":
-                    [
-                        x.strip()
-                        for x in files.split(",")
-                    ],
-
-                "summary":
-                    summary.strip(),
-
-                "solution":
-                    solution.strip()
-
-            })
+            if memory:
+                mistakes.append(memory)
 
     return {
-
         "experience": experience,
-
         "reflections": reflections,
-
         "principles": principles,
-
         "mistakes": mistakes
-
     }

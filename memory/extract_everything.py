@@ -1,4 +1,4 @@
-import ollama
+from llm.optional_ollama import get_ollama
 
 
 def extract_everything(conversation):
@@ -130,7 +130,7 @@ Conversation:
 {conversation}
 """
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen3:8b",
         messages=[
             {

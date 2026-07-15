@@ -37,6 +37,58 @@ dist/
 # Chroma
 
 chroma_db/
+chroma_db_*/
+
+# Local MemCoder state and controlled-proof output
+
+*_memories.json
+episodes.json
+experiences.json
+memory_candidates.json
+training_examples.json
+memories.json
+
+# Local MCP configuration, logs, and archives
+
+mcp_config.json
+mcp_start.log
+*.zip
+
+# Local evaluation and scratch material
+
+.agents/
+data/
+memories.json
+main.py
+examples/0[1-5]_*.py
+errors/
+eval/
+core/
+engine/
+extra/
+structure.txt
+test.py
+rerank_test.py
+setup_eval.py
+import_experiences.py
+memory/import_beta1_memories.py
+memory/trace_memory_builder.py
+scripts/build_trace_summary.py
+scripts/build_training_examples.py
+scripts/extract_experience.py
+scripts/extract_trace.py
+scripts/generate_memory_candidates.py
+
+# Superseded exploratory fixtures; retain locally, not in the Beta-1 repository
+testing/ambiguous_registration/
+testing/auto_learning_proof/
+testing/beta1_proof/
+testing/beta1_final_proof/
+testing/multi_file_duplicate/
+testing/remotion_duplicate_id/
+testing/remotion_duration/
+testing/web_bearer/
+testing/web_jwt/
 
 # Temporary
 

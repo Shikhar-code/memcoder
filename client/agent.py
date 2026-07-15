@@ -10,7 +10,9 @@ from api.memcoder_api import (
     update,
     share,
     transfer,
-    clear
+    clear,
+    prepare,
+    record
 )
 
 
@@ -83,6 +85,36 @@ class MemCoderAgent:
 
             agent_id=self.id
 
+        )
+
+    def prepare(
+            self,
+            query,
+            include_shared=True):
+
+        return prepare(
+            query,
+            agent_id=self.id,
+            include_shared=include_shared
+        )
+
+    def record(
+            self,
+            task,
+            files,
+            summary,
+            solution,
+            reflection=None,
+            principles=None):
+
+        return record(
+            task=task,
+            files=files,
+            summary=summary,
+            solution=solution,
+            reflection=reflection,
+            principles=principles,
+            agent_id=self.id
         )
 
     # -----------------------

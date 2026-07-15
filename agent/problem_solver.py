@@ -4,7 +4,7 @@ from context.hierarchical_context_builder import (
     build_hierarchical_context
 )
 
-import ollama
+from llm.optional_ollama import get_ollama
 import time
 
 
@@ -65,7 +65,8 @@ def solve_problem(
     context_start = time.time()
 
     memory_context = build_hierarchical_context(
-        results
+        results,
+        query=retrieval_problem
     )
 
     if total_memories == 0:
@@ -112,6 +113,7 @@ Instructions:
 9. If the problem is absurd, contradictory, metaphorical, fictional, or lacks enough information, explicitly say so instead of inventing a technical explanation.
 10. Do not assume fictional scenarios are real.
 11. Be concise and practical.
+12. Treat observations as process guidance: use them to choose the first verification step, never as proof of root cause.
 
 Output sections:
 
@@ -155,7 +157,7 @@ Answer:
 
     llm_start = time.time()
 
-    response = ollama.chat(
+    response = get_ollama().chat(
         model="qwen3:8b",
         messages=[
             {

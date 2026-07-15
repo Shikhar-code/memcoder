@@ -1,64 +1,103 @@
-def build_hierarchical_context(results):
+from memory.relevance import filter_trusted_memories
 
-    context = ""
 
-    # EXPERIENCES
-    if results["experiences"]:
+def build_hierarchical_context(
+        results,
+        query=""):
 
-        context += "\nPAST EXPERIENCES\n\n"
+    sections = []
 
-        for memory in results["experiences"]:
+    experiences = filter_trusted_memories(
+        results.get("experiences", []),
+        query=query
+    )
+    mistakes = filter_trusted_memories(
+        results.get("mistakes", []),
+        query=query
+    )
+    principles = filter_trusted_memories(
+        results.get("principles", []),
+        query=query
+    )
+    reflections = filter_trusted_memories(
+        results.get("reflections", []),
+        query=query
+    )
 
-            context += f"""
-Problem:
-{memory["task"]}
+    if experiences:
+        sections.append("PAST EXPERIENCES\n")
+
+        for memory in experiences:
+
+            files = memory.get("files", [])
+
+            if isinstance(files, list):
+                files_text = ", ".join(files)
+            else:
+                files_text = str(files)
+
+            sections.append(
+                f"""Problem:
+{memory.get("task", "Unknown")}
+
+Context:
+{memory.get("summary", "No summary available.")}
+
+Files:
+{files_text}
 
 Fix:
-{memory["solution"]}
-
----
+{memory.get("solution", "No solution available.")}
+──────
 """
+            )
 
-    # MISTAKES
-    if results["mistakes"]:
+    if mistakes:
+        sections.append("\nAVOID\n")
 
-        context += "\nAVOID\n\n"
+        for memory in mistakes:
 
-        for memory in results["mistakes"]:
+            files = memory.get("files", [])
 
-            context += f"""
-{memory["summary"]}
+            if isinstance(files, list):
+                files_text = ", ".join(files)
+            else:
+                files_text = str(files)
+
+            sections.append(
+                f"""{memory.get("summary", memory.get("task", "Unknown"))}
+
+Files:
+{files_text}
 
 Fix:
-{memory["solution"]}
-
----
+{memory.get("solution", "No solution available.")}
+──────
 """
+            )
 
-    # PRINCIPLES
-    if results["principles"]:
+    if principles:
+        sections.append("\nRULES\n")
 
-        context += "\nRULES\n\n"
-
-        for memory in results["principles"]:
-
-            context += f"""
-{memory["summary"]}
-
----
+        for memory in principles:
+            sections.append(
+                f"""{memory.get("summary", memory.get("task", "Unknown"))}
+──────
 """
+            )
 
-    # REFLECTIONS
-    if results["reflections"]:
+    if reflections:
+        sections.append(
+            "\nOBSERVATIONS\n"
+            "Use these observations to choose what to verify first. "
+            "They are process guidance, not proof of a root cause.\n"
+        )
 
-        context += "\nOBSERVATIONS\n\n"
-
-        for memory in results["reflections"]:
-
-            context += f"""
-{memory["summary"]}
-
----
+        for memory in reflections:
+            sections.append(
+                f"""{memory.get("summary", memory.get("task", "Unknown"))}
+──────
 """
+            )
 
-    return context
+    return "\n".join(sections)

@@ -4,7 +4,8 @@ from memory.normalize import normalize_task
 
 def find_duplicate_ids(
         task,
-        memory_type=None):
+        memory_type=None,
+        owner=None):
 
     task = normalize_task(task)
 
@@ -35,6 +36,14 @@ def find_duplicate_ids(
 
             if metadata.get(
                     "type") != memory_type:
+
+                continue
+
+        if owner is not None:
+
+            if metadata.get(
+                    "owner"
+            ) != owner:
 
                 continue
 

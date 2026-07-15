@@ -40,7 +40,9 @@ def solve_endpoint(
 
         request.query,
 
-        request.session_context
+        request.session_context,
+
+        request.agent_id
 
     )
 
@@ -51,7 +53,9 @@ def learn_endpoint(
 
     learn(
 
-        request.conversation
+        request.conversation,
+
+        agent_id=request.agent_id
 
     )
 
@@ -72,7 +76,9 @@ def search_endpoint(
 
         k=request.k,
 
-        memory_type=request.memory_type
+        memory_type=request.memory_type,
+
+        agent_id=request.agent_id
 
     )
 
@@ -83,7 +89,9 @@ def trace_endpoint(
 
     return trace(
 
-        request.query
+        request.query,
+
+        agent_id=request.agent_id
 
     )
 

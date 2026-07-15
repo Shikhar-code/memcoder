@@ -1,389 +1,246 @@
 # MemCoder
 
-> **Build AI agents that remember.**
+> Persistent, provider-independent cognition for AI coding agents.
 
-MemCoder is a **persistent semantic memory SDK for AI agents**.
+MemCoder gives an agent durable memory without owning its model. Before a task,
+the agent retrieves trusted experiences, principles, mistakes, and debugging
+reflections. After a verified result, it records a structured outcome for use
+on related future work.
 
-It enables agents to learn from conversations, retrieve relevant past experiences, and build long-term knowledge that improves future reasoning.
+Beta-1 is proven with Antigravity CLI over MCP. It does **not** require Ollama,
+CUDA, or a local generation server.
 
-Instead of starting from scratch every conversation, agents using MemCoder accumulate knowledge over time.
+```text
+agent task -> memcoder_prepare -> trusted guidance
+          -> host agent reasons, edits, and verifies
+          -> memcoder_record -> persistent memory
+```
 
----
+## What Beta-1 does
 
-## Why MemCoder?
+- Stores persistent experiences, principles, reflections, and mistakes.
+- Retrieves confidence-gated, query-relevant memories.
+- Keeps memory private per `agent_id`, with optional shared-memory retrieval.
+- Exposes provider-free MCP tools for agent hosts.
+- Rejects low-quality records and explains rejected fields.
+- Provides structured Python SDK access through `prepare()` and `record()`.
+- Has a controlled Antigravity proof where memory-guided work passed an unseen
+  regression that a matched no-memory control failed.
 
-Large Language Models are powerful, but they typically have no persistent memory between conversations.
+MemCoder does not generate answers or judge rendered image/video quality. The
+host agent supplies reasoning; MemCoder supplies cognition and persistence.
 
-MemCoder provides a long-term semantic memory layer that allows agents to:
+## Installation
 
-- Learn from previous conversations
-- Remember solved problems
-- Reuse past solutions
-- Learn from mistakes
-- Store reusable principles
-- Improve future reasoning
+### Install from this repository (recommended for Beta-1 testers)
 
-The result is an AI agent that becomes more knowledgeable with experience instead of repeatedly solving the same problems.
+Requirements: Python 3.10+ and internet access the first time Python packages
+and the embedding model are installed.
 
----
+Windows PowerShell:
 
-# Features
-
-- 🧠 Persistent semantic memory
-- 🤖 Automatic learning from conversations
-- 🔍 Semantic vector search
-- 📚 Hierarchical memory retrieval
-- 👥 Multi-agent memory isolation
-- 🌍 Shared knowledge between agents
-- 🔄 Transferable memory ownership
-- 💬 Session-based conversations
-- ✏️ Memory CRUD operations
-- 🧹 Cleanup & maintenance utilities
-- ✅ Alpha integration test suite
-
----
-
-# Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/Shikhar-code/memcoder.git
-
+```powershell
+git clone https://github.com/<your-account>/memcoder.git
 cd memcoder
+python -m venv memcoder-env
+.\memcoder-env\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install .
 ```
 
-Install the package
+macOS/Linux:
 
 ```bash
-pip install memcoder
+git clone https://github.com/<your-account>/memcoder.git
+cd memcoder
+python3 -m venv memcoder-env
+source memcoder-env/bin/activate
+python -m pip install --upgrade pip
+python -m pip install .
 ```
 
----
+Verify the installed MCP server and confirm Ollama is absent:
 
-# Quick Start
+```bash
+python -c "from adapters.mcp.server import mcp; print('PASS: MemCoder MCP imports')"
+python -m pip show ollama
+```
+
+The second command should report that `ollama` is not installed. Until this
+Beta-1 build is published to PyPI, use `python -m pip install .` rather than
+`pip install memcoder`.
+
+### Optional legacy Ollama helpers
+
+The old `solve()` and `learn()` helpers are not part of the Beta-1 MCP workflow.
+Install them only if you intentionally want that legacy path:
+
+```bash
+python -m pip install "memcoder[ollama]"
+```
+
+## Use with Antigravity CLI (AGY)
+
+### Global MCP configuration
+
+1. Install MemCoder in a virtual environment as above.
+2. Find that environment's Python executable:
+   - Windows: `<project>\memcoder-env\Scripts\python.exe`
+   - macOS/Linux: `<project>/memcoder-env/bin/python`
+3. Open AGY's global MCP configuration:
+   - Windows: `C:\Users\<you>\.gemini\config\mcp_config.json`
+   - macOS/Linux: `~/.gemini/config/mcp_config.json`
+4. Add or replace the `memcoder` entry, using your actual Python path.
+
+```json
+{
+  "mcpServers": {
+    "memcoder": {
+      "command": "C:\\absolute\\path\\to\\memcoder-env\\Scripts\\python.exe",
+      "args": ["-m", "adapters.mcp.server"]
+    }
+  }
+}
+```
+
+5. Fully restart Antigravity.
+6. Confirm its MCP Servers view exposes `memcoder_prepare` and
+   `memcoder_record`.
+
+Do not set `cwd` to the MemCoder repository for an installed-package test. It
+could make AGY import the checkout rather than the installed package.
+
+### Plugin installation
+
+This repository includes [plugin.json](plugin.json) and a portable
+[mcp_config.example.json](mcp_config.example.json).
+
+1. Create `~/.gemini/config/plugins/memcoder/`.
+2. Copy `plugin.json` into that folder.
+3. Copy `mcp_config.example.json` there, rename it `mcp_config.json`, and
+   replace `<absolute-python-path>` with the installed environment's Python.
+4. Restart Antigravity and confirm the MemCoder plugin in its MCP Servers view.
+
+The template deliberately has no hard-coded local path.
+
+### Required AGY prompt template
+
+AGY may otherwise inspect MemCoder files or skip the tools. Start each task
+with this template, replacing bracketed values:
+
+```text
+Use MemCoder's provider-free cognition workflow for this task.
+
+Before inspecting, listing, reading, searching, or editing project files, call
+memcoder_prepare exactly once with:
+- problem: "[describe the task and expected result]"
+- agent_id: "[stable project-specific owner]"
+- include_shared: false
+
+Use returned memories as investigation guidance, never as proof. Do not inspect
+or edit MemCoder's source code, database, MCP configuration, tool manifests,
+or documentation unless the user explicitly asks to debug MemCoder itself.
+
+Solve only the requested project task. Make the smallest correct change and run
+the relevant test, render, or verification command.
+
+Only after verification passes, call memcoder_record once with the actual task,
+changed files, root-cause summary, solution, one genuine debugging-process
+reflection, and reusable principles. Do not record an outcome if verification
+failed.
+
+Finally report the MemCoder prepare result, files changed, verification result,
+and record result.
+```
+
+Use a stable `agent_id` per project. Start with `include_shared: false` to
+avoid importing another project's shared memories. See the standalone
+[AGY prompt template](docs/antigravity_prompt_template.md).
+
+## MCP tools
+
+### `memcoder_prepare`
+
+Retrieves trusted cognition before the host agent works.
+
+```json
+{
+  "problem": "A deployment configuration rejects a blank required name.",
+  "agent_id": "my-project",
+  "include_shared": false
+}
+```
+
+The response includes confidence, strategy (`normal_reasoning`,
+`memory_guided`, or `memory_first`), grouped memories, and safe-use
+instructions.
+
+### `memcoder_record`
+
+Stores a verified structured outcome after the host agent succeeds.
+
+```json
+{
+  "task": "Reject blank deployment names before string processing",
+  "files": ["src/deployment_validation.py"],
+  "summary": "A blank name reached string processing before validation.",
+  "solution": "Reject missing or whitespace-only names before processing.",
+  "reflection": "I reproduced the blank-input case before changing validation.",
+  "principles": ["Validate required values before string operations."],
+  "agent_id": "my-project"
+}
+```
+
+MemCoder returns accepted records and rejected fields. A reflection must be a
+short, first-person observation about the debugging process—not a solution.
+
+## Python SDK example
 
 ```python
 from memcoder import MemCoderAgent
 
-coder = MemCoderAgent.coder()
+agent = MemCoderAgent("my-project")
 
-conversation = """
-User:
-
-torch.cuda.is_available() returns False.
-
-Assistant:
-
-PyTorch was installed without CUDA support.
-Install the CUDA-enabled PyTorch build.
-"""
-
-coder.learn(conversation)
-
-answer = coder.solve(
-    "My GPU is not detected by PyTorch."
+guidance = agent.prepare(
+    "A deployment rejects a blank required name.",
+    include_shared=False,
 )
 
-print(answer["answer"])
-```
+# Your agent reasons over guidance, edits code, and verifies the result.
 
----
-
-# Examples
-
-The repository includes complete examples demonstrating every major feature.
-
-```
-examples/
-
-01_basic.py
-02_learning.py
-03_sessions.py
-04_multi_agent.py
-05_crud.py
-```
-
-Run an example
-
-```bash
-python examples/01_basic.py
-```
-
----
-
-# Core Concepts
-
-## Learning
-
-Convert conversations into structured long-term memories.
-
-```python
-coder.learn(conversation)
-```
-
----
-
-## Semantic Search
-
-Retrieve memories using semantic similarity rather than keyword matching.
-
-```python
-coder.search("cuda")
-```
-
-Retrieve the single most relevant memory.
-
-```python
-coder.search_one("cuda")
-```
-
----
-
-## Problem Solving
-
-Use previously stored knowledge during reasoning.
-
-```python
-coder.solve(
-    "My Docker container exits immediately."
+agent.record(
+    task="Reject blank deployment names before string processing",
+    files=["src/deployment_validation.py"],
+    summary="Blank names reached string processing before validation.",
+    solution="Reject missing or whitespace-only names before processing.",
+    reflection="I reproduced the blank-input case before changing validation.",
+    principles=["Validate required values before string operations."],
 )
 ```
 
----
+## Testing
 
-## Sessions
-
-Maintain conversational context across multiple interactions.
-
-```python
-session = coder.session()
-
-session.solve(...)
-
-session.solve(...)
-
-session.learn()
-```
-
----
-
-## Multi-Agent Memory
-
-Create independent memory spaces for different agents.
-
-```python
-coder = MemCoderAgent.coder()
-
-research = MemCoderAgent.research()
-
-planner = MemCoderAgent.planner()
-```
-
-Each agent has private memories while still being able to share knowledge when appropriate.
-
----
-
-# Memory Types
-
-MemCoder organizes knowledge into four complementary memory types.
-
-### Experience
-
-Previously solved problems and successful solutions.
-
-### Mistake
-
-Common errors and how to avoid them.
-
-### Principle
-
-Reusable knowledge and best practices.
-
-### Reflection
-
-Observations that improve future reasoning.
-
----
-
-# Memory Management
-
-Update an existing memory
-
-```python
-coder.update(memory_id, summary="Updated summary")
-```
-
-Delete a memory
-
-```python
-coder.delete(memory_id)
-```
-
-Share a memory
-
-```python
-coder.share(memory_id)
-```
-
-Transfer ownership
-
-```python
-coder.transfer(memory_id, "research")
-```
-
-Clear all memories owned by an agent
-
-```python
-coder.clear()
-```
-
----
-
-# Architecture
-
-```text
-                  Conversation
-                        │
-                        ▼
-               Learning Pipeline
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   Experiences      Mistakes      Principles
-                        │
-                        ▼
-                  Reflections
-                        │
-                        ▼
-              Semantic Memory Store
-                        │
-                        ▼
-             Hierarchical Retrieval
-                        │
-                        ▼
-                 Agent Reasoning
-                        │
-                        ▼
-                  Better Responses
-```
-
----
-
-# Project Structure
-
-```
-memcoder/
-
-agent/
-api/
-client/
-context/
-examples/
-memory/
-scripts/
-server/
-tests/
-
-README.md
-pyproject.toml
-requirements.txt
-```
-
----
-
-# Testing
-
-Run the Alpha integration suite.
+Run the focused Beta-1 checks:
 
 ```bash
-python tests/test_alpha.py
+python tests/test_retrieval_safety.py
+python tests/test_retrieval_calibration.py
+python tests/test_memory_quality.py
+python tests/test_record_quality_feedback.py
+python tests/test_mcp_provider_independence.py
+python tests/test_shared_retrieval_control.py
+python tests/test_ollama_optional.py
 ```
 
----
+The complete validated scope and known non-goals are in
+[Beta-1 release scope](docs/beta1_release.md).
 
-# Maintenance
+## Roadmap
 
-Repair metadata, remove duplicate memories and clean development artifacts.
+Beta-2 work includes planning, skills derived from principles, richer
+multi-agent sharing policy, visual-domain evaluation, memory consolidation, and
+distributed synchronization.
 
-```bash
-python scripts/cleanup.py
-```
+## License
 
----
-
-# Current Status
-
-**Version:** 0.1.0-alpha
-
-Implemented features:
-
-- Persistent semantic memory
-- Automatic conversation learning
-- Semantic vector search
-- Hierarchical retrieval
-- Session support
-- Multi-agent memory
-- Shared knowledge
-- Memory ownership transfer
-- CRUD operations
-- Cleanup utilities
-- Integration tests
-
----
-
-# Roadmap
-
-## Alpha
-
-- Persistent semantic memory
-- Learning pipeline
-- Hierarchical retrieval
-- Multi-agent support
-- Session management
-- CRUD operations
-
-## Beta
-
-- Memory ranking
-- Memory consolidation
-- Importance updates
-- Forgetting & decay
-- Graph relationships
-- FastAPI server
-- OpenAI integration
-- Anthropic integration
-
-## Version 1.0
-
-- Distributed memory backend
-- Cloud deployment
-- Memory synchronization
-- Memory visualization
-- Advanced agent collaboration
-
----
-
-# Contributing
-
-Issues, suggestions and pull requests are welcome.
-
-For significant changes, please open an issue first to discuss the proposed improvement.
-
----
-
-# License
-
-This project is licensed under the MIT License.
-
----
-
-## Philosophy
-
-Knowledge should accumulate.
-
-Every solved problem, discovered principle, avoided mistake and useful insight should become part of an agent's long-term memory instead of disappearing at the end of a conversation.
-
-MemCoder is designed to provide that persistent semantic memory layer.
-
-**Build AI agents that remember.**
+MIT. See [LICENSE](LICENSE).

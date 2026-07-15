@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memcoder"
-version = "0.1.0-alpha"
-description = "Persistent semantic memory for AI agents."
+version = "0.1.0b1"
+description = "Provider-independent persistent cognition for AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
 
@@ -27,7 +27,7 @@ keywords = [
 ]
 
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: MIT License",
@@ -38,8 +38,14 @@ classifiers = [
 dependencies = [
     "chromadb",
     "sentence-transformers",
-    "ollama",
-    "numpy"
+    "numpy",
+    "fastapi",
+    "fastmcp"
+]
+
+[project.optional-dependencies]
+ollama = [
+    "ollama"
 ]
 
 [tool.setuptools]
