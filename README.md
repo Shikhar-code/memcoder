@@ -41,7 +41,7 @@ and the embedding model are installed.
 Windows PowerShell:
 
 ```powershell
-git clone https://github.com/<your-account>/memcoder.git
+git clone https://github.com/Shikhar-code/memcoder.git
 cd memcoder
 python -m venv memcoder-env
 .\memcoder-env\Scripts\Activate.ps1
@@ -52,7 +52,7 @@ python -m pip install .
 macOS/Linux:
 
 ```bash
-git clone https://github.com/<your-account>/memcoder.git
+git clone https://github.com/Shikhar-code/memcoder.git
 cd memcoder
 python3 -m venv memcoder-env
 source memcoder-env/bin/activate
