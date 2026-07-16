@@ -33,31 +33,35 @@ host agent supplies reasoning; MemCoder supplies cognition and persistence.
 
 ## Installation
 
-### Install from this repository (recommended for Beta-1 testers)
+### One-command AGY setup (recommended)
 
-Requirements: Python 3.10+ and internet access the first time Python packages
-and the embedding model are installed.
+Requirements: Python 3.10+, internet access the first time Python packages and
+the embedding model are installed, and AGY already installed.
 
 Windows PowerShell:
 
 ```powershell
-git clone https://github.com/Shikhar-code/memcoder.git
-cd memcoder
-python -m venv memcoder-env
-.\memcoder-env\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install .
+py -m pip install --upgrade pip setuptools wheel; py -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip"; py -m memcoder setup-agy
 ```
 
 macOS/Linux:
 
 ```bash
-git clone https://github.com/Shikhar-code/memcoder.git
-cd memcoder
-python3 -m venv memcoder-env
-source memcoder-env/bin/activate
-python -m pip install --upgrade pip
-python -m pip install .
+python3 -m pip install --upgrade pip setuptools wheel && python3 -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip" && python3 -m memcoder setup-agy
+```
+
+This installs MemCoder and its requirements, then configures AGY with the exact
+Python that installed it. The first install can take a few minutes while Python
+downloads packages and the embedding model. Restart AGY when it finishes; no
+plugin-install command or manual JSON editing is required.
+
+### Install from a local checkout
+
+For contributors or offline local testing:
+
+```powershell
+python -m pip install --no-build-isolation .
+python -m memcoder setup-agy
 ```
 
 Verify the installed MCP server and confirm Ollama is absent:
@@ -67,9 +71,9 @@ python -c "from adapters.mcp.server import mcp; print('PASS: MemCoder MCP import
 python -m pip show ollama
 ```
 
-The second command should report that `ollama` is not installed. Until this
-Beta-1 build is published to PyPI, use `python -m pip install .` rather than
-`pip install memcoder`.
+The second command should report that `ollama` is not installed. Until MemCoder
+is published to PyPI, the one-command setup installs the current GitHub `main`
+branch.
 
 ### Optional legacy Ollama helpers
 
@@ -82,14 +86,13 @@ python -m pip install "memcoder[ollama]"
 
 ## Use with Antigravity CLI (AGY)
 
-### Install the plugin
+### Configure AGY manually (advanced)
 
-From the activated environment and repository folder used above, run:
+The one-command installer above is preferred. If you need to configure an
+already-installed local checkout manually, run:
 
 ```bash
-python scripts/configure_agy_plugin.py
-agy plugin install .
-agy plugin enable memcoder
+python -m memcoder setup-agy
 ```
 
 Restart AGY, then check its MCP Servers view. You should see:
@@ -97,8 +100,8 @@ Restart AGY, then check its MCP Servers view. You should see:
 - `memcoder_prepare`
 - `memcoder_record`
 
-That is the complete one-time setup. The helper writes a local ignored config
-with the correct Python path, so no JSON editing is required.
+That is the complete one-time setup. It safely preserves other AGY MCP servers
+and updates only the `memcoder` entry.
 
 ### First task with MemCoder
 
