@@ -140,6 +140,22 @@ reuse the same label on every task in that project.
 For stricter control or evaluation, use the detailed
 [AGY prompt template](docs/antigravity_prompt_template.md).
 
+## What to expect
+
+MemCoder is a persistent cognition layer, not a model or autonomous executor.
+Your host agent still reasons, edits, renders, and runs tests; MemCoder supplies
+retrieved guidance and records verified outcomes for related future work.
+
+- The first task may retrieve nothing. Value compounds after several verified
+  tasks in the same project.
+- Use one stable `agent_id` per project so unrelated work does not mix.
+- Record outcomes only after the relevant test, build, render, or other
+  verification passes. This is the main protection against memory pollution.
+- It is strongest for recurring engineering patterns and project conventions.
+  It is not a substitute for human judgment on subjective or unverified work.
+- Memories are local to the installation and owner by default. Team-wide memory
+  sharing and synchronization are outside the Beta-1 scope.
+
 ## MCP tools
 
 ### `memcoder_prepare`
