@@ -33,27 +33,25 @@ host agent supplies reasoning; MemCoder supplies cognition and persistence.
 
 ## Installation
 
-### One-command AGY setup (recommended)
+### Install from PyPI (recommended)
 
-Requirements: Python 3.10+, internet access the first time Python packages and
-the embedding model are installed, and AGY already installed.
+Requirements: Python 3.10+ and internet access the first time Python packages
+and the embedding model are installed.
 
 Windows PowerShell:
 
 ```powershell
-python -m pip install --upgrade pip setuptools wheel; python -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip"; python -m memcoder setup-agy
+python -m pip install --upgrade memcoder
 ```
 
 macOS/Linux:
 
 ```bash
-python3 -m pip install --upgrade pip setuptools wheel && python3 -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip" && python3 -m memcoder setup-agy
+python3 -m pip install --upgrade memcoder
 ```
 
-This installs MemCoder and its requirements, then configures AGY with the exact
-Python that installed it. The first install can take a few minutes while Python
-downloads packages and the embedding model. Restart AGY when it finishes; no
-plugin-install command or manual JSON editing is required.
+This installs MemCoder and all required Python dependencies. The first install
+can take a few minutes while Python downloads packages and the embedding model.
 
 ### Install from a local checkout
 
@@ -71,9 +69,7 @@ python -c "from adapters.mcp.server import mcp; print('PASS: MemCoder MCP import
 python -m pip show ollama
 ```
 
-The second command should report that `ollama` is not installed. Until MemCoder
-is published to PyPI, the one-command setup installs the current GitHub `main`
-branch.
+The second command should report that `ollama` is not installed.
 
 ### Optional legacy Ollama helpers
 
@@ -86,10 +82,9 @@ python -m pip install "memcoder[ollama]"
 
 ## Use with Antigravity CLI (AGY)
 
-### Configure AGY manually (advanced)
+### Connect MemCoder to AGY
 
-The one-command installer above is preferred. If you need to configure an
-already-installed local checkout manually, run:
+After installing MemCoder, run this once in the same Python environment:
 
 ```bash
 python -m memcoder setup-agy
