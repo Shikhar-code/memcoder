@@ -69,6 +69,39 @@ def record_outcome(**kwargs):
 record.record_outcome = record_outcome
 sys.modules["memory.record_outcome"] = record
 
+markdown_calls = {}
+markdown_import = types.ModuleType("memory.markdown_import")
+
+
+def import_markdown(**kwargs):
+    markdown_calls.update(kwargs)
+    return {
+        "source_name": kwargs["source_name"],
+        "candidates": [{"task": "Validate input"}],
+        "rejected": [],
+        "approved": kwargs["approve"],
+        "recorded": []
+    }
+
+
+markdown_import.import_markdown = import_markdown
+
+
+def import_markdown_file(**kwargs):
+    markdown_calls.clear()
+    markdown_calls.update(kwargs)
+    return {
+        "source_name": kwargs["file_path"],
+        "candidates": [{"task": "Validate input"}],
+        "rejected": [],
+        "approved": kwargs["approve"],
+        "recorded": []
+    }
+
+
+markdown_import.import_markdown_file = import_markdown_file
+sys.modules["memory.markdown_import"] = markdown_import
+
 sys.modules.pop("adapters.mcp.server", None)
 server = importlib.import_module("adapters.mcp.server")
 
@@ -113,5 +146,37 @@ recorded = json.loads(
 assert recorded["experience_recorded"]
 assert recorded["rejected"] == []
 assert record_calls["agent_id"] == "antigravity"
+
+imported = json.loads(
+    server.memcoder_import_markdown(
+        markdown="- Validate input",
+        source_name="AGENTS.md",
+        agent_id="antigravity",
+        approve=False
+    )
+)
+
+assert imported["candidates"][0]["task"] == "Validate input"
+assert markdown_calls == {
+    "markdown": "- Validate input",
+    "source_name": "AGENTS.md",
+    "agent_id": "antigravity",
+    "approve": False
+}
+
+file_imported = json.loads(
+    server.memcoder_import_markdown_file(
+        file_path="AGENTS.md",
+        agent_id="antigravity",
+        approve=False
+    )
+)
+
+assert file_imported["candidates"][0]["task"] == "Validate input"
+assert markdown_calls == {
+    "file_path": "AGENTS.md",
+    "agent_id": "antigravity",
+    "approve": False
+}
 
 print("PASS: provider-free MCP cognition")

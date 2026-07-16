@@ -30,3 +30,11 @@ and record result.
 Use a distinct stable `agent_id` for every project. Keep
 `include_shared: false` for early testing, then enable shared memory only when
 you intentionally want cross-project knowledge.
+
+## Bootstrap existing project guidance
+
+For a project with existing Markdown instructions, ask AGY to call
+`memcoder_import_markdown_file` for each relevant file with `approve=false`.
+Review the candidate principles, then explicitly ask AGY to call it again with
+`approve=true`. The files must be inside the project directory from which AGY
+was launched. Do not import a document blindly.

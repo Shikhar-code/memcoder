@@ -12,6 +12,10 @@ from memory.update import update_memory
 from memory.share import share_memory
 from memory.transfer import transfer_memory
 from memory.record_outcome import record_outcome
+from memory.markdown_import import (
+    import_markdown as import_markdown_memory,
+    import_markdown_file as import_markdown_file_memory
+)
 
 
 def solve(
@@ -140,4 +144,28 @@ def record(
         reflection=reflection,
         principles=principles,
         agent_id=agent_id
+    )
+
+
+def import_markdown(
+        markdown,
+        source_name,
+        agent_id="human",
+        approve=False):
+    return import_markdown_memory(
+        markdown=markdown,
+        source_name=source_name,
+        agent_id=agent_id,
+        approve=approve
+    )
+
+
+def import_markdown_file(
+        file_path,
+        agent_id="human",
+        approve=False):
+    return import_markdown_file_memory(
+        file_path=file_path,
+        agent_id=agent_id,
+        approve=approve
     )

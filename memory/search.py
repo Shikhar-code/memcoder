@@ -149,6 +149,12 @@ def search_memory(
                     1
                 ),
 
+            "source":
+                memory.get(
+                    "source",
+                    ""
+                ),
+
             "score":
                 distance
 

@@ -13,7 +13,8 @@ def capture_memory(
         solution,
         importance=5,
         memory_type="experience",
-        owner="shared"):
+        owner="shared",
+        source=None):
 
     task = normalize_task(task)
 
@@ -31,7 +32,8 @@ def capture_memory(
 
         importance,
 
-        memory_type
+        memory_type,
+        source
 
     )
 

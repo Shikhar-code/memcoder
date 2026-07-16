@@ -1,6 +1,6 @@
 # MemCoder Beta-1 release scope
 
-Version: `0.1.0b1`
+Version: `0.1.1b1`
 
 ## Supported claim
 
@@ -16,6 +16,11 @@ The supported MCP tools are:
 
 The base package does not require Ollama. Legacy `solve()` and `learn()` remain
 available only through the `memcoder[ollama]` optional extra.
+
+Beta-1.1 also supports approval-gated Markdown bootstrap through
+`memcoder_import_markdown_file(file_path, agent_id, approve)`. Static Markdown
+is imported only as source-tagged principle candidates; it never becomes a
+fabricated experience or reflection.
 
 ## Beta-1 validation completed
 

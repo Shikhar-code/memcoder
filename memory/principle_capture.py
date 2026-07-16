@@ -4,7 +4,8 @@ from memory.store import add_memory
 
 def capture_principles(
         principles,
-        owner="shared"):
+        owner="shared",
+        source=None):
 
     memories = []
 
@@ -22,7 +23,8 @@ def capture_principles(
 
             importance=10,
 
-            memory_type="principle"
+            memory_type="principle",
+            source=source
 
         )
 

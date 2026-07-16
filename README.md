@@ -7,7 +7,7 @@ the agent retrieves trusted experiences, principles, mistakes, and debugging
 reflections. After a verified result, it records a structured outcome for use
 on related future work.
 
-Beta-1 is proven with Antigravity CLI over MCP. It does **not** require Ollama,
+Beta-1.1 is proven with Antigravity CLI over MCP. It does **not** require Ollama,
 CUDA, or a local generation server.
 
 ```text
@@ -23,6 +23,7 @@ agent task -> memcoder_prepare -> trusted guidance
 - Keeps memory private per `agent_id`, with optional shared-memory retrieval.
 - Exposes provider-free MCP tools for agent hosts.
 - Rejects low-quality records and explains rejected fields.
+- Bootstraps project guidance from approved Markdown instruction files.
 - Provides structured Python SDK access through `prepare()` and `record()`.
 - Has a controlled Antigravity proof where memory-guided work passed an unseen
   regression that a matched no-memory control failed.
@@ -176,6 +177,55 @@ Stores a verified structured outcome after the host agent succeeds.
 MemCoder returns accepted records and rejected fields. A reflection must be a
 short, first-person observation about the debugging process—not a solution.
 
+### `memcoder_import_markdown_file`
+
+Bootstrap a project from Markdown such as `AGENTS.md`, a README, a runbook, or
+an architecture guide. MemCoder extracts bullet-point guidance as **candidate
+principles**; it does not pretend static documents are experiences or
+reflections.
+
+Pass the file path directly—do not paste the document into your prompt. First
+request a preview:
+
+```json
+{
+  "file_path": "AGENTS.md",
+  "agent_id": "my-project",
+  "approve": false
+}
+```
+
+Review the returned candidates. To store the same file, call the tool again
+with `approve: true`. The path must refer to a UTF-8 `.md` or `.markdown` file
+within the project directory where AGY was launched. Imported memories retain
+their source filename.
+
+`memcoder_import_markdown` remains available for applications that already have
+Markdown content in memory, but most AGY users should use the file tool.
+
+For safety, the importer reads only actionable Markdown bullet points, preserves
+wrapped bullet text, skips code blocks, filters common instruction-injection
+phrases, and requires explicit approval before writing any memory. Descriptive
+README feature lists are shown as rejected rather than stored as principles.
+
+### First run with project instructions
+
+If a project already has `AGENTS.md`, `README.md`, or a runbook, use this AGY
+prompt once before normal work:
+
+```text
+Call `memcoder_import_markdown_file` once for each of these project instruction
+files: [AGENTS.md and any project instruction files]. Use `approve=false`.
+Show me the candidate memories. Do not store anything until I approve the
+preview. Do not inspect MemCoder's own files.
+```
+
+After reviewing the preview, say:
+
+```text
+Approve the MemCoder Markdown import you just previewed and store it.
+```
+
 ## Python SDK example
 
 ```python
@@ -198,6 +248,23 @@ agent.record(
     reflection="I reproduced the blank-input case before changing validation.",
     principles=["Validate required values before string operations."],
 )
+
+project_rules = """
+# Project rules
+- Run the focused test after every change.
+- Keep composition timing explicit.
+"""
+
+preview = agent.import_markdown(project_rules, "AGENTS.md")
+approved = agent.import_markdown(
+    project_rules,
+    "AGENTS.md",
+    approve=True,
+)
+
+# Or import a Markdown file from the current project directory.
+preview = agent.import_markdown_file("AGENTS.md")
+approved = agent.import_markdown_file("AGENTS.md", approve=True)
 ```
 
 ## Testing

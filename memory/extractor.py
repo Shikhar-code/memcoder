@@ -5,7 +5,8 @@ def extract_memory(task,
                    summary,
                    solution,
                    importance=5,
-                   memory_type="experience"):
+                   memory_type="experience",
+                   source=None):
 
     memory = {
         "task": task,
@@ -16,5 +17,8 @@ def extract_memory(task,
         "type": memory_type,
         "timestamp": str(datetime.now())
     }
+
+    if source:
+        memory["source"] = source
 
     return memory

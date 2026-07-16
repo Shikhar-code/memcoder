@@ -6,6 +6,7 @@ from fastmcp import FastMCP
 
 from memory.hierarchical_search import hierarchical_search
 from memory.record_outcome import record_outcome
+from memory.markdown_import import import_markdown, import_markdown_file
 
 
 mcp = FastMCP("memcoder")
@@ -18,7 +19,8 @@ def compact_memory(memory):
         "solution": memory.get("solution", ""),
         "files": memory.get("files", []),
         "distance": memory.get("score"),
-        "confidence": memory.get("retrieval_confidence")
+        "confidence": memory.get("retrieval_confidence"),
+        "source": memory.get("source", "")
     }
 
 
@@ -108,6 +110,44 @@ def memcoder_record(
         },
         indent=2
     )
+
+
+@mcp.tool()
+def memcoder_import_markdown(
+        markdown: str,
+        source_name: str,
+        agent_id: str = "antigravity",
+        approve: bool = False) -> str:
+    """Preview Markdown guidance; call again with approve=true to store it."""
+
+    result = import_markdown(
+        markdown=markdown,
+        source_name=source_name,
+        agent_id=agent_id,
+        approve=approve
+    )
+
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def memcoder_import_markdown_file(
+        file_path: str,
+        agent_id: str = "antigravity",
+        approve: bool = False) -> str:
+    """Preview a project Markdown file; call again with approve=true to store it.
+
+    The file must be a UTF-8 .md/.markdown file inside the current project
+    directory. This tool never imports experiences or reflections.
+    """
+
+    result = import_markdown_file(
+        file_path=file_path,
+        agent_id=agent_id,
+        approve=approve
+    )
+
+    return json.dumps(result, indent=2)
 
 
 if __name__ == "__main__":

@@ -12,7 +12,9 @@ from api.memcoder_api import (
     transfer,
     clear,
     prepare,
-    record
+    record,
+    import_markdown,
+    import_markdown_file
 )
 
 
@@ -115,6 +117,30 @@ class MemCoderAgent:
             reflection=reflection,
             principles=principles,
             agent_id=self.id
+        )
+
+    def import_markdown(
+            self,
+            markdown,
+            source_name,
+            approve=False):
+
+        return import_markdown(
+            markdown=markdown,
+            source_name=source_name,
+            agent_id=self.id,
+            approve=approve
+        )
+
+    def import_markdown_file(
+            self,
+            file_path,
+            approve=False):
+
+        return import_markdown_file(
+            file_path=file_path,
+            agent_id=self.id,
+            approve=approve
         )
 
     # -----------------------
