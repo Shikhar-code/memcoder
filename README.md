@@ -41,7 +41,7 @@ the embedding model are installed, and AGY already installed.
 Windows PowerShell:
 
 ```powershell
-py -m pip install --upgrade pip setuptools wheel; py -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip"; py -m memcoder setup-agy
+python -m pip install --upgrade pip setuptools wheel; python -m pip install --no-build-isolation "https://github.com/Shikhar-code/memcoder/archive/refs/heads/main.zip"; python -m memcoder setup-agy
 ```
 
 macOS/Linux:
