@@ -7,7 +7,8 @@ the agent retrieves trusted experiences, principles, mistakes, and debugging
 reflections. After a verified result, it records a structured outcome for use
 on related future work.
 
-Beta-1.1 is proven with Antigravity CLI over MCP. It does **not** require Ollama,
+Beta-1.2 is provider-free and works with AGY, Gemini automation, scripts, or
+other hosts. It does **not** require Ollama,
 CUDA, or a local generation server.
 
 ```text
@@ -97,6 +98,51 @@ Restart AGY, then check its MCP Servers view. You should see:
 
 That is the complete one-time setup. It safely preserves other AGY MCP servers
 and updates only the `memcoder` entry.
+
+## Use in an automated pipeline
+
+Beta-1.2 also supports any automation host through JSON-file commands. This
+keeps MemCoder separate from a host's model, RAG, database, and source code.
+
+Before the host plans work, write a request such as `prepare.json`:
+
+```json
+{
+  "problem": "Resolve a required-field validation failure and run the focused test.",
+  "agent_id": "my-automation-project",
+  "include_shared": false
+}
+```
+
+Call MemCoder and capture its JSON result:
+
+```bash
+memcoder prepare --input prepare.json > guidance.json
+```
+
+Give the returned guidance to the host as context, not proof. The host remains
+responsible for its own reasoning and verification.
+
+After the host verifies its outcome, write `record.json`:
+
+```json
+{
+  "verified": true,
+  "task": "Resolved a required-field validation failure.",
+  "files": ["src/request_validation.py", "tests/test_request_validation.py"],
+  "summary": "The focused test passed after explicit required-field validation was added.",
+  "solution": "Validated the required field before processing the request.",
+  "principles": ["Validate required fields before processing input."],
+  "agent_id": "my-automation-project"
+}
+```
+
+```bash
+memcoder record --input record.json > record-result.json
+```
+
+`record` rejects requests without `"verified": true`. That flag is a host
+attestation: only set it after the pipeline's own verification has passed.
 
 ### First task with MemCoder
 

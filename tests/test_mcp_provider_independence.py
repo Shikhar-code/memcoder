@@ -116,7 +116,7 @@ assert prepared["strategy"] == "memory_guided"
 assert prepared["experiences"][0]["task"] == (
     "Validate a required field"
 )
-assert "memcoder_record" in prepared["instructions"][-1]
+assert "verified success" in prepared["instructions"][-1]
 assert search_calls == {
     "agent_id": "antigravity",
     "include_shared": True
