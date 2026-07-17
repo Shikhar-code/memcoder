@@ -98,3 +98,4 @@ testing/web_jwt/
 
 .pytest_cache/
 .coverage
+/output

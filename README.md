@@ -1,43 +1,62 @@
 # MemCoder
 
-> Persistent, provider-independent cognition for AI coding agents.
+> Provider-independent persistent cognition for AI agents and automation.
 
-MemCoder gives an agent durable memory without owning its model. Before a task,
-the agent retrieves trusted experiences, principles, mistakes, and debugging
-reflections. After a verified result, it records a structured outcome for use
-on related future work.
+MemCoder helps an AI agent get better across related tasks without taking over
+the agent's model, tools, source code, or application database.
 
-Beta-1.2 is provider-free and works with AGY, Gemini automation, scripts, or
-other hosts. It does **not** require Ollama,
-CUDA, or a local generation server.
+Before work begins, the host retrieves trusted past experiences, mistakes,
+reflections, and principles. After the host verifies a successful result, it
+stores a structured outcome for relevant future work.
 
 ```text
-agent task -> memcoder_prepare -> trusted guidance
-          -> host agent reasons, edits, and verifies
-          -> memcoder_record -> persistent memory
+task -> MemCoder prepare -> trusted guidance -> host solves and verifies
+     -> MemCoder record -> persistent memory for later related tasks
 ```
 
-## What Beta-1 does
+Current version: **Beta-1.2**. It is provider-independent: MemCoder does not
+need Ollama, CUDA, or a local generation server.
 
-- Stores persistent experiences, principles, reflections, and mistakes.
-- Retrieves confidence-gated, query-relevant memories.
-- Keeps memory private per `agent_id`, with optional shared-memory retrieval.
-- Exposes provider-free MCP tools for agent hosts.
-- Rejects low-quality records and explains rejected fields.
-- Bootstraps project guidance from approved Markdown instruction files.
-- Provides structured Python SDK access through `prepare()` and `record()`.
-- Has a controlled Antigravity proof where memory-guided work passed an unseen
-  regression that a matched no-memory control failed.
+## Does it work with every AI?
 
-MemCoder does not generate answers or judge rendered image/video quality. The
-host agent supplies reasoning; MemCoder supplies cognition and persistence.
+It works with **any AI host or automation system that can call MCP tools or run
+a command-line program**. That includes AGY / Antigravity CLI, Gemini- or
+Claude-powered scripts, CI jobs, and custom Python applications.
+
+It does not automatically connect to a browser chat window. A host needs one
+small workflow integration: call MemCoder before work, give its returned
+guidance to the model, verify the result, then record the verified outcome.
+
+| MemCoder owns | Your host still owns |
+| --- | --- |
+| Durable local memory, retrieval, trust gating, quality checks | Model choice, reasoning, code edits, tests, renders, deployment, project database |
+
+## What Beta-1.2 can do
+
+- Persist four memory types: experiences, mistakes, reflections, and principles.
+- Retrieve query-relevant memories with confidence and lexical relevance gates.
+- Keep records separated by a simple project label (`agent_id`), with optional
+  access to intentionally shared records.
+- Reject low-quality experiences, malformed reflections, duplicate records, and
+  weak principles, with explicit rejection feedback.
+- Work through MCP (best for AGY) or JSON commands (best for any automation).
+- Preview and approve actionable guidance from local Markdown instruction files.
+
+It is not yet a generic autonomous planner or skill executor. Those are later
+Beta-2 capabilities.
 
 ## Installation
 
-### Install from PyPI (recommended)
+### Requirements
 
-Requirements: Python 3.10+ and internet access the first time Python packages
-and the embedding model are installed.
+- Python 3.10 or newer.
+- Internet access on the first install, so Python packages and MemCoder's local
+  embedding model can be downloaded.
+
+The first retrieval may take longer than later ones because the embedding model
+is initialized locally. MemCoder does not require an API key.
+
+### Install from PyPI
 
 Windows PowerShell:
 
@@ -51,79 +70,71 @@ macOS/Linux:
 python3 -m pip install --upgrade memcoder
 ```
 
-This installs MemCoder and all required Python dependencies. The first install
-can take a few minutes while Python downloads packages and the embedding model.
+Confirm that the provider-neutral commands are available:
 
-### Install from a local checkout
+```bash
+python -m memcoder --help
+```
 
-For contributors or offline local testing:
+You should see `setup-agy`, `prepare`, and `record`.
+
+> If Windows says `python` is not recognized, install Python from
+> [python.org](https://www.python.org/downloads/) and select **Add Python to
+> PATH** during installation. If your system uses `py` instead, replace
+> `python` with `py` in the commands above.
+
+### Install a local checkout
+
+For development or local testing from the repository root:
 
 ```powershell
 python -m pip install --no-build-isolation .
-python -m memcoder setup-agy
 ```
 
-Verify the installed MCP server and confirm Ollama is absent:
+## Quick start: any automation host
 
-```bash
-python -c "from adapters.mcp.server import mcp; print('PASS: MemCoder MCP imports')"
-python -m pip show ollama
-```
+Use the JSON CLI when your system can run shell commands. It works the same way
+whether the underlying model is Gemini, Claude, OpenAI, a local model, or no
+model at all.
 
-The second command should report that `ollama` is not installed.
+### 1. Choose a stable project label
 
-### Optional legacy Ollama helpers
+`agent_id` is simply a memory namespace. Use one short, stable label per
+project, for example `billing-api` or `lesson-video-pipeline`. Reuse the exact
+same label on later tasks in that project. This prevents unrelated projects
+from mixing memories.
 
-The old `solve()` and `learn()` helpers are not part of the Beta-1 MCP workflow.
-Install them only if you intentionally want that legacy path:
+### 2. Retrieve guidance before the host starts work
 
-```bash
-python -m pip install "memcoder[ollama]"
-```
-
-## Use with Antigravity CLI (AGY)
-
-### Connect MemCoder to AGY
-
-After installing MemCoder, run this once in the same Python environment:
-
-```bash
-python -m memcoder setup-agy
-```
-
-Restart AGY, then check its MCP Servers view. You should see:
-
-- `memcoder_prepare`
-- `memcoder_record`
-
-That is the complete one-time setup. It safely preserves other AGY MCP servers
-and updates only the `memcoder` entry.
-
-## Use in an automated pipeline
-
-Beta-1.2 also supports any automation host through JSON-file commands. This
-keeps MemCoder separate from a host's model, RAG, database, and source code.
-
-Before the host plans work, write a request such as `prepare.json`:
+Create `prepare.json` in your project:
 
 ```json
 {
   "problem": "Resolve a required-field validation failure and run the focused test.",
-  "agent_id": "my-automation-project",
+  "agent_id": "billing-api",
   "include_shared": false
 }
 ```
 
-Call MemCoder and capture its JSON result:
+Run:
 
 ```bash
-memcoder prepare --input prepare.json > guidance.json
+memcoder prepare --input prepare.json
 ```
 
-Give the returned guidance to the host as context, not proof. The host remains
-responsible for its own reasoning and verification.
+The response includes:
 
-After the host verifies its outcome, write `record.json`:
+- `confidence`: how strong the closest trusted experience is.
+- `strategy`: `normal_reasoning`, `memory_guided`, or `memory_first`.
+- typed memories: `experiences`, `mistakes`, `principles`, and `reflections`.
+
+Pass the response to your AI host as **guidance, not proof**. The host should
+still inspect the actual project, solve the task, and run its own verification.
+
+### 3. Record only after verification passes
+
+After the host's test, build, render, or other acceptance check passes, create
+`record.json`:
 
 ```json
 {
@@ -132,223 +143,212 @@ After the host verifies its outcome, write `record.json`:
   "files": ["src/request_validation.py", "tests/test_request_validation.py"],
   "summary": "The focused test passed after explicit required-field validation was added.",
   "solution": "Validated the required field before processing the request.",
+  "reflection": "I reproduced the missing-field case before changing validation.",
   "principles": ["Validate required fields before processing input."],
-  "agent_id": "my-automation-project"
+  "agent_id": "billing-api"
 }
 ```
 
+Run:
+
 ```bash
-memcoder record --input record.json > record-result.json
+memcoder record --input record.json
 ```
 
-`record` rejects requests without `"verified": true`. That flag is a host
-attestation: only set it after the pipeline's own verification has passed.
+The CLI requires `"verified": true`. It returns the accepted records plus any
+rejected fields. Do not set that flag or record anything when verification
+failed; this is the main defense against memory pollution.
 
-### First task with MemCoder
+### First run versus later runs
 
-Paste this into AGY for the first task in a project:
+On the first task in a project, `prepare` will usually return no memories and
+the strategy will be `normal_reasoning`. That is correct. Complete and verify
+the task normally, then record it.
+
+On later related tasks using the same `agent_id`, MemCoder can return relevant
+past outcomes and switch to `memory_guided` or `memory_first`. Its value grows
+from repeated, verified work - not from storing every conversation.
+
+## AGY / Antigravity CLI setup
+
+AGY uses MemCoder through MCP tools. One setup command adds the MemCoder MCP
+server to AGY's configuration without changing your other MCP servers.
+
+### One-time setup
+
+1. Install MemCoder using the [Installation](#installation) command above.
+
+2. Run:
+
+   ```bash
+   python -m memcoder setup-agy
+   ```
+
+3. Fully close and reopen AGY.
+
+4. Start a task. AGY should have these tools available:
+
+   - `memcoder_prepare`
+   - `memcoder_record`
+   - `memcoder_import_markdown`
+   - `memcoder_import_markdown_file`
+
+No Ollama installation, model server, API key, or `agy plugin install` command
+is required for this setup.
+
+If AGY cannot see the tools, verify the installed server first:
+
+```bash
+python -c "from adapters.mcp.server import mcp; print('MemCoder MCP import OK')"
+```
+
+If that reports a missing module, rerun `python -m pip install --upgrade
+memcoder` using the same Python environment that you used for `setup-agy`, then
+restart AGY.
+
+### First AGY task in a project
+
+Paste this prompt with your actual task below it:
 
 ```text
 Use MemCoder for this task.
 
-Before working, call memcoder_prepare once for the task. Then solve the task,
-make the smallest correct change, and run the relevant test or render.
+Before inspecting or editing project files, call memcoder_prepare exactly once
+with the task description, agent_id: "my-project", and include_shared: false.
+Use returned memories only as investigation guidance, never as proof.
 
-If verification passes, call memcoder_record once with what changed, why it
-failed, and how it was fixed. Do not record anything if verification failed.
+Solve only my requested project task. Do not inspect or edit MemCoder's source,
+database, configuration, or documentation unless I explicitly ask you to debug
+MemCoder itself. Make the smallest correct change and run the relevant test,
+build, render, or verification command.
 
-Do not inspect MemCoder's own files unless I specifically ask you to debug
-MemCoder.
+Only if verification passes, call memcoder_record exactly once with the actual
+task, changed files, root-cause summary, solution, and any genuine reflection
+or reusable principle. Do not record an outcome if verification failed.
 ```
 
-On a first run, `memcoder_prepare` normally returns no memories. That is
-expected: the successful outcome you record becomes useful on related later
-tasks.
+Replace `my-project` with a permanent project label and reuse it on every task.
+The first task normally has no retrieved memories; record the verified result
+so the next similar task has useful evidence.
 
-### Later tasks in the same project
+### Later AGY tasks
 
-Use this shorter prompt:
+For subsequent tasks in the same project, this is enough:
 
 ```text
-Use MemCoder for this task: call memcoder_prepare before working, use relevant
-memories as guidance, verify the fix, then call memcoder_record if it passes.
+Use MemCoder for this task: call memcoder_prepare once before working with
+agent_id "my-project" and include_shared false. Use relevant memories as
+guidance, verify the result, and call memcoder_record once only if it passes.
 Do not inspect MemCoder itself.
 ```
 
-For most people, that is enough. By default AGY stores memory under the
-`antigravity` owner. If you work on multiple unrelated projects, give each one
-a simple permanent name such as `remotion-trailer` or `client-dashboard` and
-ask AGY to use that name as `agent_id`. An `agent_id` is only a project label;
-reuse the same label on every task in that project.
-
-For stricter control or evaluation, use the detailed
+For a stricter reusable version, see the
 [AGY prompt template](docs/antigravity_prompt_template.md).
 
-## What to expect
-
-MemCoder is a persistent cognition layer, not a model or autonomous executor.
-Your host agent still reasons, edits, renders, and runs tests; MemCoder supplies
-retrieved guidance and records verified outcomes for related future work.
-
-- The first task may retrieve nothing. Value compounds after several verified
-  tasks in the same project.
-- Use one stable `agent_id` per project so unrelated work does not mix.
-- Record outcomes only after the relevant test, build, render, or other
-  verification passes. This is the main protection against memory pollution.
-- It is strongest for recurring engineering patterns and project conventions.
-  It is not a substitute for human judgment on subjective or unverified work.
-- Memories are local to the installation and owner by default. Team-wide memory
-  sharing and synchronization are outside the Beta-1 scope.
-
-## MCP tools
+## MCP tool reference
 
 ### `memcoder_prepare`
 
-Retrieves trusted cognition before the host agent works.
+Call once before work.
 
 ```json
 {
   "problem": "A deployment configuration rejects a blank required name.",
-  "agent_id": "my-project",
+  "agent_id": "billing-api",
   "include_shared": false
 }
 ```
 
-The response includes confidence, strategy (`normal_reasoning`,
-`memory_guided`, or `memory_first`), grouped memories, and safe-use
-instructions.
+Set `include_shared` to `false` while establishing a clean project memory. Use
+`true` only when you intentionally want records owned by `shared` to be
+eligible too.
 
 ### `memcoder_record`
 
-Stores a verified structured outcome after the host agent succeeds.
+Call once after the host has independently verified success.
 
 ```json
 {
-  "task": "Reject blank deployment names before string processing",
+  "task": "Reject blank deployment names before string processing.",
   "files": ["src/deployment_validation.py"],
-  "summary": "A blank name reached string processing before validation.",
+  "summary": "Blank names reached string processing before validation.",
   "solution": "Reject missing or whitespace-only names before processing.",
   "reflection": "I reproduced the blank-input case before changing validation.",
   "principles": ["Validate required values before string operations."],
-  "agent_id": "my-project"
+  "agent_id": "billing-api"
 }
 ```
 
-MemCoder returns accepted records and rejected fields. A reflection must be a
-short, first-person observation about the debugging process—not a solution.
+MCP has no `verified` field because verification is enforced by the host
+workflow and task prompt. The JSON CLI provides an additional hard gate with
+`"verified": true`.
 
-### `memcoder_import_markdown_file`
+## Import existing project instructions from Markdown
 
-Bootstrap a project from Markdown such as `AGENTS.md`, a README, a runbook, or
-an architecture guide. MemCoder extracts bullet-point guidance as **candidate
-principles**; it does not pretend static documents are experiences or
+Use this when a project has an `AGENTS.md`, runbook, architecture guide, or
+other instruction file. MemCoder extracts only actionable bullet-point guidance
+as candidate **principles**. It does not treat documents as experiences or
 reflections.
 
-Pass the file path directly—do not paste the document into your prompt. First
-request a preview:
+From AGY, first preview the file without saving it:
 
 ```json
 {
   "file_path": "AGENTS.md",
-  "agent_id": "my-project",
+  "agent_id": "billing-api",
   "approve": false
 }
 ```
 
-Review the returned candidates. To store the same file, call the tool again
-with `approve: true`. The path must refer to a UTF-8 `.md` or `.markdown` file
-within the project directory where AGY was launched. Imported memories retain
-their source filename.
+Review the candidates. Then call the same tool again with `"approve": true`
+to store the approved principles.
 
-`memcoder_import_markdown` remains available for applications that already have
-Markdown content in memory, but most AGY users should use the file tool.
+The Markdown file must be UTF-8, have a `.md` or `.markdown` extension, be
+inside the project directory where AGY was launched, and be at most 1 MB.
+Code blocks, descriptive feature lists, placeholder text, and common
+instruction-injection patterns are rejected rather than stored.
 
-For safety, the importer reads only actionable Markdown bullet points, preserves
-wrapped bullet text, skips code blocks, filters common instruction-injection
-phrases, and requires explicit approval before writing any memory. Descriptive
-README feature lists are shown as rejected rather than stored as principles.
+## Local storage and privacy
 
-### First run with project instructions
+MemCoder stores memory locally in ChromaDB. By default it uses the package or
+checkout's `chroma_db` directory. For an isolated test run, set
+`MEMCODER_DB_PATH` to a different local path before calling MemCoder.
 
-If a project already has `AGENTS.md`, `README.md`, or a runbook, use this AGY
-prompt once before normal work:
+Records are scoped by `agent_id`. They are not synchronized to a cloud account
+or shared with a team by default.
 
-```text
-Call `memcoder_import_markdown_file` once for each of these project instruction
-files: [AGENTS.md and any project instruction files]. Use `approve=false`.
-Show me the candidate memories. Do not store anything until I approve the
-preview. Do not inspect MemCoder's own files.
-```
+## Optional legacy Ollama helpers
 
-After reviewing the preview, say:
-
-```text
-Approve the MemCoder Markdown import you just previewed and store it.
-```
-
-## Python SDK example
-
-```python
-from memcoder import MemCoderAgent
-
-agent = MemCoderAgent("my-project")
-
-guidance = agent.prepare(
-    "A deployment rejects a blank required name.",
-    include_shared=False,
-)
-
-# Your agent reasons over guidance, edits code, and verifies the result.
-
-agent.record(
-    task="Reject blank deployment names before string processing",
-    files=["src/deployment_validation.py"],
-    summary="Blank names reached string processing before validation.",
-    solution="Reject missing or whitespace-only names before processing.",
-    reflection="I reproduced the blank-input case before changing validation.",
-    principles=["Validate required values before string operations."],
-)
-
-project_rules = """
-# Project rules
-- Run the focused test after every change.
-- Keep composition timing explicit.
-"""
-
-preview = agent.import_markdown(project_rules, "AGENTS.md")
-approved = agent.import_markdown(
-    project_rules,
-    "AGENTS.md",
-    approve=True,
-)
-
-# Or import a Markdown file from the current project directory.
-preview = agent.import_markdown_file("AGENTS.md")
-approved = agent.import_markdown_file("AGENTS.md", approve=True)
-```
-
-## Testing
-
-Run the focused Beta-1 checks:
+The old `solve()` and `learn()` helpers are not part of the current Beta-1.2
+MCP or JSON CLI workflow. Install their optional dependency only if you
+intentionally need that legacy path:
 
 ```bash
+python -m pip install "memcoder[ollama]"
+```
+
+## Verification for contributors
+
+Run the focused provider-free checks from a local checkout:
+
+```bash
+python tests/test_automation_cli.py
+python tests/test_mcp_provider_independence.py
 python tests/test_retrieval_safety.py
 python tests/test_retrieval_calibration.py
 python tests/test_memory_quality.py
 python tests/test_record_quality_feedback.py
-python tests/test_mcp_provider_independence.py
-python tests/test_shared_retrieval_control.py
 python tests/test_ollama_optional.py
 ```
 
-The complete validated scope and known non-goals are in
-[Beta-1 release scope](docs/beta1_release.md).
+The validated Beta-1 scope is in [Beta-1 release scope](docs/beta1_release.md).
+The implementation architecture is in
+[the current architecture PDF](output/pdf/memcoder-current-architecture.pdf).
 
 ## Roadmap
 
-Beta-2 work includes planning, skills derived from principles, richer
-multi-agent sharing policy, visual-domain evaluation, memory consolidation, and
-distributed synchronization.
+Beta-2 will focus on skills derived from proven principles and constrained
+planning. See [the roadmap](docs/roadmap.md).
 
 ## License
 
