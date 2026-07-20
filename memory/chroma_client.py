@@ -20,9 +20,12 @@ def set_db_path(path):
     db_path = Path(path)
 
 class ChromaCollectionProxy:
+    def __init__(self, name):
+        self.name = name
+
     def _get_col(self):
         client = chromadb.PersistentClient(path=str(db_path))
-        return client.get_or_create_collection(name="memories")
+        return client.get_or_create_collection(name=self.name)
 
     def __getattr__(self, name):
         return getattr(self._get_col(), name)
@@ -30,4 +33,5 @@ class ChromaCollectionProxy:
     def __len__(self):
         return len(self._get_col())
 
-collection = ChromaCollectionProxy()
+collection = ChromaCollectionProxy("memories")
+knowledge_collection = ChromaCollectionProxy("knowledge")

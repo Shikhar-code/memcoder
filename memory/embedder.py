@@ -61,3 +61,22 @@ def embed(text):
     _embedding_cache[text] = embedding
 
     return embedding
+
+
+def embed_many(texts):
+    """Embed a batch while preserving the existing normalized-vector cache."""
+    cleaned = [str(text).strip() for text in texts]
+    missing = list(dict.fromkeys(
+        text for text in cleaned if text not in _embedding_cache
+    ))
+
+    if missing:
+        embeddings = get_model().encode(
+            missing,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+            batch_size=128,
+        ).tolist()
+        _embedding_cache.update(zip(missing, embeddings))
+
+    return [_embedding_cache[text] for text in cleaned]
