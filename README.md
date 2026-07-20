@@ -91,6 +91,95 @@ For development or local testing from the repository root:
 python -m pip install --no-build-isolation .
 ```
 
+## Read-only Markdown knowledge (video branch)
+
+This branch adds a separate **Knowledge** index for large project instruction
+corpora. Knowledge is source material - such as subject guides, scene rules,
+and rendering constraints - and is never stored as an Experience, Reflection,
+Mistake, or learned Principle.
+
+Sync an approved Markdown folder once, or safely run this command at every
+automation startup. It indexes only new or changed files and removes chunks for
+files deleted from that source folder.
+
+```powershell
+python -m memcoder knowledge sync --source "C:\Users\shikh\Knowledge-Base-main"
+```
+
+The source remains read-only. MemCoder stores only searchable chunks and their
+provenance in its own local `knowledge` collection. A downloaded archive folder
+containing one nested knowledge directory is detected automatically.
+
+For each chunk, MemCoder retains the subject folder, production category,
+top-level document/scene heading, section heading, source-relative path, and
+source hash. It splits long files by document and section before embedding,
+which makes a large corpus usable without injecting whole Markdown files into a
+model prompt.
+
+To retrieve this knowledge with normal cognition, include the subject and an
+optional production category in `prepare.json`:
+
+```json
+{
+  "problem": "Plan a readable Biology cell-structure explainer scene.",
+  "agent_id": "lesson-video-pipeline",
+  "include_shared": false,
+  "include_knowledge": true,
+  "subject": "bio",
+  "category": "AI Rendering Rules"
+}
+```
+
+`memcoder prepare --input prepare.json` returns a separate `knowledge` array
+with the source path, headings, content, and relevance confidence. Treat that
+array as prerequisite reference context; treat the separate learned-memory
+arrays as verified past experience. Set `include_knowledge` to `false` only
+when a host deliberately needs a memory-only request.
+
+Check the local index without embedding or changing anything:
+
+```powershell
+python -m memcoder knowledge status --source "C:\Users\shikh\Knowledge-Base-main"
+```
+
+The report includes indexed chunk count, source-file count, subjects, and
+categories. A future automated pipeline should run this health check after its
+startup sync and fail clearly if its required knowledge source is absent.
+
+### Project contract for an automated host
+
+Create one local configuration file at the automation project's root. It keeps
+the stable memory namespace and the approved Markdown source out of individual
+requests:
+
+```powershell
+python -m memcoder knowledge configure `
+  --source "C:\\path\\to\\Knowledge-Base" `
+  --agent-id "lesson-video-pipeline"
+```
+
+This writes `.memcoder/knowledge.json`. It is local-only because it contains an
+absolute machine path. An automated host can then use the same contract on
+every run:
+
+```powershell
+python -m memcoder knowledge sync --config .memcoder/knowledge.json
+python -m memcoder knowledge status --config .memcoder/knowledge.json
+python -m memcoder prepare --config .memcoder/knowledge.json --input prepare.json
+```
+
+With `--config`, `prepare.json` needs only the current problem and optional
+knowledge scope. The configured `agent_id`, private-memory setting, and
+knowledge setting are applied automatically:
+
+```json
+{
+  "problem": "Plan a readable Biology cell-structure explainer scene.",
+  "subject": "bio",
+  "category": "AI Rendering Rules"
+}
+```
+
 ## Quick start: any automation host
 
 Use the JSON CLI when your system can run shell commands. It works the same way
