@@ -15,14 +15,20 @@ mcp = FastMCP("memcoder")
 def memcoder_prepare(
         problem: str,
         agent_id: str = "antigravity",
-        include_shared: bool = True) -> str:
+        include_shared: bool = True,
+        include_knowledge: bool = True,
+        subject: str | None = None,
+        category: str | None = None) -> str:
     """Retrieve provider-independent cognition before the host agent solves."""
 
     return json.dumps(
         prepare_cognition(
             problem,
             agent_id=agent_id,
-            include_shared=include_shared
+            include_shared=include_shared,
+            include_knowledge=include_knowledge,
+            subject=subject,
+            category=category,
         ),
         indent=2
     )
