@@ -6,6 +6,21 @@ import sys
 from pathlib import Path
 
 from api.cognition import prepare_cognition, record_cognition
+from memory.knowledge import (
+    configure_knowledge,
+    knowledge_status,
+    load_knowledge_config,
+    sync_knowledge,
+)
+
+
+# The CLI is often invoked by another automation process on Windows.  Its
+# output is JSON and may contain Unicode copied from Markdown knowledge, so it
+# must not inherit a legacy CP1252 console encoding and fail while emitting a
+# valid result.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8")
 
 
 def default_agy_config_path():
@@ -95,6 +110,68 @@ def main(argv=None):
             help="Path to a JSON request file, or '-' to read standard input."
         )
 
+    subcommands.choices["prepare"].add_argument(
+        "--config",
+        help="Optional project knowledge configuration file."
+    )
+
+    knowledge_sync = subcommands.add_parser(
+        "knowledge",
+        help="Manage the separate, read-only Markdown knowledge index."
+    )
+    knowledge_subcommands = knowledge_sync.add_subparsers(
+        dest="knowledge_command",
+        required=True,
+    )
+    knowledge_sync_command = knowledge_subcommands.add_parser(
+        "sync",
+        help="Incrementally index Markdown knowledge from an approved directory."
+    )
+    sync_source = knowledge_sync_command.add_mutually_exclusive_group()
+    sync_source.add_argument(
+        "--source",
+        help="Directory containing Markdown knowledge files."
+    )
+    sync_source.add_argument(
+        "--config",
+        help="Project knowledge configuration file."
+    )
+    knowledge_status_command = knowledge_subcommands.add_parser(
+        "status",
+        help="Show the current local knowledge-index health and scope."
+    )
+    knowledge_status_command.add_argument(
+        "--source",
+        help="Optionally report status for one configured Markdown source."
+    )
+    knowledge_status_command.add_argument(
+        "--config",
+        help="Project knowledge configuration file."
+    )
+    knowledge_configure_command = knowledge_subcommands.add_parser(
+        "configure",
+        help="Write a project-local source and agent identity contract."
+    )
+    knowledge_configure_command.add_argument(
+        "--source",
+        required=True,
+        help="Directory containing Markdown knowledge files."
+    )
+    knowledge_configure_command.add_argument(
+        "--agent-id",
+        required=True,
+        help="Stable MemCoder owner label for this automation project."
+    )
+    knowledge_configure_command.add_argument(
+        "--config",
+        help="Destination configuration file (default: .memcoder/knowledge.json)."
+    )
+    knowledge_configure_command.add_argument(
+        "--include-shared",
+        action="store_true",
+        help="Allow intentionally shared learned memories for this project."
+    )
+
     arguments = parser.parse_args(argv)
 
     if arguments.command == "setup-agy":
@@ -107,15 +184,66 @@ def main(argv=None):
         print("Restart AGY. No plugin install command is required.")
         return 0
 
+    if arguments.command == "knowledge":
+        try:
+            if arguments.knowledge_command == "sync":
+                config = (
+                    load_knowledge_config(arguments.config)
+                    if arguments.config else None
+                )
+                source = arguments.source or (config or {}).get("source_root")
+                if not source:
+                    raise ValueError("Knowledge sync requires --source or --config.")
+                result = sync_knowledge(source)
+            elif arguments.knowledge_command == "configure":
+                result = configure_knowledge(
+                    source_root=arguments.source,
+                    agent_id=arguments.agent_id,
+                    config_path=arguments.config,
+                    include_shared=arguments.include_shared,
+                )
+            else:
+                config = (
+                    load_knowledge_config(arguments.config)
+                    if arguments.config else None
+                )
+                result = knowledge_status(
+                    arguments.source or (config or {}).get("source_root")
+                )
+        except ValueError as error:
+            emit_json({
+                "error": {
+                    "code": "invalid_request",
+                    "message": str(error)
+                }
+            })
+            return 2
+
+        emit_json(result)
+        return 0
+
     try:
         request = load_json_request(arguments.input)
 
         if arguments.command == "prepare":
-            result = prepare_cognition(
-                problem=require_text(request, "problem"),
-                agent_id=request.get("agent_id", "automation"),
-                include_shared=bool(request.get("include_shared", True))
+            config = (
+                load_knowledge_config(arguments.config)
+                if arguments.config else {}
             )
+            prepare_arguments = {
+                "problem": require_text(request, "problem"),
+                "agent_id": request.get("agent_id", config.get("agent_id", "automation")),
+                "include_shared": bool(
+                    request.get("include_shared", config.get("include_shared", True))
+                ),
+                "include_knowledge": bool(
+                    request.get("include_knowledge", config.get("include_knowledge", True))
+                ),
+            }
+            for field in ("subject", "category"):
+                if field in request:
+                    prepare_arguments[field] = require_text(request, field)
+            result = prepare_cognition(**prepare_arguments)
         else:
             if request.get("verified") is not True:
                 raise ValueError(
