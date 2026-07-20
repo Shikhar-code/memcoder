@@ -40,6 +40,7 @@ chroma_db/
 chroma_db_*/
 
 # Local MemCoder state and controlled-proof output
+.memcoder/
 
 *_memories.json
 episodes.json
