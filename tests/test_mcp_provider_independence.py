@@ -52,6 +52,32 @@ def hierarchical_search(problem, agent_id, include_shared=True):
 search.hierarchical_search = hierarchical_search
 sys.modules["memory.hierarchical_search"] = search
 
+knowledge = types.ModuleType("memory.knowledge")
+knowledge_calls = {}
+
+
+def search_knowledge(problem, subject=None, category=None):
+    knowledge_calls.update(
+        problem=problem,
+        subject=subject,
+        category=category,
+    )
+    return [{
+        "content": "Use a labelled diagram with readable text.",
+        "subject": subject or "bio",
+        "category": category or "AI Rendering Rules",
+        "document": "Cell Structure Scene",
+        "section": "Layout Rules",
+        "source_path": "bio/21_AI_Rendering_Rules.md",
+        "source_hash": "source-hash",
+        "distance": 0.4,
+        "confidence": 0.8,
+    }]
+
+
+knowledge.search_knowledge = search_knowledge
+sys.modules["memory.knowledge"] = knowledge
+
 record_calls = {}
 record = types.ModuleType("memory.record_outcome")
 
@@ -121,6 +147,14 @@ assert search_calls == {
     "agent_id": "antigravity",
     "include_shared": True
 }
+assert prepared["knowledge"][0]["source_path"] == (
+    "bio/21_AI_Rendering_Rules.md"
+)
+assert knowledge_calls == {
+    "problem": "A required field is missing.",
+    "subject": None,
+    "category": None,
+}
 
 isolated = json.loads(
     server.memcoder_prepare(
@@ -132,6 +166,18 @@ isolated = json.loads(
 
 assert isolated["include_shared"] is False
 assert search_calls["include_shared"] is False
+
+subject_scoped = json.loads(
+    server.memcoder_prepare(
+        "Plan a biology diagram.",
+        agent_id="antigravity",
+        subject="bio",
+        category="AI Rendering Rules",
+    )
+)
+assert subject_scoped["knowledge"][0]["subject"] == "bio"
+assert knowledge_calls["subject"] == "bio"
+assert knowledge_calls["category"] == "AI Rendering Rules"
 
 recorded = json.loads(
     server.memcoder_record(

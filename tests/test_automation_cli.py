@@ -53,7 +53,8 @@ with TemporaryDirectory() as temporary_directory:
     assert prepare_calls == {
         "problem": "Plan a verified educational video render.",
         "agent_id": "video-pipeline",
-        "include_shared": False
+        "include_shared": False,
+        "include_knowledge": True,
     }
 
     record_path = directory / "record.json"
@@ -83,5 +84,34 @@ with TemporaryDirectory() as temporary_directory:
     assert code == 2
     assert output["error"]["code"] == "invalid_request"
     assert record_calls["task"] == "Render an educational video."
+
+
+knowledge_calls = {}
+
+
+def sync_knowledge(source):
+    knowledge_calls["source"] = source
+    return {"files_indexed": 3, "chunks_indexed": 12}
+
+
+cli.sync_knowledge = sync_knowledge
+code, output = run_command([
+    "knowledge", "sync", "--source", "C:/knowledge-base"
+])
+assert code == 0
+assert output["chunks_indexed"] == 12
+assert knowledge_calls == {"source": "C:/knowledge-base"}
+
+
+def knowledge_status(source=None):
+    knowledge_calls["status_source"] = source
+    return {"chunks": 12, "files": 3, "subjects": ["bio"]}
+
+
+cli.knowledge_status = knowledge_status
+code, output = run_command(["knowledge", "status", "--source", "C:/knowledge-base"])
+assert code == 0
+assert output["chunks"] == 12
+assert knowledge_calls["status_source"] == "C:/knowledge-base"
 
 print("PASS: provider-free automation CLI")
