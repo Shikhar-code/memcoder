@@ -13,7 +13,28 @@ def compact_memory(memory):
     }
 
 
-def prepare_cognition(problem, agent_id="automation", include_shared=True):
+def compact_knowledge(knowledge):
+    """Return source-traceable reference knowledge without treating it as memory."""
+    return {
+        "content": knowledge.get("content", ""),
+        "subject": knowledge.get("subject", ""),
+        "category": knowledge.get("category", ""),
+        "document": knowledge.get("document", ""),
+        "section": knowledge.get("section", ""),
+        "source_path": knowledge.get("source_path", ""),
+        "source_hash": knowledge.get("source_hash", ""),
+        "distance": knowledge.get("distance"),
+        "confidence": knowledge.get("confidence"),
+    }
+
+
+def prepare_cognition(
+        problem,
+        agent_id="automation",
+        include_shared=True,
+        include_knowledge=True,
+        subject=None,
+        category=None):
     """Retrieve trusted guidance before an independent host starts work."""
     from memory.hierarchical_search import hierarchical_search
 
@@ -23,9 +44,22 @@ def prepare_cognition(problem, agent_id="automation", include_shared=True):
         include_shared=include_shared
     )
 
+    knowledge = []
+    if include_knowledge:
+        from memory.knowledge import search_knowledge
+        knowledge = search_knowledge(
+            problem,
+            subject=subject,
+            category=category,
+        )
+
     return {
         "problem": problem,
         "include_shared": include_shared,
+        "knowledge": [
+            compact_knowledge(item)
+            for item in knowledge
+        ],
         "confidence": results["confidence"],
         "strategy": results["strategy"],
         "experiences": [
@@ -46,6 +80,7 @@ def prepare_cognition(problem, agent_id="automation", include_shared=True):
         ],
         "instructions": [
             "Use trusted memories as investigation guidance, not proof.",
+            "Use retrieved knowledge as source-traceable prerequisite context.",
             "Prefer listed files and verification steps before broad exploration.",
             "If no trusted memory is present, solve normally.",
             "Record an outcome only after the host has verified success."
