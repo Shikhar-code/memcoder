@@ -12,6 +12,7 @@ from memory.knowledge import (
     load_knowledge_config,
     sync_knowledge,
 )
+from memory.assets import search_assets, write_asset_catalog
 
 
 # The CLI is often invoked by another automation process on Windows.  Its
@@ -157,6 +158,37 @@ def main(argv=None):
         required=True,
         help="Directory containing Markdown knowledge files."
     )
+
+    assets_command = subcommands.add_parser(
+        "assets",
+        help="Build and search a separate approved visual-asset catalog."
+    )
+    assets_subcommands = assets_command.add_subparsers(
+        dest="assets_command",
+        required=True,
+    )
+    assets_catalog_command = assets_subcommands.add_parser(
+        "catalog",
+        help="Create deterministic metadata for approved image, SVG, and video assets."
+    )
+    assets_catalog_command.add_argument("--source", required=True)
+    assets_catalog_command.add_argument("--output", required=True)
+    assets_catalog_command.add_argument(
+        "--metadata",
+        help="Optional JSON overlay keyed by relative asset path for curated concepts and visual types.",
+    )
+    assets_catalog_command.add_argument(
+        "--subject",
+        help="Optionally catalog one normalized subject, such as economics or physics.",
+    )
+    assets_search_command = assets_subcommands.add_parser(
+        "search",
+        help="Search one generated asset catalog without loading asset binaries."
+    )
+    assets_search_command.add_argument("--catalog", required=True)
+    assets_search_command.add_argument("--query", required=True)
+    assets_search_command.add_argument("--subject")
+    assets_search_command.add_argument("--limit", type=int, default=8)
     knowledge_configure_command.add_argument(
         "--agent-id",
         required=True,
@@ -219,6 +251,28 @@ def main(argv=None):
             })
             return 2
 
+        emit_json(result)
+        return 0
+
+    if arguments.command == "assets":
+        try:
+            if arguments.assets_command == "catalog":
+                result = write_asset_catalog(
+                    arguments.source,
+                    arguments.output,
+                    subject=arguments.subject,
+                    metadata_path=arguments.metadata,
+                )
+            else:
+                result = search_assets(
+                    arguments.catalog,
+                    arguments.query,
+                    subject=arguments.subject,
+                    limit=arguments.limit,
+                )
+        except ValueError as error:
+            emit_json({"error": {"code": "invalid_request", "message": str(error)}})
+            return 2
         emit_json(result)
         return 0
 
