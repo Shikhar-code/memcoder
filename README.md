@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/memcoder-hero.svg" alt="MemCoder — persistent cognition for agents" width="100%" />
+<img src="assets/memcoder-hero.svg?v=2" alt="MemCoder — persistent cognition for agents" width="100%" />
 
 <p>
   <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=flat-square&label=PyPI&color=6D9EFF" alt="PyPI" /></a>
