@@ -28,10 +28,11 @@
     </circle>
     <text x="108" y="92" fill="#DCE9FF" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">LOCAL · VERIFIED · MODULAR</text>
   </g>
-  <text x="67" y="182" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-2">MemCoder</text>
-  <text x="70" y="226" fill="#B8C6E4" font-family="Arial, sans-serif" font-size="24">Persistent cognition for agents that learn from verified work.</text>
-  <text x="70" y="266" fill="#8294BA" font-family="Arial, sans-serif" font-size="16">Retrieve precisely. Verify evidence. Reuse what proved itself.</text>
-  <g transform="translate(674 104)">
+  <text x="67" y="176" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-2">MemCoder</text>
+  <text x="70" y="219" fill="#B8C6E4" font-family="Arial, sans-serif" font-size="23">Persistent cognition for agents.</text>
+  <text x="70" y="250" fill="#B8C6E4" font-family="Arial, sans-serif" font-size="23">Built from verified work.</text>
+  <text x="70" y="290" fill="#8294BA" font-family="Arial, sans-serif" font-size="16">Retrieve precisely. Verify evidence. Reuse what proved itself.</text>
+  <g transform="translate(735 104)">
     <path d="M48 124H145M215 124H312" stroke="url(#line)" stroke-width="3" stroke-dasharray="8 8">
       <animate attributeName="stroke-dashoffset" from="32" to="0" dur="1.8s" repeatCount="indefinite"/>
     </path>
