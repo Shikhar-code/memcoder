@@ -1,0 +1,67 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">MemCoder cognition loop</title>
+  <desc id="desc">An animated visual of verified agent experience becoming reusable skills and plans.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1020"/>
+      <stop offset="0.54" stop-color="#131B35"/>
+      <stop offset="1" stop-color="#0E1930"/>
+    </linearGradient>
+    <linearGradient id="line" x1="210" y1="0" x2="1000" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#76A9FF" stop-opacity=".2"/>
+      <stop offset=".5" stop-color="#BFA1FF"/>
+      <stop offset="1" stop-color="#6FE1BC" stop-opacity=".25"/>
+    </linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="420" rx="24" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="418" rx="23" stroke="#8EA8D5" stroke-opacity=".22"/>
+  <path d="M0 320C170 250 253 390 440 306C608 231 673 112 878 174C1000 211 1070 166 1200 87" stroke="#76A9FF" stroke-opacity=".10" stroke-width="2"/>
+  <path d="M0 344C190 275 308 401 487 322C652 250 735 152 921 211C1031 246 1126 213 1200 169" stroke="#BFA1FF" stroke-opacity=".09" stroke-width="2"/>
+  <g opacity=".84">
+    <rect x="67" y="68" width="195" height="38" rx="19" fill="#172545" stroke="#76A9FF" stroke-opacity=".5"/>
+    <circle cx="91" cy="87" r="6" fill="#76A9FF" filter="url(#glow)">
+      <animate attributeName="opacity" values=".35;1;.35" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <text x="108" y="92" fill="#DCE9FF" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="1.6">LOCAL · VERIFIED · MODULAR</text>
+  </g>
+  <text x="67" y="182" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-2">MemCoder</text>
+  <text x="70" y="226" fill="#B8C6E4" font-family="Arial, sans-serif" font-size="24">Persistent cognition for agents that learn from verified work.</text>
+  <text x="70" y="266" fill="#8294BA" font-family="Arial, sans-serif" font-size="16">Retrieve precisely. Verify evidence. Reuse what proved itself.</text>
+  <g transform="translate(674 104)">
+    <path d="M48 124H145M215 124H312" stroke="url(#line)" stroke-width="3" stroke-dasharray="8 8">
+      <animate attributeName="stroke-dashoffset" from="32" to="0" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+    <g>
+      <rect x="0" y="80" width="97" height="88" rx="17" fill="#142442" stroke="#76A9FF" stroke-opacity=".7"/>
+      <circle cx="48" cy="112" r="14" stroke="#76A9FF" stroke-width="2"/>
+      <path d="M42 112L47 117L56 106" stroke="#76A9FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="48" y="145" text-anchor="middle" fill="#DDEAFF" font-family="Arial, sans-serif" font-size="13" font-weight="700">VERIFY</text>
+    </g>
+    <g>
+      <rect x="145" y="80" width="70" height="88" rx="17" fill="#211B45" stroke="#BFA1FF" stroke-opacity=".72"/>
+      <path d="M169 111C169 103 175 98 180 98C186 98 190 102 190 108C190 118 177 120 177 129" stroke="#BFA1FF" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="177" cy="141" r="2" fill="#BFA1FF"/>
+      <text x="180" y="157" text-anchor="middle" fill="#EEE8FF" font-family="Arial, sans-serif" font-size="11" font-weight="700">LEARN</text>
+    </g>
+    <g>
+      <rect x="312" y="80" width="109" height="88" rx="17" fill="#123D39" stroke="#6FE1BC" stroke-opacity=".72"/>
+      <path d="M348 111H386M348 124H376M348 137H366" stroke="#6FE1BC" stroke-width="2.4" stroke-linecap="round"/>
+      <text x="366" y="157" text-anchor="middle" fill="#D8FFF2" font-family="Arial, sans-serif" font-size="12" font-weight="700">REUSE</text>
+    </g>
+    <circle cx="48" cy="124" r="31" stroke="#76A9FF" stroke-opacity=".2">
+      <animate attributeName="r" values="27;39;27" dur="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values=".55;0;.55" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="180" cy="124" r="5" fill="#BFA1FF" filter="url(#glow)">
+      <animate attributeName="opacity" values=".25;1;.25" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="366" cy="124" r="5" fill="#6FE1BC" filter="url(#glow)">
+      <animate attributeName="opacity" values="1;.25;1" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="1118" y="378" text-anchor="end" fill="#7184AA" font-family="Arial, sans-serif" font-size="13" letter-spacing="1.2">EXPERIENCE → SKILL → PLAN</text>
+</svg>
