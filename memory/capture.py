@@ -14,7 +14,9 @@ def capture_memory(
         importance=5,
         memory_type="experience",
         owner="shared",
-        source=None):
+        source=None,
+        verification=None,
+        metadata=None):
 
     task = normalize_task(task)
 
@@ -33,11 +35,16 @@ def capture_memory(
         importance,
 
         memory_type,
-        source
+        source,
+        verification
 
     )
 
     memory["owner"] = owner
+
+    for key, value in (metadata or {}).items():
+        if key not in memory:
+            memory[key] = value
 
     add_memory(
         memory

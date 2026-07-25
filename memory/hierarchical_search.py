@@ -31,7 +31,8 @@ def get_strategy(confidence):
 def hierarchical_search(
         problem,
         agent_id="human",
-        include_shared=True):
+        include_shared=True,
+        include_skills=True):
 
     query_embedding = embed(problem)
 
@@ -67,6 +68,16 @@ def hierarchical_search(
         include_shared=include_shared
     )
 
+    skills = []
+    if include_skills:
+        skills = search_memory(
+            query_embedding=query_embedding,
+            k=3,
+            memory_type="skill",
+            agent_id=agent_id,
+            include_shared=include_shared
+        )
+
     experiences = filter_trusted_memories(
         experiences,
         query=problem
@@ -86,6 +97,20 @@ def hierarchical_search(
         reflections,
         query=problem
     )
+
+    if include_skills:
+        skills = filter_trusted_memories(
+            skills,
+            query=problem
+        )
+
+        # A vector match alone must never turn malformed metadata into a procedure.
+        from memory.skills import skill_definition
+        skills = [skill for skill in skills if skill_definition(skill) is not None]
+
+        # Repeated QA-rejected executions require review before automatic reuse.
+        from memory.skill_health import eligible_skills
+        skills = eligible_skills(skills, agent_id=agent_id)
 
     confidence = calculate_confidence(
         experiences
@@ -107,6 +132,7 @@ def hierarchical_search(
 
         "principles": principles,
 
-        "reflections": reflections
+        "reflections": reflections,
+        "skills": skills,
 
     }

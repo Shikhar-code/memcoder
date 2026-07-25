@@ -27,10 +27,11 @@ search = types.ModuleType("memory.hierarchical_search")
 search_calls = {}
 
 
-def hierarchical_search(problem, agent_id, include_shared=True):
+def hierarchical_search(problem, agent_id, include_shared=True, include_skills=True):
     search_calls.update(
         agent_id=agent_id,
-        include_shared=include_shared
+        include_shared=include_shared,
+        include_skills=include_skills,
     )
     return {
     "confidence": 0.73,
@@ -105,6 +106,24 @@ sys.modules["memory.markdown_import"] = markdown_import
 sys.modules.pop("adapters.mcp.server", None)
 server = importlib.import_module("adapters.mcp.server")
 
+start_calls = {}
+server.start_cognition = lambda **kwargs: start_calls.update(kwargs) or {
+    "brief": {}, "plan": {"mode": "foundation", "steps": []}
+}
+started = json.loads(
+    server.memcoder_start(
+        "A required field is missing.",
+        agent_id="antigravity",
+        include_shared=False,
+    )
+)
+assert started["plan"]["mode"] == "foundation"
+assert start_calls == {
+    "problem": "A required field is missing.",
+    "agent_id": "antigravity",
+    "include_shared": False,
+}
+
 prepared = json.loads(
     server.memcoder_prepare(
         "A required field is missing.",
@@ -113,13 +132,15 @@ prepared = json.loads(
 )
 
 assert prepared["strategy"] == "memory_guided"
-assert prepared["experiences"][0]["task"] == (
+assert prepared["detail_level"] == "brief"
+assert prepared["brief"]["evidence"][0]["task"] == (
     "Validate a required field"
 )
-assert "verified success" in prepared["instructions"][-1]
+assert "QA approves" in prepared["instructions"][-1]
 assert search_calls == {
     "agent_id": "antigravity",
-    "include_shared": True
+    "include_shared": True,
+    "include_skills": True,
 }
 
 isolated = json.loads(
@@ -133,12 +154,92 @@ isolated = json.loads(
 assert isolated["include_shared"] is False
 assert search_calls["include_shared"] is False
 
+without_skills = json.loads(
+    server.memcoder_prepare(
+        "A required field is missing.",
+        agent_id="antigravity",
+        include_skills=False,
+    )
+)
+assert without_skills["include_skills"] is False
+assert search_calls["include_skills"] is False
+
+expanded = json.loads(
+    server.memcoder_prepare(
+        "A required field is missing.",
+        agent_id="antigravity",
+        detail_level="full"
+    )
+)
+assert expanded["experiences"][0]["task"] == "Validate a required field"
+
+plan_calls = {}
+server.plan_cognition = lambda **kwargs: plan_calls.update(kwargs) or {
+    "plan": {"mode": "foundation", "steps": []}
+}
+planned = json.loads(
+    server.memcoder_plan(
+        "A required field is missing.",
+        agent_id="antigravity",
+        include_shared=False,
+    )
+)
+assert planned["plan"]["mode"] == "foundation"
+assert plan_calls == {
+    "problem": "A required field is missing.",
+    "agent_id": "antigravity",
+    "include_shared": False,
+}
+
+history_calls = {}
+server.plan_history_cognition = lambda **kwargs: history_calls.update(kwargs) or {
+    "plan_id": kwargs["plan_id"], "outcomes": []
+}
+history = json.loads(
+    server.memcoder_plan_history(
+        "plan_1234567890abcdef1234",
+        agent_id="antigravity",
+    )
+)
+assert history["outcomes"] == []
+assert history_calls == {
+    "plan_id": "plan_1234567890abcdef1234",
+    "agent_id": "antigravity",
+}
+
+health_calls = {}
+server.skill_health_cognition = lambda **kwargs: health_calls.update(kwargs) or {
+    "skill_id": kwargs["skill_id"], "status": "unproven"
+}
+health = json.loads(server.memcoder_skill_health("skill-1", agent_id="antigravity"))
+assert health["status"] == "unproven"
+assert health_calls == {"skill_id": "skill-1", "agent_id": "antigravity"}
+
+evaluation_calls = {}
+server.evaluate_cognition = lambda runs: evaluation_calls.update(runs=runs) or {
+    "conditions": {"baseline": {"runs": len(runs)}}
+}
+evaluation = json.loads(server.memcoder_evaluate([
+    {"task_id": "task-1", "condition": "baseline", "passed": True}
+]))
+assert evaluation["conditions"]["baseline"]["runs"] == 1
+assert evaluation_calls["runs"][0]["task_id"] == "task-1"
+
 recorded = json.loads(
     server.memcoder_record(
         task="Validate a required field",
         files=["api.py"],
         summary="A required field was missing.",
         solution="Validate it before processing.",
+        evidence={
+            "checks": [{
+                "name": "focused validation test",
+                "kind": "test",
+                "status": "passed",
+                "command": "python test_validation.py",
+                "output": "PASS"
+            }]
+        },
         agent_id="antigravity"
     )
 )
@@ -146,6 +247,26 @@ recorded = json.loads(
 assert recorded["experience_recorded"]
 assert recorded["rejected"] == []
 assert record_calls["agent_id"] == "antigravity"
+
+skill_calls = {}
+server.promote_skill_cognition = lambda **kwargs: skill_calls.update(kwargs) or {
+    "promoted": True,
+    "id": "skill-1",
+}
+promoted = json.loads(
+    server.memcoder_promote_skill(
+        name="Required field validation",
+        when_to_use="A required request field may be missing before processing.",
+        inputs=["request payload"],
+        steps=["Check the field.", "Run the focused test."],
+        verification=["Focused test passes."],
+        supporting_experience_ids=["experience-1", "experience-2"],
+        agent_id="antigravity",
+    )
+)
+assert promoted["promoted"]
+assert skill_calls["supporting_experience_ids"] == ["experience-1", "experience-2"]
+assert skill_calls["supporting_principle_ids"] is None
 
 imported = json.loads(
     server.memcoder_import_markdown(

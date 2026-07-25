@@ -155,6 +155,30 @@ def search_memory(
                     ""
                 ),
 
+            "source_experience_id":
+                memory.get(
+                    "source_experience_id",
+                    ""
+                ),
+
+            "skill_definition":
+                memory.get(
+                    "skill_definition",
+                    ""
+                ),
+
+            "supporting_experience_ids":
+                memory.get(
+                    "supporting_experience_ids",
+                    ""
+                ),
+
+            "supporting_principle_ids":
+                memory.get(
+                    "supporting_principle_ids",
+                    ""
+                ),
+
             "score":
                 distance
 

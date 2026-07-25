@@ -134,7 +134,22 @@ def record(
         solution,
         reflection=None,
         principles=None,
+        evidence=None,
+        plan_id=None,
+        applied_skill_id=None,
         agent_id="human"):
+
+    from memory.qa import evaluate_outcome_qa
+
+    qa_report = evaluate_outcome_qa(
+        task=task,
+        files=files,
+        summary=summary,
+        solution=solution,
+        evidence=evidence,
+        reflection=reflection,
+        principles=principles,
+    )
 
     return record_outcome(
         task=task,
@@ -143,7 +158,10 @@ def record(
         solution=solution,
         reflection=reflection,
         principles=principles,
-        agent_id=agent_id
+        agent_id=agent_id,
+        qa_report=qa_report,
+        plan_id=plan_id,
+        applied_skill_id=applied_skill_id,
     )
 
 

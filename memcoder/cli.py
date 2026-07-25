@@ -5,7 +5,17 @@ import json
 import sys
 from pathlib import Path
 
-from api.cognition import prepare_cognition, record_cognition
+from api.cognition import (
+    evaluate_cognition,
+    plan_history_cognition,
+    plan_cognition,
+    prepare_cognition,
+    promote_skill_cognition,
+    record_cognition,
+    skill_health_cognition,
+    start_cognition,
+    verify_cognition,
+)
 
 
 def default_agy_config_path():
@@ -86,14 +96,35 @@ def main(argv=None):
     )
 
     for command, help_text in (
+            ("start", "Retrieve a compact brief and bounded plan in one call."),
+            ("plan-history", "Read owner-scoped audit outcomes for one plan."),
+            ("skill-health", "Read owner-scoped health for one promoted skill."),
+            ("evaluate", "Summarize explicit baseline and MemCoder-assisted runs."),
             ("prepare", "Retrieve provider-free cognition from a JSON request."),
-            ("record", "Store a verified outcome from a JSON request.")):
+            ("plan", "Build a bounded provider-free plan from a JSON request."),
+            ("verify", "Evaluate supplied host verification evidence without storing memory."),
+            ("record", "QA and store an outcome only when its evidence is admitted.")):
         subcommand = subcommands.add_parser(command, help=help_text)
         subcommand.add_argument(
             "--input",
             required=True,
             help="Path to a JSON request file, or '-' to read standard input."
         )
+
+    skill_command = subcommands.add_parser(
+        "skill",
+        help="Promote QA-supported experiences into reusable skills."
+    )
+    skill_subcommands = skill_command.add_subparsers(dest="skill_command", required=True)
+    skill_promote = skill_subcommands.add_parser(
+        "promote",
+        help="Promote one structured skill from QA-approved supporting experiences."
+    )
+    skill_promote.add_argument(
+        "--input",
+        required=True,
+        help="Path to a JSON request file, or '-' to read standard input."
+    )
 
     arguments = parser.parse_args(argv)
 
@@ -110,35 +141,82 @@ def main(argv=None):
     try:
         request = load_json_request(arguments.input)
 
-        if arguments.command == "prepare":
+        if arguments.command == "start":
+            result = start_cognition(
+                problem=require_text(request, "problem"),
+                agent_id=request.get("agent_id", "automation"),
+                include_shared=bool(request.get("include_shared", True)),
+            )
+        elif arguments.command == "plan-history":
+            result = plan_history_cognition(
+                plan_id=require_text(request, "plan_id"),
+                agent_id=request.get("agent_id", "automation"),
+            )
+        elif arguments.command == "skill-health":
+            result = skill_health_cognition(
+                skill_id=require_text(request, "skill_id"),
+                agent_id=request.get("agent_id", "automation"),
+            )
+        elif arguments.command == "evaluate":
+            runs = request.get("runs")
+            result = evaluate_cognition(runs)
+        elif arguments.command == "prepare":
             result = prepare_cognition(
                 problem=require_text(request, "problem"),
                 agent_id=request.get("agent_id", "automation"),
-                include_shared=bool(request.get("include_shared", True))
+                include_shared=bool(request.get("include_shared", True)),
+                include_skills=bool(request.get("include_skills", True)),
+                detail_level=request.get("detail_level", "brief"),
+            )
+        elif arguments.command == "plan":
+            result = plan_cognition(
+                problem=require_text(request, "problem"),
+                agent_id=request.get("agent_id", "automation"),
+                include_shared=bool(request.get("include_shared", True)),
+            )
+        elif arguments.command == "skill":
+            result = promote_skill_cognition(
+                name=require_text(request, "name"),
+                when_to_use=require_text(request, "when_to_use"),
+                inputs=request.get("inputs"),
+                steps=request.get("steps"),
+                verification=request.get("verification"),
+                supporting_experience_ids=request.get("supporting_experience_ids"),
+                supporting_principle_ids=request.get("supporting_principle_ids"),
+                agent_id=request.get("agent_id", "automation"),
+                human_approved=bool(request.get("human_approved", False)),
             )
         else:
-            if request.get("verified") is not True:
-                raise ValueError(
-                    "Record requests require 'verified': true after host verification."
-                )
-
             files = request.get("files")
             if not isinstance(files, list):
                 raise ValueError("Request field 'files' must be a list.")
+
+            evidence = request.get("evidence")
+            if not isinstance(evidence, dict):
+                raise ValueError("Request field 'evidence' must be an object with verification checks.")
 
             principles = request.get("principles")
             if principles is not None and not isinstance(principles, list):
                 raise ValueError("Request field 'principles' must be a list when provided.")
 
-            result = record_cognition(
-                task=require_text(request, "task"),
-                files=files,
-                summary=require_text(request, "summary"),
-                solution=require_text(request, "solution"),
-                reflection=request.get("reflection"),
-                principles=principles,
-                agent_id=request.get("agent_id", "automation")
-            )
+            outcome = {
+                "task": require_text(request, "task"),
+                "files": files,
+                "summary": require_text(request, "summary"),
+                "solution": require_text(request, "solution"),
+                "reflection": request.get("reflection"),
+                "principles": principles,
+                "evidence": evidence,
+            }
+            if arguments.command == "verify":
+                result = verify_cognition(**outcome)
+            else:
+                result = record_cognition(
+                    **outcome,
+                    plan_id=request.get("plan_id"),
+                    applied_skill_id=request.get("applied_skill_id"),
+                    agent_id=request.get("agent_id", "automation")
+                )
     except ValueError as error:
         emit_json({
             "error": {

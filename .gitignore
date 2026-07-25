@@ -90,6 +90,10 @@ testing/remotion_duration/
 testing/web_bearer/
 testing/web_jwt/
 
+# Local Beta-2 evaluation copies and agent-run output
+testing/beta2_controlled_runs/
+testing/beta2_evaluation_runs/
+
 # Temporary
 
 *.tmp

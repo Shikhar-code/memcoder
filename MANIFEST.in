@@ -1,0 +1,22 @@
+include LICENSE
+include README.md
+include pyproject.toml
+
+# Release archives should not ship local proof fixtures, build products, or
+# historical auxiliary applications. Runtime packages are included by setuptools.
+prune tests
+prune testing
+prune build
+prune dist
+prune cache
+prune client
+prune core
+prune eval
+prune examples
+prune extra
+prune server
+prune session
+prune scripts
+
+global-exclude __pycache__
+global-exclude *.py[cod]

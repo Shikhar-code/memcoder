@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memcoder"
-version = "0.1.2b1"
+version = "0.2.0b1"
 description = "Provider-independent persistent cognition for AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,7 +13,7 @@ authors = [
     {name = "Shikhar"}
 ]
 
-license = {text = "MIT"}
+license = "MIT"
 
 keywords = [
     "ai",
@@ -30,7 +30,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
@@ -56,3 +55,5 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
+include = ["memcoder*", "memory*", "api*", "adapters*", "agent*", "context*", "llm*"]
+exclude = ["tests*", "testing*", "build*", "dist*", "cache*", "client*", "core*", "eval*", "examples*", "extra*", "server*", "session*"]

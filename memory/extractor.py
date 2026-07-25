@@ -6,7 +6,8 @@ def extract_memory(task,
                    solution,
                    importance=5,
                    memory_type="experience",
-                   source=None):
+                   source=None,
+                   verification=None):
 
     memory = {
         "task": task,
@@ -20,5 +21,8 @@ def extract_memory(task,
 
     if source:
         memory["source"] = source
+
+    if verification:
+        memory["verification"] = verification
 
     return memory

@@ -1,5 +1,7 @@
 """Provider-free recording of a solved agent outcome."""
 
+import json
+
 from memory.capture import capture_memory
 from memory.principle_capture import capture_principles
 from memory.quality import (
@@ -17,8 +19,36 @@ def record_outcome(
         solution,
         reflection=None,
         principles=None,
-        agent_id="human"):
+        agent_id="human",
+        qa_report=None,
+        plan_id=None,
+        applied_skill_id=None):
     """Persist only structured memories supplied by the calling agent."""
+
+    recorded = {
+        "experience": None,
+        "plan_outcome": None,
+        "reflections": [],
+        "principles": [],
+        "rejected": []
+    }
+
+    if plan_id is not None:
+        from memory.plan_outcomes import record_plan_outcome
+        recorded["plan_outcome"] = record_plan_outcome(
+            plan_id=plan_id,
+            task=task,
+            qa_report=qa_report,
+            agent_id=agent_id,
+            applied_skill_id=applied_skill_id,
+        )
+
+    if not isinstance(qa_report, dict) or qa_report.get("verdict") != "approved":
+        verdict = qa_report.get("verdict") if isinstance(qa_report, dict) else "missing"
+        recorded["rejected"].append(
+            f"qa: outcome was not admitted (verdict: {verdict})"
+        )
+        return recorded
 
     experience = {
         "task": task,
@@ -27,37 +57,51 @@ def record_outcome(
         "solution": solution
     }
 
-    recorded = {
-        "experience": None,
-        "reflections": [],
-        "principles": [],
-        "rejected": []
-    }
-
     if is_valid_experience(experience):
-        capture_memory(
+        stored_experience = capture_memory(
             task=task,
             files=files,
             summary=summary,
             solution=solution,
             importance=5,
             memory_type="experience",
-            owner=agent_id
+            owner=agent_id,
+            verification=json.dumps({
+                "qa_schema_version": qa_report.get("schema_version"),
+                "qa_verdict": qa_report.get("verdict"),
+                "evidence_summary": qa_report.get("evidence_summary", {}),
+            }, sort_keys=True)
         )
 
-        recorded["experience"] = experience
+        recorded["experience"] = {
+            **experience,
+            "id": stored_experience.get("hash", ""),
+        }
     else:
         recorded["rejected"].append(
             "experience: task, files, summary, and solution must be meaningful"
         )
 
     if reflection and is_valid_reflection(reflection):
-        capture_reflection(
+        source_experience_id = (
+            recorded["experience"]["id"] if recorded["experience"] else None
+        )
+        captured_reflection = capture_reflection(
             reflection,
-            owner=agent_id
+            owner=agent_id,
+            source_experience_id=source_experience_id,
+            verification={
+                "qa_schema_version": qa_report.get("schema_version"),
+                "qa_verdict": qa_report.get("verdict"),
+                "source_experience_id": source_experience_id,
+            },
         )
 
-        recorded["reflections"].append(reflection)
+        recorded["reflections"].append({
+            "text": reflection,
+            "id": captured_reflection.get("hash", ""),
+            "source_experience_id": source_experience_id,
+        })
     elif reflection:
         recorded["rejected"].append(
             "reflection: use one short 'I ...' investigation observation; "

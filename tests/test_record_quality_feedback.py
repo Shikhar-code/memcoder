@@ -12,7 +12,14 @@ captures = []
 
 
 capture = types.ModuleType("memory.capture")
-capture.capture_memory = lambda **kwargs: captures.append(("experience", kwargs))
+
+
+def capture_memory(**kwargs):
+    captures.append(("experience", kwargs))
+    return {"hash": "experience-test"}
+
+
+capture.capture_memory = capture_memory
 sys.modules["memory.capture"] = capture
 
 principles = types.ModuleType("memory.principle_capture")
@@ -37,12 +44,27 @@ result = record_outcome(
     solution="Validate the value before reading it.",
     reflection="I implemented explicit validation before calling strip.",
     principles=["Validate required input before processing it."],
-    agent_id="test"
+    agent_id="test",
+    qa_report={"verdict": "approved", "schema_version": 1, "evidence_summary": {}}
 )
 
 assert result["experience"] is not None
 assert result["reflections"] == []
 assert any(item.startswith("reflection:") for item in result["rejected"])
 assert len(captures) == 2
+
+rejected_plan = record_outcome(
+    task="Validate a required value",
+    files=["validator.py"],
+    summary="A required value caused an unexpected KeyError.",
+    solution="Validate the value before reading it.",
+    agent_id="test",
+    qa_report={"verdict": "rejected", "schema_version": 1, "evidence_summary": {}},
+    plan_id="plan_1234567890abcdef1234",
+    applied_skill_id="skill-validation",
+)
+assert rejected_plan["experience"] is None
+assert rejected_plan["plan_outcome"]["status"] == "failed"
+assert any(item.startswith("qa:") for item in rejected_plan["rejected"])
 
 print("PASS: record quality feedback")
