@@ -127,6 +127,18 @@ def evaluate_outcome_qa(
 
 
 def _report(verdict, gates, field_rejections, checks):
+    playbook = []
+    for check in checks:
+        if check.get("status") != "passed":
+            continue
+        item = {"name": check["name"], "kind": check["kind"]}
+        if check["kind"] in {"test", "build", "lint"}:
+            item["command"] = check.get("command", "")
+        elif check["kind"] == "assertion":
+            item["assertion"] = check.get("assertion", "")
+        else:
+            item["reviewer"] = check.get("reviewer", "")
+        playbook.append(item)
     return {
         "schema_version": QA_SCHEMA_VERSION,
         "verdict": verdict,
@@ -139,4 +151,5 @@ def _report(verdict, gates, field_rejections, checks):
             "failed_checks": [check["name"] for check in checks if check["status"] == "failed"],
             "check_kinds": sorted({check["kind"] for check in checks}),
         },
+        "verification_playbook": playbook,
     }

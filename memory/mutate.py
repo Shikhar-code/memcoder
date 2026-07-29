@@ -1,6 +1,7 @@
 from memory.chroma_client import collection
 from memory.embedder import embed
-from memory.memory_hash import memory_hash
+from memory.records import record_id, revise_record, searchable_document
+from memory.record_store import save_record
 
 
 def mutate_memory(
@@ -35,58 +36,24 @@ def mutate_memory(
         memory
     )
 
-    # -----------------------
-    # Recompute hash
-    # -----------------------
+    revise_record(memory)
+    document = searchable_document(memory)
 
-    memory["hash"] = memory_hash(
-        memory
-    )
-
-    document = f"""
-Task:
-{memory['task']}
-
-Files:
-{', '.join(memory['files'])}
-
-Summary:
-{memory['summary']}
-
-Solution:
-{memory['solution']}
-"""
+    # SQLite is authoritative; the index update below is rebuildable.
+    save_record(memory, document=document)
 
     # -----------------------
     # Replace record
     # -----------------------
 
-    collection.delete(
-        ids=[memory_id]
+    # Updating in place prevents a mutable edit from breaking provenance links.
+    collection.update(
+        ids=[memory_id],
+        documents=[document],
+        embeddings=[embed(document)],
+        metadatas=[memory],
     )
 
-    collection.add(
-
-        ids=[
-            memory["hash"]
-        ],
-
-        documents=[
-            document
-        ],
-
-        embeddings=[
-            embed(
-                document
-            )
-        ],
-
-        metadatas=[
-            memory
-        ]
-
-    )
-
-    memory["id"] = memory["hash"]
+    memory["id"] = record_id(memory)
 
     return memory

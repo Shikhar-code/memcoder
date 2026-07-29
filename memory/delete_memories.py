@@ -1,4 +1,5 @@
 from memory.chroma_client import collection
+from memory.record_store import delete_records
 
 
 def delete_memories(
@@ -13,6 +14,7 @@ def delete_memories(
     collection.delete(
         ids=ids
     )
+    delete_records(ids)
 
     if verbose:
 

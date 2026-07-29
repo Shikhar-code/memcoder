@@ -16,7 +16,8 @@ def capture_memory(
         owner="shared",
         source=None,
         verification=None,
-        metadata=None):
+        metadata=None,
+        environment=None):
 
     task = normalize_task(task)
 
@@ -41,6 +42,10 @@ def capture_memory(
     )
 
     memory["owner"] = owner
+
+    if environment is not None:
+        from memory.validity import attach_environment
+        attach_environment(memory, environment)
 
     for key, value in (metadata or {}).items():
         if key not in memory:

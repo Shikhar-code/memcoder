@@ -49,6 +49,10 @@ def add_memory(memory):
 store.add_memory = add_memory
 sys.modules["memory.store"] = store
 
+provenance = types.ModuleType("memory.provenance")
+provenance.link = lambda *args, **kwargs: None
+sys.modules["memory.provenance"] = provenance
+
 from memory.skills import promote_skill
 
 

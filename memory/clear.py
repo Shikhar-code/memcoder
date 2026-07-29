@@ -1,4 +1,5 @@
 from memory.chroma_client import collection
+from memory.record_store import delete_owner
 
 
 def clear_owner(owner):
@@ -26,11 +27,7 @@ def clear_owner(owner):
         }
     )
 
-    if len(results["ids"]) == 0:
-        return 0
-
-    collection.delete(
-        ids=results["ids"]
-    )
-
-    return len(results["ids"])
+    if results["ids"]:
+        collection.delete(ids=results["ids"])
+    durable_count = delete_owner(owner)
+    return max(len(results["ids"]), durable_count)

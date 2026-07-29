@@ -1,7 +1,5 @@
 """Derived trust state for Skills from linked, QA-audited plan outcomes."""
 
-import json
-
 
 REVIEW_FAILURE_COUNT = 2
 
@@ -11,25 +9,12 @@ def skill_health(skill_id, agent_id="automation"):
     if not isinstance(skill_id, str) or not skill_id.strip():
         raise ValueError("skill_id must be a non-empty string.")
 
-    from memory.chroma_client import collection
+    from memory.audit_store import outcomes_for_skill
 
-    result = collection.get(
-        where={
-            "$and": [
-                {"type": "plan_outcome"},
-                {"applied_skill_id": skill_id},
-                {"owner": agent_id},
-            ]
-        },
-        include=["metadatas"],
-    )
-    statuses = []
-    for metadata in result.get("metadatas", []):
-        try:
-            verification = json.loads(metadata.get("verification", ""))
-        except (TypeError, json.JSONDecodeError):
-            verification = {}
-        statuses.append(verification.get("status", metadata.get("plan_status", "unknown")))
+    statuses = [
+        entry.get("status", "unknown")
+        for entry in outcomes_for_skill(skill_id, agent_id)
+    ]
 
     succeeded = statuses.count("succeeded")
     failed = statuses.count("failed")

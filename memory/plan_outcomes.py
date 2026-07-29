@@ -1,6 +1,6 @@
 """Durable, non-guidance audit records for bounded plan execution."""
 
-import json
+from uuid import uuid4
 
 
 PLAN_OUTCOME_SCHEMA_VERSION = 1
@@ -38,25 +38,22 @@ def record_plan_outcome(
         "evidence_summary": evidence_summary,
     }
 
-    from memory.capture import capture_memory
+    from memory.audit_store import append_plan_outcome
 
-    stored = capture_memory(
-        task=f"Plan outcome: {task}",
-        files=["plan_outcome"],
-        summary=f"Plan {plan_id} finished with status: {status}.",
-        solution="Audit record only; this result is not retrieval guidance.",
-        importance=1,
-        memory_type="plan_outcome",
-        owner=agent_id,
-        verification=json.dumps(verification, sort_keys=True),
-        metadata={
-            "plan_id": plan_id,
-            "plan_status": status,
-            "applied_skill_id": applied_skill_id or "",
-        },
-    )
+    stored = append_plan_outcome({
+        "id": f"audit_{uuid4().hex}",
+        "schema_version": PLAN_OUTCOME_SCHEMA_VERSION,
+        "plan_id": plan_id,
+        "task": task,
+        "owner": agent_id,
+        "status": status,
+        "qa_verdict": verdict,
+        "evidence_summary": evidence_summary,
+        "applied_skill_id": applied_skill_id,
+        "verification": verification,
+    })
     return {
-        "id": stored.get("hash", ""),
+        "id": stored["id"],
         "plan_id": plan_id,
         "status": status,
         "qa_verdict": verdict,
@@ -69,30 +66,5 @@ def plan_outcome_history(plan_id, agent_id="automation"):
     if not isinstance(plan_id, str) or not plan_id.startswith("plan_"):
         raise ValueError("plan_id must be a MemCoder plan identifier.")
 
-    from memory.chroma_client import collection
-
-    result = collection.get(
-        where={
-            "$and": [
-                {"type": "plan_outcome"},
-                {"plan_id": plan_id},
-                {"owner": agent_id},
-            ]
-        },
-        include=["metadatas"],
-    )
-    entries = []
-    for entry_id, metadata in zip(result.get("ids", []), result.get("metadatas", [])):
-        try:
-            verification = json.loads(metadata.get("verification", ""))
-        except (TypeError, json.JSONDecodeError):
-            verification = {}
-        entries.append({
-            "id": entry_id,
-            "plan_id": metadata.get("plan_id", plan_id),
-            "status": metadata.get("plan_status", "unknown"),
-            "applied_skill_id": metadata.get("applied_skill_id") or None,
-            "qa_verdict": verification.get("qa_verdict", "missing"),
-            "timestamp": metadata.get("timestamp", ""),
-        })
-    return sorted(entries, key=lambda entry: entry["timestamp"], reverse=True)
+    from memory.audit_store import plan_outcome_history as load_history
+    return load_history(plan_id, agent_id)

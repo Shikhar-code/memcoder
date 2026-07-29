@@ -9,27 +9,21 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 
-class FakeCollection:
-    def get(self, where, include):
-        skill_id = where["$and"][1]["applied_skill_id"]
-        statuses = {
-            "skill-failing": ["failed", "failed"],
-            "skill-trusted": ["succeeded", "succeeded", "succeeded", "failed"],
-            "skill-monitor": ["succeeded", "failed"],
-            "skill-new": [],
-        }[skill_id]
-        return {
-            "ids": [f"outcome-{index}" for index, _ in enumerate(statuses)],
-            "metadatas": [
-                {"verification": json.dumps({"status": status})}
-                for status in statuses
-            ],
-        }
+audit_store = types.ModuleType("memory.audit_store")
 
 
-chroma = types.ModuleType("memory.chroma_client")
-chroma.collection = FakeCollection()
-sys.modules["memory.chroma_client"] = chroma
+def outcomes_for_skill(skill_id, agent_id):
+    statuses = {
+        "skill-failing": ["failed", "failed"],
+        "skill-trusted": ["succeeded", "succeeded", "succeeded", "failed"],
+        "skill-monitor": ["succeeded", "failed"],
+        "skill-new": [],
+    }[skill_id]
+    return [{"status": status, "owner": agent_id} for status in statuses]
+
+
+audit_store.outcomes_for_skill = outcomes_for_skill
+sys.modules["memory.audit_store"] = audit_store
 
 from memory.skill_health import eligible_skills, skill_health
 

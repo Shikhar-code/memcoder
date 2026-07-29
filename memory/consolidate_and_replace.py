@@ -71,6 +71,12 @@ def consolidate_and_replace(
 
         return merged
 
+    raise ValueError(
+        "Destructive consolidation is retired. Use the retention preview/apply "
+        "workflow, which preserves original evidence and marks exact duplicates "
+        "as superseded instead."
+    )
+
     delete_memories(
         duplicate_ids,
         verbose=verbose

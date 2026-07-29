@@ -2,6 +2,8 @@
 
 import json
 
+from memory.records import record_id
+
 
 SKILL_SCHEMA_VERSION = 1
 
@@ -162,6 +164,7 @@ def promote_skill(
 
     from memory.extractor import extract_memory
     from memory.store import add_memory
+    from memory.provenance import link
 
     memory = extract_memory(
         task=name,
@@ -180,10 +183,13 @@ def promote_skill(
     memory["supporting_experience_ids"] = json.dumps(support_ids)
     memory["supporting_principle_ids"] = json.dumps(principle_ids)
     stored = add_memory(memory)
+    skill_id = record_id(stored)
+    for support_id in support_ids + principle_ids:
+        link(support_id, skill_id, "supports", agent_id)
     return {
         "promoted": True,
         "skill": definition,
-        "id": stored.get("hash", ""),
+        "id": skill_id,
         "supporting_experience_count": len(supporting),
     }
 

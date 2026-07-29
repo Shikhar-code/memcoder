@@ -1,15 +1,25 @@
 from memory.embedder import embed
 from memory.chroma_client import collection
-from memory.duplicate import is_duplicate
-from memory.memory_hash import memory_hash
+from memory.duplicate import find_duplicate
 from memory.importance import score_importance
 from memory.confidence import confidence_score
+from memory.records import initialize_record, searchable_document
+from memory.record_store import (
+    migrate_legacy_chroma,
+    migrate_legacy_workspace_storage,
+    save_record,
+)
 
 
 
 def add_memory(
         memory,
         verbose=False):
+
+    # Move existing Chroma-only records into the durable store once before
+    # admitting a new record. Chroma remains a rebuildable retrieval index.
+    migrate_legacy_workspace_storage()
+    migrate_legacy_chroma(collection)
 
     # -------------------------
     # Defensive defaults
@@ -31,14 +41,6 @@ def add_memory(
     # Metadata
     # -------------------------
 
-    memory["confidence"] = confidence_score(
-        memory
-    )
-
-    memory["hash"] = memory_hash(
-        memory
-    )
-
     if "importance" not in memory:
 
         memory["importance"] = score_importance(
@@ -53,34 +55,33 @@ def add_memory(
 
         memory["owner"] = "shared"
 
+    memory["confidence"] = confidence_score(memory)
+    initialize_record(memory)
+
     # -------------------------
     # Duplicate check
     # -------------------------
 
-    if is_duplicate(memory):
+    duplicate = find_duplicate(memory)
+
+    if duplicate:
 
         if verbose:
             print("Memory already exists. Skipping.")
 
-        return memory
+        return duplicate
 
     # -------------------------
     # Build searchable document
     # -------------------------
 
-    text = f"""
-Task:
-{memory['task']}
+    text = searchable_document(memory)
 
-Files:
-{', '.join(memory['files'])}
+    # -------------------------
+    # Persist source of truth before indexing
+    # -------------------------
 
-Summary:
-{memory['summary']}
-
-Solution:
-{memory['solution']}
-"""
+    save_record(memory, document=text)
 
     # -------------------------
     # Store
@@ -89,7 +90,7 @@ Solution:
     collection.add(
 
         ids=[
-        memory["hash"]
+        memory["record_id"]
         ],
 
         documents=[

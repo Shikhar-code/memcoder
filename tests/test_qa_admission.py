@@ -33,6 +33,11 @@ approved = evaluate_outcome_qa(**OUTCOME, evidence=PASSING_EVIDENCE)
 assert approved["verdict"] == "approved"
 assert approved["approved"]
 assert approved["evidence_summary"]["passed_checks"] == ["focused request validation test"]
+assert approved["verification_playbook"] == [{
+    "name": "focused request validation test",
+    "kind": "test",
+    "command": "python test_request_validation.py",
+}]
 
 missing = evaluate_outcome_qa(**OUTCOME, evidence=None)
 assert missing["verdict"] == "insufficient_evidence"

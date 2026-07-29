@@ -47,6 +47,7 @@ experiences.json
 memory_candidates.json
 training_examples.json
 memories.json
+memcoder_plan_outcomes.jsonl
 
 # Local MCP configuration, logs, and archives
 

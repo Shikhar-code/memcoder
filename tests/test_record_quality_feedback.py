@@ -1,12 +1,18 @@
 """Record admission must explain why an optional memory was rejected."""
 
 import importlib
+import os
 import sys
+import tempfile
 import types
 from pathlib import Path
 
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+audit_path = tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl").name
+os.unlink(audit_path)
+os.environ["MEMCODER_AUDIT_PATH"] = audit_path
 
 captures = []
 
@@ -23,7 +29,7 @@ capture.capture_memory = capture_memory
 sys.modules["memory.capture"] = capture
 
 principles = types.ModuleType("memory.principle_capture")
-principles.capture_principles = lambda values, owner: captures.append(
+principles.capture_principles = lambda values, owner, **kwargs: captures.append(
     ("principles", values)
 )
 sys.modules["memory.principle_capture"] = principles

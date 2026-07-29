@@ -1,4 +1,5 @@
 from memory.chroma_client import collection
+from memory.record_store import delete_records
 
 
 def delete_memory(
@@ -11,6 +12,7 @@ def delete_memory(
         ]
 
     )
+    delete_records([memory_id])
 
     return {
 

@@ -1,11 +1,15 @@
 from memory.extractor import extract_memory
 from memory.store import add_memory
+from memory.provenance import link
+from memory.records import record_id
 
 
 def capture_principles(
         principles,
         owner="shared",
-        source=None):
+        source=None,
+        source_experience_id=None,
+        environment=None):
 
     memories = []
 
@@ -29,13 +33,21 @@ def capture_principles(
         )
 
         memory["owner"] = owner
+        if environment is not None:
+            from memory.validity import attach_environment
+            attach_environment(memory, environment)
 
-        add_memory(
-            memory
-        )
+        stored = add_memory(memory)
+        if source_experience_id:
+            link(
+                record_id(stored),
+                source_experience_id,
+                "derived_from",
+                owner,
+            )
 
         memories.append(
-            memory
+            stored
         )
 
     return memories

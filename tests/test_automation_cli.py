@@ -21,6 +21,7 @@ evaluation_calls = {}
 start_calls = {}
 record_calls = {}
 skill_calls = {}
+storage_calls = {}
 
 
 def prepare_cognition(**kwargs):
@@ -78,11 +79,118 @@ cli.record_cognition = record_cognition
 cli.promote_skill_cognition = promote_skill_cognition
 
 
+def migrate_legacy_chroma(collection):
+    storage_calls["migrate"] = collection
+    return {"migrated": 3, "already_migrated": False}
+
+
+def migrate_legacy_workspace_storage():
+    storage_calls["workspace_migration"] = True
+    return {"already_migrated": False, "records": 3, "edges": 2, "audits": 1}
+
+
+def rebuild_guidance_index(collection, embed):
+    storage_calls["rebuild"] = (collection, embed)
+    return {"indexed": 3, "removed": 4}
+
+
+def backfill_existing_provenance():
+    storage_calls["provenance"] = True
+    return {"processed": 3, "links_considered": 2}
+
+
+def storage_status():
+    return {"records": 3, "provenance_edges": 2, "plan_audits": 1}
+
+
+def export_snapshot(output):
+    storage_calls["export"] = output
+    return {"path": str(output), "records": 3}
+
+
+def create_backup(output):
+    storage_calls["backup"] = output
+    return {"path": str(output or "automatic.zip"), "records": 3, "format": "zip"}
+
+
+def restore_snapshot(input):
+    storage_calls["restore"] = input
+    return {"mode": "merge", "records_merged": 3}
+
+
+def retention_preview(owner=None):
+    storage_calls["retention_preview"] = owner
+    return {"schema_version": 1, "actions": [], "safe_to_apply": False}
+
+
+def apply_retention_preview(preview, owner=None):
+    storage_calls["retention_apply"] = (preview, owner)
+    return {"mode": "state_transition_only", "applied": [], "deleted": []}
+
+
+cli.migrate_legacy_chroma = migrate_legacy_chroma
+cli.migrate_legacy_workspace_storage = migrate_legacy_workspace_storage
+cli.rebuild_guidance_index = rebuild_guidance_index
+cli.backfill_existing_provenance = backfill_existing_provenance
+cli.storage_status = storage_status
+cli.export_snapshot = export_snapshot
+cli.create_backup = create_backup
+cli.restore_snapshot = restore_snapshot
+cli.retention_preview = retention_preview
+cli.apply_retention_preview = apply_retention_preview
+
+
 def run_command(arguments):
     output = io.StringIO()
     with redirect_stdout(output):
         code = cli.main(arguments)
     return code, json.loads(output.getvalue())
+
+
+with TemporaryDirectory() as storage_directory:
+    directory = Path(storage_directory)
+    code, output = run_command(["storage", "migrate"])
+    assert code == 0
+    assert output["storage"]["migration"]["migrated"] == 3
+    assert output["storage"]["provenance"]["processed"] == 3
+
+    code, output = run_command(["storage", "rebuild-index"])
+    assert code == 0
+    assert output["storage"]["index"] == {"indexed": 3, "removed": 4}
+
+    code, output = run_command(["storage", "status"])
+    assert code == 0
+    assert output["storage"]["records"] == 3
+
+    export_output = directory / "export.json"
+    code, output = run_command(["storage", "export", "--output", str(export_output)])
+    assert code == 0
+    assert output["storage"]["export"]["records"] == 3
+
+    backup_output = directory / "backup.zip"
+    code, output = run_command(["storage", "backup", "--output", str(backup_output)])
+    assert code == 0
+    assert output["storage"]["backup"]["format"] == "zip"
+
+    code, output = run_command(["storage", "restore", "--input", str(backup_output)])
+    assert code == 0
+    assert output["storage"]["restore"]["mode"] == "merge"
+
+    code, output = run_command(["storage", "retention-preview", "--owner", "video-pipeline"])
+    assert code == 0
+    assert output["retention"]["safe_to_apply"] is False
+    assert storage_calls["retention_preview"] == "video-pipeline"
+
+    retention_path = directory / "retention.json"
+    retention_path.write_text(
+        json.dumps({"retention": {"schema_version": 1, "actions": []}}),
+        encoding="utf-8",
+    )
+    code, output = run_command([
+        "storage", "retention-apply", "--input", str(retention_path), "--owner", "video-pipeline"
+    ])
+    assert code == 0
+    assert output["retention"]["mode"] == "state_transition_only"
 
 
 with TemporaryDirectory() as temporary_directory:

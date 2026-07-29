@@ -32,7 +32,8 @@ def hierarchical_search(
         problem,
         agent_id="human",
         include_shared=True,
-        include_skills=True):
+        include_skills=True,
+        environment=None):
 
     query_embedding = embed(problem)
 
@@ -80,28 +81,33 @@ def hierarchical_search(
 
     experiences = filter_trusted_memories(
         experiences,
-        query=problem
+        query=problem,
+        current_environment=environment,
     )
 
     mistakes = filter_trusted_memories(
         mistakes,
-        query=problem
+        query=problem,
+        current_environment=environment,
     )
 
     principles = filter_trusted_memories(
         principles,
-        query=problem
+        query=problem,
+        current_environment=environment,
     )
 
     reflections = filter_trusted_memories(
         reflections,
-        query=problem
+        query=problem,
+        current_environment=environment,
     )
 
     if include_skills:
         skills = filter_trusted_memories(
             skills,
-            query=problem
+            query=problem,
+            current_environment=environment,
         )
 
         # A vector match alone must never turn malformed metadata into a procedure.

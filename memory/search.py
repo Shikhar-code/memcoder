@@ -1,5 +1,8 @@
 from memory.embedder import embed
 from memory.chroma_client import collection
+from memory.records import record_id
+from memory.provenance import trace
+from memory.proof import build_proof
 
 
 def search_memory(
@@ -81,13 +84,10 @@ def search_memory(
             memories,
             distances):
 
-        output.append({
+        result = {
 
             "id":
-                memory.get(
-                    "hash",
-                    ""
-                ),
+                record_id(memory),
 
             "task":
                 memory.get(
@@ -149,6 +149,16 @@ def search_memory(
                     1
                 ),
 
+            "record_state": memory.get("record_state", "trusted"),
+
+            "revision": memory.get("revision", 1),
+
+            "environment": memory.get("environment", ""),
+
+            "validity_reason": memory.get("validity_reason", ""),
+
+            "provenance": trace(record_id(memory), owner=memory.get("owner")),
+
             "source":
                 memory.get(
                     "source",
@@ -179,9 +189,9 @@ def search_memory(
                     ""
                 ),
 
-            "score":
-                distance
-
-        })
+            "score": distance
+        }
+        result["proof"] = build_proof(result)
+        output.append(result)
 
     return output

@@ -10,6 +10,8 @@ from memory.quality import (
     is_valid_reflection
 )
 from memory.reflection_capture import capture_reflection
+from memory.records import record_id
+from memory.provenance import link
 
 
 def record_outcome(
@@ -22,7 +24,8 @@ def record_outcome(
         agent_id="human",
         qa_report=None,
         plan_id=None,
-        applied_skill_id=None):
+        applied_skill_id=None,
+        environment=None):
     """Persist only structured memories supplied by the calling agent."""
 
     recorded = {
@@ -66,17 +69,27 @@ def record_outcome(
             importance=5,
             memory_type="experience",
             owner=agent_id,
+            environment=environment,
             verification=json.dumps({
                 "qa_schema_version": qa_report.get("schema_version"),
                 "qa_verdict": qa_report.get("verdict"),
                 "evidence_summary": qa_report.get("evidence_summary", {}),
+                "verification_playbook": qa_report.get("verification_playbook", []),
             }, sort_keys=True)
         )
 
         recorded["experience"] = {
             **experience,
-            "id": stored_experience.get("hash", ""),
+            "id": record_id(stored_experience),
         }
+        if recorded["plan_outcome"] is not None:
+            link(
+                recorded["experience"]["id"],
+                recorded["plan_outcome"]["id"],
+                "validated_by",
+                agent_id,
+                metadata={"qa_verdict": qa_report.get("verdict")},
+            )
     else:
         recorded["rejected"].append(
             "experience: task, files, summary, and solution must be meaningful"
@@ -90,6 +103,7 @@ def record_outcome(
             reflection,
             owner=agent_id,
             source_experience_id=source_experience_id,
+            environment=environment,
             verification={
                 "qa_schema_version": qa_report.get("schema_version"),
                 "qa_verdict": qa_report.get("verdict"),
@@ -99,7 +113,7 @@ def record_outcome(
 
         recorded["reflections"].append({
             "text": reflection,
-            "id": captured_reflection.get("hash", ""),
+            "id": record_id(captured_reflection),
             "source_experience_id": source_experience_id,
         })
     elif reflection:
@@ -117,7 +131,11 @@ def record_outcome(
     if valid_principles:
         capture_principles(
             valid_principles,
-            owner=agent_id
+            owner=agent_id,
+            source_experience_id=(
+                recorded["experience"]["id"] if recorded["experience"] else None
+            ),
+            environment=environment,
         )
 
         recorded["principles"] = valid_principles

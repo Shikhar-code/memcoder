@@ -54,6 +54,11 @@ def add_memory(memory):
 store.add_memory = add_memory
 sys.modules["memory.store"] = store
 
+links = []
+provenance = types.ModuleType("memory.provenance")
+provenance.link = lambda *args, **kwargs: links.append(args)
+sys.modules["memory.provenance"] = provenance
+
 from memory.skills import promote_skill, skill_definition
 
 
@@ -93,6 +98,11 @@ assert promoted["supporting_experience_count"] == 2
 assert promoted["skill"]["version"] == 1
 assert promoted["skill"]["supporting_principle_ids"] == ["principle-1"]
 assert stored[0]["type"] == "skill"
+assert links == [
+    ("experience-1", "skill-1", "supports", "skill-test"),
+    ("experience-2", "skill-1", "supports", "skill-test"),
+    ("principle-1", "skill-1", "supports", "skill-test"),
+]
 assert skill_definition(stored[0])["name"] == "Required field validation"
 assert skill_definition({"skill_definition": "{not JSON"}) is None
 assert skill_definition({"skill_definition": json.dumps({

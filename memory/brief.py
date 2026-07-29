@@ -21,6 +21,7 @@ def _estimate_tokens(value):
 
 def _card(memory, memory_type):
     health = memory.get("health") if memory_type == "skill" else None
+    proof = memory.get("proof") if isinstance(memory.get("proof"), dict) else {}
     return {
         "id": memory.get("id", ""),
         "type": memory_type,
@@ -32,6 +33,12 @@ def _card(memory, memory_type):
         "confidence": memory.get("retrieval_confidence"),
         # A full health audit belongs in the plan/detail API, not the brief.
         "health": health.get("status") if isinstance(health, dict) else None,
+        # The full proof belongs in detail mode. Keep only a tiny status signal
+        # here so the default cognition brief remains inside its token budget.
+        "proof_status": (
+            f"{proof.get('record_state', 'trusted')}/{proof.get('applicability', 'unknown')}"
+            if proof else None
+        ),
     }
 
 
@@ -40,6 +47,11 @@ def _recommended_next_action(results):
     experiences = results.get("experiences", [])
     mistakes = results.get("mistakes", [])
     principles = results.get("principles", [])
+    candidates = skills or experiences or mistakes or principles
+    if candidates:
+        verification = candidates[0].get("proof", {}).get("required_verification", [])
+        if verification:
+            return f"Use the retrieved guidance as a hypothesis; first verify: {verification[0]}"
     if skills:
         return "Use the retrieved skill as a procedure, then verify each required completion condition in the current project."
     if experiences:

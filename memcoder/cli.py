@@ -16,6 +16,22 @@ from api.cognition import (
     start_cognition,
     verify_cognition,
 )
+from memory.chroma_client import collection
+from memory.embedder import embed
+from memory.record_store import (
+    migrate_legacy_chroma,
+    migrate_legacy_workspace_storage,
+    rebuild_guidance_index,
+)
+from memory.provenance import backfill_existing_provenance
+from memory.storage_ops import (
+    create_backup,
+    export_snapshot,
+    restore_snapshot,
+    storage_status,
+)
+from memory.retention import apply_retention_preview, retention_preview
+from memory.contradictions import report_contradiction, resolve_contradiction
 
 
 def default_agy_config_path():
@@ -95,6 +111,62 @@ def main(argv=None):
         help="Override AGY's MCP config path."
     )
 
+    storage_command = subcommands.add_parser(
+        "storage",
+        help="Migrate or rebuild MemCoder's local durable memory storage.",
+    )
+    storage_subcommands = storage_command.add_subparsers(
+        dest="storage_command", required=True
+    )
+    storage_subcommands.add_parser(
+        "migrate",
+        help="Copy legacy Chroma-only guidance records into the durable local store.",
+    )
+    storage_subcommands.add_parser(
+        "rebuild-index",
+        help="Rebuild the semantic retrieval index from the durable local store.",
+    )
+    storage_subcommands.add_parser(
+        "status",
+        help="Show durable-record, provenance, and audit counts without changing data.",
+    )
+    storage_export = storage_subcommands.add_parser(
+        "export",
+        help="Write a portable JSON export of local MemCoder cognition.",
+    )
+    storage_export.add_argument("--output", required=True, type=Path)
+    storage_backup = storage_subcommands.add_parser(
+        "backup",
+        help="Create a timestamped portable backup archive.",
+    )
+    storage_backup.add_argument("--output", type=Path)
+    storage_restore = storage_subcommands.add_parser(
+        "restore",
+        help="Merge a portable backup, then rebuild the retrieval index.",
+    )
+    storage_restore.add_argument("--input", required=True, type=Path)
+    retention_preview_command = storage_subcommands.add_parser(
+        "retention-preview",
+        help="Preview safe exact-duplicate retention actions without changing memory.",
+    )
+    retention_preview_command.add_argument("--owner")
+    retention_apply = storage_subcommands.add_parser(
+        "retention-apply",
+        help="Apply a reviewed retention preview; records are never deleted.",
+    )
+    retention_apply.add_argument("--input", required=True, type=Path)
+    retention_apply.add_argument("--owner")
+    contradiction_report = storage_subcommands.add_parser(
+        "contradiction-report",
+        help="Record conflicting evidence and withhold both memories from automatic reuse.",
+    )
+    contradiction_report.add_argument("--input", required=True, type=Path)
+    contradiction_resolve = storage_subcommands.add_parser(
+        "contradiction-resolve",
+        help="Resolve reviewed conflicting evidence without deleting either record.",
+    )
+    contradiction_resolve.add_argument("--input", required=True, type=Path)
+
     for command, help_text in (
             ("start", "Retrieve a compact brief and bounded plan in one call."),
             ("plan-history", "Read owner-scoped audit outcomes for one plan."),
@@ -138,15 +210,92 @@ def main(argv=None):
         print("Restart AGY. No plugin install command is required.")
         return 0
 
+    if arguments.command == "storage":
+        if arguments.storage_command == "status":
+            emit_json({"storage": storage_status()})
+            return 0
+        if arguments.storage_command == "retention-preview":
+            emit_json({"retention": retention_preview(owner=arguments.owner)})
+            return 0
+        if arguments.storage_command == "retention-apply":
+            try:
+                preview = load_json_request(arguments.input)
+                if isinstance(preview.get("retention"), dict):
+                    preview = preview["retention"]
+                result = apply_retention_preview(preview, owner=arguments.owner)
+            except ValueError as error:
+                parser.error(str(error))
+            emit_json({"retention": result})
+            return 0
+        if arguments.storage_command in {"contradiction-report", "contradiction-resolve"}:
+            try:
+                request = load_json_request(arguments.input)
+                owner = require_text(request, "owner")
+                reason = require_text(request, "reason")
+                if arguments.storage_command == "contradiction-report":
+                    result = report_contradiction(
+                        require_text(request, "first_id"),
+                        require_text(request, "second_id"),
+                        owner=owner,
+                        reason=reason,
+                    )
+                else:
+                    result = resolve_contradiction(
+                        require_text(request, "winner_id"),
+                        require_text(request, "loser_id"),
+                        owner=owner,
+                        reason=reason,
+                    )
+            except ValueError as error:
+                parser.error(str(error))
+            emit_json({"contradiction": result})
+            return 0
+
+        migration = migrate_legacy_chroma(collection)
+        workspace_migration = migrate_legacy_workspace_storage()
+        provenance = backfill_existing_provenance()
+        if arguments.storage_command == "migrate":
+            emit_json({"storage": {
+                "migration": migration,
+                "workspace_migration": workspace_migration,
+                "provenance": provenance,
+            }})
+        elif arguments.storage_command == "rebuild-index":
+            result = rebuild_guidance_index(collection, embed)
+            emit_json({"storage": {
+                "migration": migration,
+                "workspace_migration": workspace_migration,
+                "provenance": provenance,
+                "index": result,
+            }})
+        elif arguments.storage_command == "export":
+            emit_json({"storage": {"export": export_snapshot(arguments.output)}})
+        elif arguments.storage_command == "backup":
+            emit_json({"storage": {"backup": create_backup(arguments.output)}})
+        else:
+            emit_json({"storage": {
+                "migration": migration,
+                "workspace_migration": workspace_migration,
+                "provenance": provenance,
+                "restore": restore_snapshot(arguments.input),
+            }})
+        return 0
+
     try:
         request = load_json_request(arguments.input)
+        environment = request.get("environment")
+        if environment is not None and not isinstance(environment, dict):
+            raise ValueError("Request field 'environment' must be an object when provided.")
 
         if arguments.command == "start":
-            result = start_cognition(
+            options = dict(
                 problem=require_text(request, "problem"),
                 agent_id=request.get("agent_id", "automation"),
                 include_shared=bool(request.get("include_shared", True)),
             )
+            if environment is not None:
+                options["environment"] = environment
+            result = start_cognition(**options)
         elif arguments.command == "plan-history":
             result = plan_history_cognition(
                 plan_id=require_text(request, "plan_id"),
@@ -161,19 +310,25 @@ def main(argv=None):
             runs = request.get("runs")
             result = evaluate_cognition(runs)
         elif arguments.command == "prepare":
-            result = prepare_cognition(
+            options = dict(
                 problem=require_text(request, "problem"),
                 agent_id=request.get("agent_id", "automation"),
                 include_shared=bool(request.get("include_shared", True)),
                 include_skills=bool(request.get("include_skills", True)),
                 detail_level=request.get("detail_level", "brief"),
             )
+            if environment is not None:
+                options["environment"] = environment
+            result = prepare_cognition(**options)
         elif arguments.command == "plan":
-            result = plan_cognition(
+            options = dict(
                 problem=require_text(request, "problem"),
                 agent_id=request.get("agent_id", "automation"),
                 include_shared=bool(request.get("include_shared", True)),
             )
+            if environment is not None:
+                options["environment"] = environment
+            result = plan_cognition(**options)
         elif arguments.command == "skill":
             result = promote_skill_cognition(
                 name=require_text(request, "name"),
@@ -208,6 +363,8 @@ def main(argv=None):
                 "principles": principles,
                 "evidence": evidence,
             }
+            if environment is not None:
+                outcome["environment"] = environment
             if arguments.command == "verify":
                 result = verify_cognition(**outcome)
             else:

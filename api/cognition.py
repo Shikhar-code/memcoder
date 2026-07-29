@@ -12,6 +12,11 @@ def compact_memory(memory):
         "confidence": memory.get("retrieval_confidence"),
         "source": memory.get("source", ""),
         "source_experience_id": memory.get("source_experience_id", ""),
+        "provenance": memory.get("provenance", []),
+        "record_state": memory.get("record_state", "trusted"),
+        "applicability": memory.get("applicability", "unknown"),
+        "validity_reason": memory.get("validity_reason", ""),
+        "proof": memory.get("proof", {}),
         "skill": _skill_definition(memory),
         "skill_health": memory.get("health") if memory.get("type") == "skill" else None,
     }
@@ -29,7 +34,8 @@ def prepare_cognition(
         agent_id="automation",
         include_shared=True,
         include_skills=True,
-        detail_level="brief"):
+        detail_level="brief",
+        environment=None):
     """Retrieve trusted guidance before an independent host starts work."""
     from memory.hierarchical_search import hierarchical_search
     from memory.brief import build_decision_brief
@@ -37,12 +43,14 @@ def prepare_cognition(
     if detail_level not in {"brief", "full"}:
         raise ValueError("detail_level must be 'brief' or 'full'.")
 
-    results = hierarchical_search(
-        problem,
-        agent_id=agent_id,
-        include_shared=include_shared,
-        include_skills=include_skills,
-    )
+    retrieval_options = {
+        "agent_id": agent_id,
+        "include_shared": include_shared,
+        "include_skills": include_skills,
+    }
+    if environment is not None:
+        retrieval_options["environment"] = environment
+    results = hierarchical_search(problem, **retrieval_options)
 
     response = {
         "problem": problem,
@@ -69,17 +77,16 @@ def prepare_cognition(
     return response
 
 
-def plan_cognition(problem, agent_id="automation", include_shared=True):
+def plan_cognition(problem, agent_id="automation", include_shared=True, environment=None):
     """Return one bounded plan grounded in retrieved QA-backed skills when available."""
     from memory.hierarchical_search import hierarchical_search
     from memory.brief import build_decision_brief
     from memory.plans import build_action_plan
 
-    results = hierarchical_search(
-        problem,
-        agent_id=agent_id,
-        include_shared=include_shared,
-    )
+    retrieval_options = {"agent_id": agent_id, "include_shared": include_shared}
+    if environment is not None:
+        retrieval_options["environment"] = environment
+    results = hierarchical_search(problem, **retrieval_options)
     return {
         "problem": problem,
         "include_shared": include_shared,
@@ -95,7 +102,7 @@ def plan_cognition(problem, agent_id="automation", include_shared=True):
     }
 
 
-def start_cognition(problem, agent_id="automation", include_shared=True):
+def start_cognition(problem, agent_id="automation", include_shared=True, environment=None):
     """Return the compact brief and bounded plan in one retrieval operation.
 
     This is the default host entry point for automated integrations. It avoids
@@ -106,11 +113,10 @@ def start_cognition(problem, agent_id="automation", include_shared=True):
     from memory.brief import build_decision_brief
     from memory.plans import build_action_plan
 
-    results = hierarchical_search(
-        problem,
-        agent_id=agent_id,
-        include_shared=include_shared,
-    )
+    retrieval_options = {"agent_id": agent_id, "include_shared": include_shared}
+    if environment is not None:
+        retrieval_options["environment"] = environment
+    results = hierarchical_search(problem, **retrieval_options)
     return {
         "problem": problem,
         "include_shared": include_shared,
@@ -148,6 +154,77 @@ def skill_health_cognition(skill_id, agent_id="automation"):
     return skill_health(skill_id=skill_id, agent_id=agent_id)
 
 
+def update_memory_validity_cognition(
+        record_id,
+        state,
+        agent_id="automation",
+        reason=None,
+        environment=None):
+    """Set lifecycle validity for one owner-scoped durable memory record."""
+    from memory.validity import set_record_validity
+
+    updated = set_record_validity(
+        record_id=record_id,
+        state=state,
+        owner=agent_id,
+        reason=reason,
+        environment=environment,
+    )
+    return {
+        "id": updated["record_id"],
+        "record_state": updated["record_state"],
+        "revision": updated["revision"],
+        "environment": updated.get("environment", ""),
+        "validity_reason": updated.get("validity_reason", ""),
+    }
+
+
+def retention_preview_cognition(agent_id=None, environment=None):
+    """Preview exact-duplicate retention actions without changing memory."""
+    from memory.retention import retention_preview
+
+    return retention_preview(owner=agent_id, environment=environment)
+
+
+def apply_retention_cognition(preview, agent_id=None):
+    """Apply an explicitly reviewed, evidence-preserving retention preview."""
+    from memory.retention import apply_retention_preview
+
+    return apply_retention_preview(preview, owner=agent_id)
+
+
+def trace_memory_cognition(record_id, agent_id=None):
+    """Inspect a record's direct provenance edges and current durable state."""
+    from memory.provenance import trace
+    from memory.record_store import get_record
+
+    record = get_record(record_id)
+    if record is None:
+        raise ValueError(f"Memory record was not found: {record_id}")
+    if agent_id is not None and record.get("owner") != agent_id:
+        raise ValueError("Memory record is not owned by this agent.")
+    return {
+        "id": record["record_id"],
+        "record_state": record.get("record_state", "trusted"),
+        "revision": record.get("revision", 1),
+        "provenance": trace(record_id, owner=agent_id),
+    }
+
+
+def report_contradiction_cognition(first_id, second_id, reason, agent_id="automation"):
+    """Record conflicting evidence and withhold both memories from automatic reuse."""
+    from memory.contradictions import report_contradiction
+
+    return report_contradiction(first_id, second_id, owner=agent_id, reason=reason)
+
+
+def resolve_contradiction_cognition(winner_id, loser_id, reason, agent_id="automation"):
+    """Resolve a reviewed contradiction without deleting either original record."""
+    from memory.contradictions import resolve_contradiction
+
+    return resolve_contradiction(winner_id, loser_id, owner=agent_id, reason=reason)
+
+
 def evaluate_cognition(runs):
     """Summarize explicit baseline and MemCoder-assisted host evaluation runs."""
     from memory.evaluation import evaluate_runs
@@ -165,7 +242,8 @@ def record_cognition(
         evidence=None,
         plan_id=None,
         applied_skill_id=None,
-        agent_id="automation"):
+        agent_id="automation",
+        environment=None):
     """QA an outcome and persist it only when the evidence is admitted."""
     from memory.record_outcome import record_outcome
     from memory.qa import evaluate_outcome_qa
@@ -191,6 +269,7 @@ def record_cognition(
         qa_report=qa,
         plan_id=plan_id,
         applied_skill_id=applied_skill_id,
+        environment=environment,
     )
 
     return {

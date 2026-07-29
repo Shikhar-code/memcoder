@@ -1,27 +1,20 @@
 """Plan outcomes are durable audits and never become retrieval guidance."""
 
 import importlib
-import json
+import os
 import sys
-import types
+import tempfile
 from pathlib import Path
 
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-captures = []
-capture = types.ModuleType("memory.capture")
-
-
-def capture_memory(**kwargs):
-    captures.append(kwargs)
-    return {"hash": f"plan-outcome-{len(captures)}"}
-
-
-capture.capture_memory = capture_memory
-sys.modules["memory.capture"] = capture
 sys.modules.pop("memory.plan_outcomes", None)
 outcomes = importlib.import_module("memory.plan_outcomes")
+
+audit_path = tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl").name
+os.unlink(audit_path)
+os.environ["MEMCODER_AUDIT_PATH"] = audit_path
 
 passed = outcomes.record_plan_outcome(
     plan_id="plan_1234567890abcdef1234",
@@ -31,9 +24,7 @@ passed = outcomes.record_plan_outcome(
     applied_skill_id="skill-1",
 )
 assert passed["status"] == "succeeded"
-assert captures[0]["memory_type"] == "plan_outcome"
-assert captures[0]["metadata"]["plan_status"] == "succeeded"
-assert json.loads(captures[0]["verification"])["qa_verdict"] == "approved"
+assert passed["id"].startswith("audit_")
 
 failed = outcomes.record_plan_outcome(
     plan_id="plan_1234567890abcdef1234",
@@ -42,7 +33,6 @@ failed = outcomes.record_plan_outcome(
     agent_id="plan-test",
 )
 assert failed["status"] == "failed"
-assert captures[1]["metadata"]["plan_status"] == "failed"
 
 unverified = outcomes.record_plan_outcome(
     plan_id="plan_1234567890abcdef1234",
@@ -51,40 +41,10 @@ unverified = outcomes.record_plan_outcome(
     agent_id="plan-test",
 )
 assert unverified["status"] == "unverified"
-
-history_calls = {}
-
-
-class FakeCollection:
-    def get(self, where, include):
-        history_calls.update(where=where, include=include)
-        return {
-            "ids": ["plan-outcome-old", "plan-outcome-new"],
-            "metadatas": [
-                {
-                    "plan_id": "plan_1234567890abcdef1234",
-                    "plan_status": "failed",
-                    "applied_skill_id": "skill-1",
-                    "timestamp": "2026-01-01T00:00:00",
-                    "verification": json.dumps({"qa_verdict": "rejected"}),
-                },
-                {
-                    "plan_id": "plan_1234567890abcdef1234",
-                    "plan_status": "succeeded",
-                    "applied_skill_id": "skill-1",
-                    "timestamp": "2026-01-02T00:00:00",
-                    "verification": json.dumps({"qa_verdict": "approved"}),
-                },
-            ],
-        }
-
-
-chroma = types.ModuleType("memory.chroma_client")
-chroma.collection = FakeCollection()
-sys.modules["memory.chroma_client"] = chroma
 history = outcomes.plan_outcome_history("plan_1234567890abcdef1234", agent_id="plan-test")
-assert [entry["status"] for entry in history] == ["succeeded", "failed"]
-assert history_calls["include"] == ["metadatas"]
+assert {entry["status"] for entry in history} == {"unverified", "failed", "succeeded"}
+assert all(entry["id"].startswith("audit_") for entry in history)
+assert all("plan_outcome" not in entry for entry in history)
 
 try:
     outcomes.record_plan_outcome("wrong", "task", {"verdict": "approved"})
