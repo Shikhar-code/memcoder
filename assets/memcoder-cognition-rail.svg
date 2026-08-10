@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">The MemCoder cognition rail</title>
+  <desc id="desc">A task moves through attention, trusted retrieval, host verification, and evidence-backed learning.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#08111f"/>
+      <stop offset="1" stop-color="#12142f"/>
+    </linearGradient>
+    <linearGradient id="rail" x1="110" y1="0" x2="1090" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72a7ff"/>
+      <stop offset=".5" stop-color="#b89cff"/>
+      <stop offset="1" stop-color="#61e6bd"/>
+    </linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      text { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+      @keyframes breathe { 0%,100% { opacity:.35 } 50% { opacity:1 } }
+      .breathe { animation: breathe 2.8s ease-in-out infinite; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="320" rx="24" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="318" rx="23" fill="none" stroke="#9db5e4" stroke-opacity=".16"/>
+  <text x="64" y="58" fill="#f2f5ff" font-size="24" font-weight="750">The cognition rail</text>
+  <text x="64" y="84" fill="#7f92b9" font-size="13" letter-spacing=".7">COMPACT WHEN USEFUL / SILENT WHEN EVIDENCE IS WEAK</text>
+
+  <path d="M112 173H1088" stroke="#31415f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M112 173H1088" stroke="url(#rail)" stroke-opacity=".45" stroke-width="2" stroke-dasharray="7 10"/>
+
+  <g transform="translate(112 173)">
+    <circle r="42" fill="#132440" stroke="#72a7ff" stroke-width="2"/>
+    <path d="M-13 0H13M0-13V13" stroke="#72a7ff" stroke-width="2.5" stroke-linecap="round"/>
+    <text y="67" text-anchor="middle" fill="#dce8ff" font-size="12" font-weight="700">TASK</text>
+    <text y="87" text-anchor="middle" fill="#7184aa" font-size="10">host request</text>
+  </g>
+  <g transform="translate(350 173)">
+    <circle r="42" fill="#15213f" stroke="#8c9fff" stroke-width="2"/>
+    <path d="M-15 2Q0-14 15 2Q0 17-15 2Z" fill="none" stroke="#9eabff" stroke-width="2"/>
+    <circle r="5" fill="#9eabff"/>
+    <text y="67" text-anchor="middle" fill="#e4e8ff" font-size="12" font-weight="700">ATTEND</text>
+    <text y="87" text-anchor="middle" fill="#7888ad" font-size="10">none / risk / brief / plan</text>
+  </g>
+  <g transform="translate(600 173)">
+    <circle r="42" fill="#201b44" stroke="#b89cff" stroke-width="2"/>
+    <path d="M-15-10H15M-15 0H9M-15 10H4" stroke="#c8b5ff" stroke-width="2.5" stroke-linecap="round"/>
+    <text y="67" text-anchor="middle" fill="#eee8ff" font-size="12" font-weight="700">RETRIEVE</text>
+    <text y="87" text-anchor="middle" fill="#8f82b1" font-size="10">trusted evidence only</text>
+  </g>
+  <g transform="translate(850 173)">
+    <circle r="42" fill="#172541" stroke="#7fabff" stroke-width="2"/>
+    <path d="M-16 0L-5 11L17-13" fill="none" stroke="#7fabff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text y="67" text-anchor="middle" fill="#dce9ff" font-size="12" font-weight="700">VERIFY</text>
+    <text y="87" text-anchor="middle" fill="#7386ad" font-size="10">host proof gate</text>
+  </g>
+  <g transform="translate(1088 173)">
+    <circle class="breathe" r="49" fill="none" stroke="#61e6bd" stroke-opacity=".35"/>
+    <circle r="42" fill="#123b38" stroke="#61e6bd" stroke-width="2"/>
+    <path d="M-15 10V-8M0 10V-1M15 10V-16" stroke="#72efc7" stroke-width="3" stroke-linecap="round"/>
+    <text y="67" text-anchor="middle" fill="#d8fff2" font-size="12" font-weight="700">COMPOUND</text>
+    <text y="87" text-anchor="middle" fill="#75a99b" font-size="10">experience to skill</text>
+  </g>
+
+  <circle r="5" fill="#72a7ff" filter="url(#glow)"><animateMotion dur="5.8s" repeatCount="indefinite" path="M112 173H1088"/></circle>
+  <circle r="4" fill="#b89cff" filter="url(#glow)"><animateMotion dur="5.8s" begin="-2.9s" repeatCount="indefinite" path="M112 173H1088"/></circle>
+
+  <rect x="423" y="108" width="354" height="24" rx="12" fill="#111a31" stroke="#526689" stroke-opacity=".45"/>
+  <text x="600" y="125" text-anchor="middle" fill="#8fa2c8" font-size="10" font-weight="700" letter-spacing="1.2">RELEVANCE / VALIDITY / OWNERSHIP / PROVENANCE</text>
+  <text x="600" y="296" text-anchor="middle" fill="#66799e" font-size="11" letter-spacing="1">NO PASSING EVIDENCE = NO DURABLE LEARNING</text>
+</svg>
