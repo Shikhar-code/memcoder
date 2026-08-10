@@ -8,15 +8,9 @@ prune tests
 prune testing
 prune build
 prune dist
-prune cache
-prune client
-prune core
-prune eval
 prune examples
-prune extra
-prune server
-prune session
 prune scripts
+prune codex-marketplace
 
 global-exclude __pycache__
 global-exclude *.py[cod]

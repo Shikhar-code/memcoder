@@ -1,5 +1,4 @@
 chromadb
-sentence-transformers
+sentence-transformers<5
 numpy
-fastapi
 fastmcp

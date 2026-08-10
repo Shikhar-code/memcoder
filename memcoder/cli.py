@@ -6,7 +6,9 @@ import sys
 from pathlib import Path
 
 from api.cognition import (
+    checkpoint_cognition,
     evaluate_cognition,
+    intervene_cognition,
     plan_history_cognition,
     plan_cognition,
     prepare_cognition,
@@ -14,10 +16,10 @@ from api.cognition import (
     record_cognition,
     skill_health_cognition,
     start_cognition,
+    task_state_cognition,
     verify_cognition,
 )
 from memory.chroma_client import collection
-from memory.embedder import embed
 from memory.record_store import (
     migrate_legacy_chroma,
     migrate_legacy_workspace_storage,
@@ -168,6 +170,9 @@ def main(argv=None):
     contradiction_resolve.add_argument("--input", required=True, type=Path)
 
     for command, help_text in (
+            ("intervene", "Return the smallest useful cognition packet for a task."),
+            ("checkpoint", "Save bounded working state without creating memory."),
+            ("task-state", "Read the latest owner-scoped working checkpoint."),
             ("start", "Retrieve a compact brief and bounded plan in one call."),
             ("plan-history", "Read owner-scoped audit outcomes for one plan."),
             ("skill-health", "Read owner-scoped health for one promoted skill."),
@@ -261,6 +266,7 @@ def main(argv=None):
                 "provenance": provenance,
             }})
         elif arguments.storage_command == "rebuild-index":
+            from memory.embedder import embed
             result = rebuild_guidance_index(collection, embed)
             emit_json({"storage": {
                 "migration": migration,
@@ -287,7 +293,32 @@ def main(argv=None):
         if environment is not None and not isinstance(environment, dict):
             raise ValueError("Request field 'environment' must be an object when provided.")
 
-        if arguments.command == "start":
+        if arguments.command == "intervene":
+            options = dict(
+                problem=require_text(request, "problem"),
+                agent_id=request.get("agent_id", "automation"),
+                include_shared=bool(request.get("include_shared", True)),
+                token_budget=request.get("token_budget", 450),
+            )
+            if environment is not None:
+                options["environment"] = environment
+            result = intervene_cognition(**options)
+        elif arguments.command == "checkpoint":
+            update = request.get("update")
+            if not isinstance(update, dict):
+                raise ValueError("Request field 'update' must be an object.")
+            result = checkpoint_cognition(
+                task_id=require_text(request, "task_id"),
+                update=update,
+                agent_id=request.get("agent_id", "automation"),
+                prediction_result=request.get("prediction_result"),
+            )
+        elif arguments.command == "task-state":
+            result = task_state_cognition(
+                task_id=require_text(request, "task_id"),
+                agent_id=request.get("agent_id", "automation"),
+            )
+        elif arguments.command == "start":
             options = dict(
                 problem=require_text(request, "problem"),
                 agent_id=request.get("agent_id", "automation"),

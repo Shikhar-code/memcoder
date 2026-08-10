@@ -2,6 +2,28 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.2.2b1 — Beta 2.2
+
+### Added
+
+- Added the first provider-free cognitive runtime with bounded intervention,
+  Transfer Delta, belief separation, falsifiable predictions, reuse checks, and
+  owner-scoped task checkpoints.
+- Added a local Codex desktop plugin bundle, plus an environment-binding setup
+  script, that invokes MemCoder implicitly for substantive development work.
+
+### Changed
+
+- Rebuilt the README around a clearer product story, host-specific onboarding,
+  the cognitive runtime, trust boundaries, and current evidence limits.
+
+### Removed
+
+- Retired the disconnected Alpha agent/client/server stack, Ollama workflows,
+  exploratory LLM extraction utilities, and obsolete Beta-1 proof fixtures.
+- Replaced the legacy `MemCoderAgent` SDK export with the current provider-free
+  cognition API.
+
 ## 0.2.0b1 — Beta 2 release candidate
 
 ### Added
@@ -30,7 +52,6 @@ All notable changes to MemCoder are documented here.
 
 - The provider-free MCP and CLI workflows do not require Ollama, CUDA, an API
   key, or a local generation server.
-- Legacy Ollama helpers remain optional through `memcoder[ollama]`.
 
 ### Evidence boundary
 

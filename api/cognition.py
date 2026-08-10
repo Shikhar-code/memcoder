@@ -136,6 +136,55 @@ def start_cognition(problem, agent_id="automation", include_shared=True, environ
     }
 
 
+def intervene_cognition(
+        problem,
+        agent_id="automation",
+        include_shared=True,
+        environment=None,
+        token_budget=450):
+    """Return the smallest useful, falsifiable cognition intervention."""
+    from memory.hierarchical_search import hierarchical_search
+    from memory.runtime import build_cognitive_packet
+
+    retrieval_options = {"agent_id": agent_id, "include_shared": include_shared}
+    if environment is not None:
+        retrieval_options["environment"] = environment
+    results = hierarchical_search(problem, **retrieval_options)
+    return build_cognitive_packet(
+        problem,
+        results,
+        environment=environment,
+        token_budget=token_budget,
+    )
+
+
+def checkpoint_cognition(
+        task_id,
+        update,
+        agent_id="automation",
+        prediction_result=None):
+    """Persist bounded working state without adding semantic guidance."""
+    from memory.runtime import checkpoint_task_state
+
+    return checkpoint_task_state(
+        task_id=task_id,
+        owner=agent_id,
+        update=update,
+        prediction_result=prediction_result,
+    )
+
+
+def task_state_cognition(task_id, agent_id="automation"):
+    """Read the latest owner-scoped working-memory checkpoint."""
+    from memory.runtime import read_task_state
+
+    return {
+        "task_id": task_id,
+        "agent_id": agent_id,
+        "checkpoint": read_task_state(task_id, agent_id),
+    }
+
+
 def plan_history_cognition(plan_id, agent_id="automation"):
     """Return read-only, owner-scoped audit history for a generated plan."""
     from memory.plan_outcomes import plan_outcome_history

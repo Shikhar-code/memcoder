@@ -6,6 +6,8 @@ from fastmcp import FastMCP
 
 from memory.markdown_import import import_markdown, import_markdown_file
 from api.cognition import (
+    checkpoint_cognition,
+    intervene_cognition,
     plan_cognition,
     plan_history_cognition,
     retention_preview_cognition,
@@ -19,12 +21,62 @@ from api.cognition import (
     record_cognition,
     skill_health_cognition,
     start_cognition,
+    task_state_cognition,
     update_memory_validity_cognition,
     verify_cognition,
 )
 
 
 mcp = FastMCP("memcoder")
+
+
+@mcp.tool()
+def memcoder_intervene(
+        problem: str,
+        agent_id: str = "codex",
+        include_shared: bool = True,
+        environment: dict | None = None,
+        token_budget: int = 450) -> str:
+    """Return the smallest useful cognition packet for the current task."""
+
+    return json.dumps(
+        intervene_cognition(
+            problem=problem,
+            agent_id=agent_id,
+            include_shared=include_shared,
+            environment=environment,
+            token_budget=token_budget,
+        ),
+        indent=2,
+    )
+
+
+@mcp.tool()
+def memcoder_checkpoint(
+        task_id: str,
+        update: dict,
+        agent_id: str = "codex",
+        prediction_result: dict | None = None) -> str:
+    """Save bounded task state without creating semantic memory."""
+
+    return json.dumps(
+        checkpoint_cognition(
+            task_id=task_id,
+            update=update,
+            agent_id=agent_id,
+            prediction_result=prediction_result,
+        ),
+        indent=2,
+    )
+
+
+@mcp.tool()
+def memcoder_task_state(task_id: str, agent_id: str = "codex") -> str:
+    """Read the latest owner-scoped task checkpoint."""
+
+    return json.dumps(
+        task_state_cognition(task_id=task_id, agent_id=agent_id), indent=2
+    )
 
 
 @mcp.tool()

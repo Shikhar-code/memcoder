@@ -1,6 +1,6 @@
 # Beta 2 release checklist
 
-This checklist prepares the `0.2.0b1` Beta 2 pre-release. It is intentionally
+This checklist prepares the next Beta 2 pre-release. It is intentionally
 stricter than a source-tree test pass: users install the wheel and configure a
 host separately.
 
@@ -8,12 +8,12 @@ host separately.
 
 - [x] QA-gated Experience admission, reflection provenance, compact briefs,
   Skills, planning, plan audits, Skill health, and evaluation APIs implemented.
-- [x] Provider-free local test suite passed (24 tests; the legacy Alpha test is
-  excluded because it depends on external embedding-model availability).
+- [x] Provider-free regression suite passed without an external model provider.
 - [x] Clean source and wheel archive contents verified: release archives omit
   tests, controlled runs, local databases, build output, and auxiliary folders.
-- [x] `0.2.0b1` metadata and release notes prepared.
-- [x] README updated with installation, CLI, AGY, privacy, and evidence guidance.
+- [x] Package metadata and release notes prepared.
+- [x] README updated with Codex, AGY, CLI, Python, privacy, architecture, and
+  evidence guidance.
 
 ## Before committing
 
@@ -29,6 +29,8 @@ host separately.
 
 ## Before publishing to PyPI
 
+- [ ] Remove any previous `build/`, `dist/`, and `memcoder.egg-info/` output so
+  deleted packages cannot survive in a new wheel through stale build state.
 - [ ] Run `python -m build --no-isolation`.
 - [ ] In a new virtual environment, install the generated wheel and run
   `python -m memcoder --help`.
@@ -39,7 +41,7 @@ host separately.
 
 ## Recommended release notes summary
 
-> MemCoder 0.2.0b1 adds evidence-gated learning, compact cognition briefs,
-> reusable Skills, bounded plans, plan audits, Skill health, and explicit
-> evaluation reporting. It remains a provider-independent, local-first
-> cognition layer: the host model still solves and verifies tasks.
+> MemCoder's next Beta 2 release adds evidence-gated learning, compact cognition
+> briefs, reusable Skills, bounded plans, plan audits, Skill health, a
+> provider-free cognitive runtime, and local Codex integration. The host model
+> still solves and verifies tasks.

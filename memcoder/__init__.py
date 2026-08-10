@@ -1,23 +1,19 @@
-"""Public MemCoder SDK exports, loaded only when an SDK symbol is requested."""
+"""Lazy public exports for MemCoder's provider-free cognition API."""
 
 __all__ = [
-    "MemCoderAgent",
-    "banner",
-    "show",
-    "show_results",
-    "show_answer",
-    "show_trace"
+    "checkpoint_cognition",
+    "intervene_cognition",
+    "plan_cognition",
+    "prepare_cognition",
+    "record_cognition",
+    "start_cognition",
+    "task_state_cognition",
+    "verify_cognition",
 ]
 
 
 def __getattr__(name):
-    """Avoid loading retrieval dependencies for CLI-only automation hosts."""
-    if name == "MemCoderAgent":
-        from client.agent import MemCoderAgent
-        return MemCoderAgent
-
-    if name in {"banner", "show", "show_results", "show_answer", "show_trace"}:
-        from client import display
-        return getattr(display, name)
-
+    if name in __all__:
+        from api import cognition
+        return getattr(cognition, name)
     raise AttributeError(f"module 'memcoder' has no attribute {name!r}")

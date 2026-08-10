@@ -106,6 +106,44 @@ sys.modules["memory.markdown_import"] = markdown_import
 sys.modules.pop("adapters.mcp.server", None)
 server = importlib.import_module("adapters.mcp.server")
 
+intervene_calls = {}
+server.intervene_cognition = lambda **kwargs: intervene_calls.update(kwargs) or {
+    "intervention": {"mode": "none"}, "budget": {"within_budget": True}
+}
+intervention = json.loads(server.memcoder_intervene(
+    "Investigate a required field failure.",
+    agent_id="codex",
+    include_shared=False,
+    token_budget=300,
+))
+assert intervention["intervention"]["mode"] == "none"
+assert intervene_calls == {
+    "problem": "Investigate a required field failure.",
+    "agent_id": "codex",
+    "include_shared": False,
+    "environment": None,
+    "token_budget": 300,
+}
+
+checkpoint_calls = {}
+server.checkpoint_cognition = lambda **kwargs: checkpoint_calls.update(kwargs) or {
+    "id": "checkpoint-1"
+}
+checkpoint = json.loads(server.memcoder_checkpoint(
+    "task-1", {"facts": ["The test fails."]}, agent_id="codex"
+))
+assert checkpoint["id"] == "checkpoint-1"
+assert checkpoint_calls["task_id"] == "task-1"
+assert checkpoint_calls["update"]["facts"] == ["The test fails."]
+
+state_calls = {}
+server.task_state_cognition = lambda **kwargs: state_calls.update(kwargs) or {
+    "checkpoint": None
+}
+state = json.loads(server.memcoder_task_state("task-1", agent_id="codex"))
+assert state["checkpoint"] is None
+assert state_calls == {"task_id": "task-1", "agent_id": "codex"}
+
 start_calls = {}
 server.start_cognition = lambda **kwargs: start_calls.update(kwargs) or {
     "brief": {}, "plan": {"mode": "foundation", "steps": []}

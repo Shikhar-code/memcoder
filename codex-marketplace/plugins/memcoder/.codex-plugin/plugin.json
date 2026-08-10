@@ -1,0 +1,25 @@
+{
+  "name": "memcoder",
+  "version": "0.2.2-beta.1",
+  "description": "Provider-free persistent cognition for Codex development tasks.",
+  "author": {
+    "name": "Shikhar-code"
+  },
+  "repository": "https://github.com/Shikhar-code/memcoder",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "MemCoder",
+    "shortDescription": "Verified cognition for Codex development.",
+    "longDescription": "MemCoder retrieves bounded, confidence-gated guidance before work, preserves task checkpoints, and admits learning only after verification.",
+    "developerName": "Shikhar-code",
+    "category": "Productivity",
+    "capabilities": [
+      "Persistent cognition",
+      "Verified memory",
+      "Task checkpoints"
+    ],
+    "defaultPrompt": "Use MemCoder cognition while completing this development task."
+  },
+  "mcpServers": "./.mcp.json"
+}

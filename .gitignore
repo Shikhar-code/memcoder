@@ -18,6 +18,7 @@ venv/
 
 .vscode/
 .idea/
+.serena/
 
 # OS
 
@@ -58,6 +59,12 @@ mcp_start.log
 # Local evaluation and scratch material
 
 .agents/
+.adhyaapak-pdf-review/
+.video-review/
+.video_review_math/
+.workflow-video-review/
+_video_review_*/
+_review_*.jpg
 data/
 memories.json
 main.py
@@ -74,26 +81,14 @@ setup_eval.py
 import_experiences.py
 memory/import_beta1_memories.py
 memory/trace_memory_builder.py
-scripts/build_trace_summary.py
-scripts/build_training_examples.py
-scripts/extract_experience.py
-scripts/extract_trace.py
-scripts/generate_memory_candidates.py
-
-# Superseded exploratory fixtures; retain locally, not in the Beta-1 repository
-testing/ambiguous_registration/
-testing/auto_learning_proof/
-testing/beta1_proof/
-testing/beta1_final_proof/
-testing/multi_file_duplicate/
-testing/remotion_duplicate_id/
-testing/remotion_duration/
-testing/web_bearer/
-testing/web_jwt/
 
 # Local Beta-2 evaluation copies and agent-run output
 testing/beta2_controlled_runs/
 testing/beta2_evaluation_runs/
+
+# Retained local Beta-1 proof evidence (not part of the current package)
+testing/beta1_final_proof/
+testing/beta1_proof/
 
 # Temporary
 

@@ -1,0 +1,6 @@
+interface:
+  display_name: "MemCoder Cognition"
+  short_description: "Use verified memory before and after coding"
+  default_prompt: "Use $use-memcoder to guide this task with verified MemCoder cognition."
+policy:
+  allow_implicit_invocation: true

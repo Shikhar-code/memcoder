@@ -218,6 +218,21 @@ place.
 **Primary goal:** make MemCoder an invisible, token-aware catalyst in compatible
 agent workflows, once its memory substrate is safe enough to automate.
 
+### Implementation status — first vertical slice complete
+
+- `memcoder_intervene` now compiles a bounded Cognitive Packet and selects
+  `none`, `risk`, `brief`, or `plan` without a model provider.
+- Packets include task archetype, belief separation, Transfer Delta, a
+  prediction/falsification contract, a pre-edit reuse check, and required proof.
+- Owner-scoped task checkpoints persist bounded working state outside semantic
+  guidance memory.
+- The Python API, CLI, and MCP expose the same runtime contract.
+- A validated Codex desktop plugin bundles the MCP server and an implicitly
+  invoked cognition workflow Skill for local dogfooding.
+
+The phase is not release-complete until diverse real-project evaluations show
+measurable benefit without correctness or token regressions.
+
 ```text
 Task begins
 → should MemCoder intervene?
@@ -250,10 +265,9 @@ Task begins
 - **Task archetypes:** give validation, integration, rendering, transformation,
   dependency, security, and documentation tasks different retrieval and
   verification policies.
-- **Codex plugin:** intentionally deferred until the end of this phase, after
-  the runtime is proven through MCP/SDK hosts. It will bundle MemCoder MCP,
-  a cognition workflow Skill, and trusted lifecycle hooks for internal
-  dogfooding and a later host-native release.
+- **Codex plugin:** the local dogfooding bundle is complete. Published
+  marketplace distribution and deeper host-native lifecycle hooks remain gated
+  on real-project evaluation of the cognitive runtime.
 
 ### Release gate
 

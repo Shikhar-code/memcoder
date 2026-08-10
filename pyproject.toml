@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memcoder"
-version = "0.2.0b1"
+version = "0.2.2b1"
 description = "Provider-independent persistent cognition for AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,24 +36,25 @@ classifiers = [
 
 dependencies = [
     "chromadb",
-    "sentence-transformers",
+    "sentence-transformers<5",
     "numpy",
-    "fastapi",
     "fastmcp"
 ]
 
 [project.scripts]
 memcoder = "memcoder.cli:main"
 
-[project.optional-dependencies]
-ollama = [
-    "ollama"
-]
+[project.urls]
+Homepage = "https://github.com/Shikhar-code/memcoder"
+Repository = "https://github.com/Shikhar-code/memcoder"
+Documentation = "https://github.com/Shikhar-code/memcoder#readme"
+Issues = "https://github.com/Shikhar-code/memcoder/issues"
+Changelog = "https://github.com/Shikhar-code/memcoder/blob/main/CHANGELOG.md"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["memcoder*", "memory*", "api*", "adapters*", "agent*", "context*", "llm*"]
-exclude = ["tests*", "testing*", "build*", "dist*", "cache*", "client*", "core*", "eval*", "examples*", "extra*", "server*", "session*"]
+include = ["memcoder*", "memory*", "api*", "adapters*"]
+exclude = ["tests*", "testing*", "build*", "dist*", "examples*", "scripts*"]
