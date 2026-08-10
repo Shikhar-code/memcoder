@@ -1,6 +1,6 @@
 {
   "name": "memcoder",
-  "version": "0.2.2-beta.1",
+  "version": "0.2.3-beta.1+codex.20260810185018",
   "description": "Provider-free persistent cognition for Codex development tasks.",
   "author": {
     "name": "Shikhar-code"
@@ -11,15 +11,19 @@
   "interface": {
     "displayName": "MemCoder",
     "shortDescription": "Verified cognition for Codex development.",
-    "longDescription": "MemCoder retrieves bounded, confidence-gated guidance before work, preserves task checkpoints, and admits learning only after verification.",
+    "longDescription": "MemCoder retrieves decision-useful verified guidance, preserves project decisions across sessions, and admits learning only after verification.",
     "developerName": "Shikhar-code",
     "category": "Productivity",
     "capabilities": [
       "Persistent cognition",
       "Verified memory",
-      "Task checkpoints"
+      "Utility-gated retrieval",
+      "Project resurrection",
+      "Verified handoff"
     ],
-    "defaultPrompt": "Use MemCoder cognition while completing this development task."
+    "defaultPrompt": [
+      "Use MemCoder cognition while completing this development task."
+    ]
   },
   "mcpServers": "./.mcp.json"
 }

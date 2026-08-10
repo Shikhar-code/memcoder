@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "memcoder"
-version = "0.2.2b1"
-description = "Provider-independent persistent cognition for AI agents."
+version = "0.2.3b1"
+description = "Local, provider-independent cognition for AI agents with verified memory and project continuity."
 readme = "README.md"
 requires-python = ">=3.10"
 
@@ -17,9 +17,14 @@ license = "MIT"
 
 keywords = [
     "ai",
+    "cognition",
     "llm",
     "memory",
+    "agent-memory",
     "agent",
+    "mcp",
+    "planning",
+    "quality-assurance",
     "rag",
     "semantic-search",
     "vector-database",

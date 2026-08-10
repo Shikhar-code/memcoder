@@ -10,6 +10,8 @@ def compact_memory(memory):
         "files": memory.get("files", []),
         "distance": memory.get("score"),
         "confidence": memory.get("retrieval_confidence"),
+        "utility_score": memory.get("utility_score"),
+        "decision_overlap": memory.get("decision_overlap", 0),
         "source": memory.get("source", ""),
         "source_experience_id": memory.get("source_experience_id", ""),
         "provenance": memory.get("provenance", []),
@@ -150,12 +152,96 @@ def intervene_cognition(
     if environment is not None:
         retrieval_options["environment"] = environment
     results = hierarchical_search(problem, **retrieval_options)
-    return build_cognitive_packet(
+    packet = build_cognitive_packet(
         problem,
         results,
         environment=environment,
         token_budget=token_budget,
     )
+    from memory.utility import save_receipt
+    save_receipt(packet["receipt"], agent_id, environment=environment)
+    return packet
+
+
+def utility_feedback_cognition(
+        intervention_id,
+        rating,
+        agent_id="automation",
+        reason=None,
+        action=None,
+        outcome=None,
+        mute=False,
+        applicability_correction=None):
+    """Record whether an exact intervention helped without changing memory validity."""
+    from memory.utility import record_feedback
+    return record_feedback(
+        intervention_id=intervention_id,
+        rating=rating,
+        owner=agent_id,
+        reason=reason,
+        action=action,
+        outcome=outcome,
+        mute=mute,
+        applicability_correction=applicability_correction,
+    )
+
+
+def retrieval_debug_cognition(
+        problem,
+        agent_id="automation",
+        include_shared=True,
+        environment=None,
+        utility_threshold=None):
+    """Explain semantic and utility ranking, gates, and withheld guidance."""
+    from memory.hierarchical_search import hierarchical_search
+    from memory.utility import frame_decision
+    results = hierarchical_search(
+        problem,
+        agent_id=agent_id,
+        include_shared=include_shared,
+        environment=environment,
+        utility_threshold=utility_threshold,
+    )
+    return {
+        "problem": problem,
+        "decision_frame": frame_decision(problem, environment=environment),
+        "confidence": results["confidence"],
+        "strategy": results["strategy"],
+        "diagnostic": results["utility_diagnostic"],
+    }
+
+
+def project_update_cognition(project_id, update, agent_id="automation", environment=None):
+    """Incrementally update bounded, owner-scoped project state and decisions."""
+    from memory.project_cortex import update_project_state
+    return update_project_state(project_id, agent_id, update, environment=environment)
+
+
+def project_resurrect_cognition(
+        project_id,
+        agent_id="automation",
+        environment=None,
+        token_budget=600):
+    """Return a bounded resume brief with stale decisions withheld."""
+    from memory.project_cortex import resurrect_project
+    return resurrect_project(
+        project_id,
+        agent_id,
+        environment=environment,
+        token_budget=token_budget,
+    )
+
+
+def project_handoff_cognition(project_id, agent_id="automation", environment=None):
+    """Export a secret-scrubbed project cognition capsule."""
+    from memory.project_cortex import export_handoff
+    return export_handoff(project_id, agent_id, environment=environment)
+
+
+def project_accept_cognition(capsule, agent_id="automation", environment=None):
+    """Accept a bounded handoff while reporting environment drift."""
+    from memory.project_cortex import accept_handoff
+    return accept_handoff(capsule, agent_id, environment=environment)
 
 
 def checkpoint_cognition(

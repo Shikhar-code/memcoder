@@ -33,7 +33,8 @@ def hierarchical_search(
         agent_id="human",
         include_shared=True,
         include_skills=True,
-        environment=None):
+        environment=None,
+        utility_threshold=None):
 
     query_embedding = embed(problem)
 
@@ -126,7 +127,7 @@ def hierarchical_search(
         confidence
     )
 
-    return {
+    results = {
 
         "confidence": confidence,
 
@@ -142,3 +143,11 @@ def hierarchical_search(
         "skills": skills,
 
     }
+    from memory.utility import apply_utility_policy
+    return apply_utility_policy(
+        results,
+        problem,
+        owner=agent_id,
+        threshold=utility_threshold,
+        environment=environment,
+    )

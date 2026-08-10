@@ -9,6 +9,11 @@ from api.cognition import (
     checkpoint_cognition,
     evaluate_cognition,
     intervene_cognition,
+    project_accept_cognition,
+    project_handoff_cognition,
+    project_resurrect_cognition,
+    project_update_cognition,
+    retrieval_debug_cognition,
     plan_history_cognition,
     plan_cognition,
     prepare_cognition,
@@ -17,6 +22,7 @@ from api.cognition import (
     skill_health_cognition,
     start_cognition,
     task_state_cognition,
+    utility_feedback_cognition,
     verify_cognition,
 )
 from memory.chroma_client import collection
@@ -171,8 +177,14 @@ def main(argv=None):
 
     for command, help_text in (
             ("intervene", "Return the smallest useful cognition packet for a task."),
+            ("utility-feedback", "Rate the decision utility of one exact intervention."),
+            ("retrieval-debug", "Explain semantic rank, utility rank, and withheld guidance."),
             ("checkpoint", "Save bounded working state without creating memory."),
             ("task-state", "Read the latest owner-scoped working checkpoint."),
+            ("project-update", "Update bounded durable project state and decisions."),
+            ("project-resurrect", "Recover a bounded project continuation brief."),
+            ("project-handoff", "Export a safe project cognition capsule."),
+            ("project-accept", "Accept and revalidate a project cognition capsule."),
             ("start", "Retrieve a compact brief and bounded plan in one call."),
             ("plan-history", "Read owner-scoped audit outcomes for one plan."),
             ("skill-health", "Read owner-scoped health for one promoted skill."),
@@ -303,6 +315,25 @@ def main(argv=None):
             if environment is not None:
                 options["environment"] = environment
             result = intervene_cognition(**options)
+        elif arguments.command == "utility-feedback":
+            result = utility_feedback_cognition(
+                intervention_id=require_text(request, "intervention_id"),
+                rating=require_text(request, "rating"),
+                agent_id=request.get("agent_id", "automation"),
+                reason=request.get("reason"),
+                action=request.get("action"),
+                outcome=request.get("outcome"),
+                mute=bool(request.get("mute", False)),
+                applicability_correction=request.get("applicability_correction"),
+            )
+        elif arguments.command == "retrieval-debug":
+            result = retrieval_debug_cognition(
+                problem=require_text(request, "problem"),
+                agent_id=request.get("agent_id", "automation"),
+                include_shared=bool(request.get("include_shared", True)),
+                environment=environment,
+                utility_threshold=request.get("utility_threshold"),
+            )
         elif arguments.command == "checkpoint":
             update = request.get("update")
             if not isinstance(update, dict):
@@ -317,6 +348,38 @@ def main(argv=None):
             result = task_state_cognition(
                 task_id=require_text(request, "task_id"),
                 agent_id=request.get("agent_id", "automation"),
+            )
+        elif arguments.command == "project-update":
+            update = request.get("update")
+            if not isinstance(update, dict):
+                raise ValueError("Request field 'update' must be an object.")
+            result = project_update_cognition(
+                project_id=require_text(request, "project_id"),
+                update=update,
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
+            )
+        elif arguments.command == "project-resurrect":
+            result = project_resurrect_cognition(
+                project_id=require_text(request, "project_id"),
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
+                token_budget=request.get("token_budget", 600),
+            )
+        elif arguments.command == "project-handoff":
+            result = project_handoff_cognition(
+                project_id=require_text(request, "project_id"),
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
+            )
+        elif arguments.command == "project-accept":
+            capsule = request.get("capsule")
+            if not isinstance(capsule, dict):
+                raise ValueError("Request field 'capsule' must be an object.")
+            result = project_accept_cognition(
+                capsule=capsule,
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
             )
         elif arguments.command == "start":
             options = dict(

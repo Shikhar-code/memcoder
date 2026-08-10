@@ -8,6 +8,11 @@ from memory.markdown_import import import_markdown, import_markdown_file
 from api.cognition import (
     checkpoint_cognition,
     intervene_cognition,
+    project_accept_cognition,
+    project_handoff_cognition,
+    project_resurrect_cognition,
+    project_update_cognition,
+    retrieval_debug_cognition,
     plan_cognition,
     plan_history_cognition,
     retention_preview_cognition,
@@ -23,6 +28,7 @@ from api.cognition import (
     start_cognition,
     task_state_cognition,
     update_memory_validity_cognition,
+    utility_feedback_cognition,
     verify_cognition,
 )
 
@@ -52,6 +58,48 @@ def memcoder_intervene(
 
 
 @mcp.tool()
+def memcoder_utility_feedback(
+        intervention_id: str,
+        rating: str,
+        agent_id: str = "codex",
+        reason: str | None = None,
+        action: str | None = None,
+        outcome: str | None = None,
+        mute: bool = False,
+        applicability_correction: dict | None = None) -> str:
+    """Rate one exact intervention as helpful, ignored, misleading, or harmful."""
+
+    return json.dumps(utility_feedback_cognition(
+        intervention_id=intervention_id,
+        rating=rating,
+        agent_id=agent_id,
+        reason=reason,
+        action=action,
+        outcome=outcome,
+        mute=mute,
+        applicability_correction=applicability_correction,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_retrieval_debug(
+        problem: str,
+        agent_id: str = "codex",
+        include_shared: bool = True,
+        environment: dict | None = None,
+        utility_threshold: float | None = None) -> str:
+    """Explain semantic rank, utility rank, gates, and withheld guidance."""
+
+    return json.dumps(retrieval_debug_cognition(
+        problem=problem,
+        agent_id=agent_id,
+        include_shared=include_shared,
+        environment=environment,
+        utility_threshold=utility_threshold,
+    ), indent=2)
+
+
+@mcp.tool()
 def memcoder_checkpoint(
         task_id: str,
         update: dict,
@@ -77,6 +125,66 @@ def memcoder_task_state(task_id: str, agent_id: str = "codex") -> str:
     return json.dumps(
         task_state_cognition(task_id=task_id, agent_id=agent_id), indent=2
     )
+
+
+@mcp.tool()
+def memcoder_project_update(
+        project_id: str,
+        update: dict,
+        agent_id: str = "codex",
+        environment: dict | None = None) -> str:
+    """Incrementally store bounded project facts, risks, goals, and decisions."""
+
+    return json.dumps(project_update_cognition(
+        project_id=project_id,
+        update=update,
+        agent_id=agent_id,
+        environment=environment,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_project_resurrect(
+        project_id: str,
+        agent_id: str = "codex",
+        environment: dict | None = None,
+        token_budget: int = 600) -> str:
+    """Recover a bounded continuation brief with stale decisions withheld."""
+
+    return json.dumps(project_resurrect_cognition(
+        project_id=project_id,
+        agent_id=agent_id,
+        environment=environment,
+        token_budget=token_budget,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_project_handoff(
+        project_id: str,
+        agent_id: str = "codex",
+        environment: dict | None = None) -> str:
+    """Export a bounded, secret-scrubbed project cognition capsule."""
+
+    return json.dumps(project_handoff_cognition(
+        project_id=project_id,
+        agent_id=agent_id,
+        environment=environment,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_project_accept(
+        capsule: dict,
+        agent_id: str = "codex",
+        environment: dict | None = None) -> str:
+    """Accept a project handoff and report receiver environment drift."""
+
+    return json.dumps(project_accept_cognition(
+        capsule=capsule,
+        agent_id=agent_id,
+        environment=environment,
+    ), indent=2)
 
 
 @mcp.tool()

@@ -2,6 +2,24 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.2.3b1 — Beta 2.3
+
+### Added
+
+- Added decision framing, utility-aware ranking and vetoes, diverse evidence,
+  intervention receipts, exact-intervention feedback, and retrieval diagnostics.
+- Added Project Cortex with bounded project state, rationale-bearing decisions,
+  environment-drift invalidation, Project Resurrection, and secret-scrubbed
+  cross-host handoff capsules.
+- Exposed Beta 2.3 through Python, CLI, MCP, and the local Codex plugin.
+
+### Changed
+
+- Trusted semantic matches must now also clear a decision-utility gate before
+  they can influence the host.
+- Updated the Codex workflow to preserve material project state and report
+  whether retrieved guidance actually helped.
+
 ## 0.2.2b1 — Beta 2.2
 
 ### Added

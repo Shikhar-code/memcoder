@@ -195,6 +195,40 @@ def _compact_packet(packet, token_budget):
         "verification": packet["prediction"]["verification"][:1],
         "confidence": packet["prediction"]["confidence"],
     }
+    diagnostic = packet.get("retrieval_debug", {})
+    packet["retrieval_debug"] = {
+        "selected": diagnostic.get("selected", [])[:1],
+        "withheld": diagnostic.get("withheld", [])[:1],
+    }
+    frame = packet.get("decision_frame", {})
+    packet["decision_frame"] = {
+        "archetype": frame.get("archetype"),
+        "failure_risk": frame.get("failure_risk"),
+        "proof_need": frame.get("proof_need"),
+    }
+    if _estimate_tokens(packet) > token_budget:
+        packet["guidance"] = {
+            "recommended_next_action": packet.get("guidance", {}).get("recommended_next_action", "")
+        }
+        receipt = packet.get("receipt", {})
+        packet["receipt"] = {
+            "id": receipt.get("id"),
+            "why_now": receipt.get("why_now"),
+            "decision_changed": receipt.get("decision_changed"),
+            "memory_ids": receipt.get("memory_ids", [])[:2],
+            "known_differences": receipt.get("known_differences", [])[:1],
+            "expected_value": receipt.get("expected_value", 0.0),
+            "token_cost_budget": receipt.get("token_cost_budget"),
+            "verification": receipt.get("verification"),
+        }
+        packet["reuse_check"] = {
+            "required_before_edit": True,
+            "smallest_safe_action": packet.get("reuse_check", {}).get("smallest_safe_action"),
+        }
+        if packet.get("transfer_delta"):
+            packet["transfer_delta"] = {
+                "required_verification": packet["transfer_delta"].get("required_verification", [])[:1]
+            }
     return packet
 
 
@@ -204,6 +238,7 @@ def build_cognitive_packet(problem, results, environment=None, token_budget=DEFA
     intervention = choose_intervention(results, token_budget=token_budget)
     memory_type, memory = _primary_memory(results)
     delta = build_transfer_delta(memory, environment=environment)
+    from memory.utility import build_receipt, frame_decision
     packet = {
         "schema_version": 1,
         "problem": _text(problem, 280),
@@ -233,7 +268,13 @@ def build_cognitive_packet(problem, results, environment=None, token_budget=DEFA
         },
         "guidance": build_decision_brief(problem, results),
         "plan": build_action_plan(problem, results) if intervention["mode"] == "plan" else None,
+        "decision_frame": frame_decision(problem, environment=environment),
+        "receipt": build_receipt(problem, results, environment=environment),
+        "retrieval_debug": results.get("utility_diagnostic", {"selected": [], "withheld": []}),
     }
+    packet["receipt"]["supporting_evidence"] = packet["receipt"].get("memory_ids", [])[:3]
+    packet["receipt"]["known_differences"] = (delta or {}).get("differences", [])[:2]
+    packet["receipt"]["token_cost_budget"] = token_budget
     packet = _compact_packet(packet, token_budget)
     estimated = _estimate_tokens(packet)
     packet["budget"] = {
