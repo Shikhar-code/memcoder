@@ -138,11 +138,11 @@ Weak guidance    rate the exact receipt → reduce future interference
 
 ## Start in 60 seconds
 
-### Option A — install the published beta
+### Option A — install from PyPI (recommended)
 
 ```powershell
-python -m pip install --upgrade --pre memcoder
-python -m memcoder --help
+pip install memcoder
+memcoder --help
 memcoder storage status
 ```
 
