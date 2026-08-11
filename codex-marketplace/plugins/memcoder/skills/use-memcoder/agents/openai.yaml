@@ -1,6 +1,6 @@
 interface:
   display_name: "MemCoder Cognition"
-  short_description: "Use verified cognition and evidence-gated Dreaming"
-  default_prompt: "Use $use-memcoder automatically for this task; keep Dream candidates sandboxed until verified."
+  short_description: "Use verified cognition, failure frontiers, and proof-gated branches"
+  default_prompt: "Use $use-memcoder automatically; surface applicable Failure Frontiers and keep branch changes proof-gated and reversible."
 policy:
   allow_implicit_invocation: true

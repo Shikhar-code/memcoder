@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder Beta 2.5 — local, evidence-gated cognition for coding agents" width="100%" />
+<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder Beta 2.6 — local, evidence-gated cognition for coding agents" width="100%" />
 
 <br />
 
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=for-the-badge&label=PyPI&color=6D9EFF" alt="PyPI" /></a>
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=for-the-badge&color=63D7C5" alt="Python 3.10+" /></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-BFA1FF?style=for-the-badge" alt="MIT license" /></a>
-<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.5-FFB86B?style=for-the-badge" alt="Beta 2.5" /></a>
+<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.6-FFB86B?style=for-the-badge" alt="Beta 2.6" /></a>
 
 ### Persistent cognition for agents that need to be right twice.
 
@@ -21,7 +21,7 @@ after the host supplies proof.
 
 <a href="#start-here"><strong>Start here</strong></a>
 &nbsp;·&nbsp; <a href="#why-memcoder"><strong>Why MemCoder</strong></a>
-&nbsp;·&nbsp; <a href="#whats-new-in-beta-25"><strong>Beta 2.5</strong></a>
+&nbsp;·&nbsp; <a href="#whats-new-in-beta-26"><strong>Beta 2.6</strong></a>
 &nbsp;·&nbsp; <a href="#connect-a-host"><strong>Connect a host</strong></a>
 &nbsp;·&nbsp; <a href="#evidence-not-hype"><strong>Evidence</strong></a>
 
@@ -75,7 +75,7 @@ MemCoder requires Python 3.10+. Its core does not require Ollama, CUDA, or a
 generation-model API key. The first semantic-index use may download a local
 embedding model.
 
-### Use the current Beta 2.5 source
+### Use the current Beta 2.6 source
 
 ```powershell
 git clone https://github.com/Shikhar-code/memcoder.git
@@ -162,9 +162,74 @@ resurrection, and safe handoff—never a raw chat archive.
 
 </details>
 
+## What's new in Beta 2.6
+
+Beta 2.6 turns verified failures and competing ideas into inspectable,
+reversible cognition. It stays local and provider-free: the host still reasons,
+edits, and verifies while MemCoder supplies bounded evidence and proof gates.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Failure Frontiers
+
+Record a failure's trigger, risk, warning, smallest verification, and
+counterexamples. Autopilot surfaces only applicable active warnings, and
+harmful feedback moves a frontier out of automatic guidance.
+
+</td>
+<td width="50%" valign="top">
+
+### Causal calibration
+
+Intervention outcomes are counted separately from memory content. Helpful,
+ignored, misleading, and harmful feedback produces an explicit calibration
+summary instead of silently rewriting trusted records.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Cognitive Branches
+
+Try an alternative plan in an owner-scoped branch. Changes, hypotheses, and
+supporting memory IDs remain isolated until proof obligations pass.
+
+</td>
+<td width="50%" valign="top">
+
+### Cognitive Diff + merge gates
+
+Compare branch decisions deterministically, detect conflicts and environment
+drift, then merge or roll back without deleting the audit trail.
+
+</td>
+</tr>
+</table>
+
+```text
+failure evidence -> Failure Frontier -> warning + smallest check
+alternative idea -> Cognitive Branch -> proof obligations -> diff -> merge/rollback
+intervention outcome -> calibration summary -> safer future ranking
+```
+
+<details>
+<summary><strong>Beta 2.6 controls</strong></summary>
+
+| Surface | Use it for |
+| --- | --- |
+| `memcoder frontier --input request.json` | Record, match, update, or calibrate a failure boundary |
+| `memcoder branch --input request.json` | Create, change, prove, diff, merge, or roll back a cognitive branch |
+| `memcoder utility-summary --input request.json` | Inspect causal feedback calibration |
+| `memcoder storage status` | Count records, frontiers, branches, and Dream candidates |
+
+</details>
+
 ## What's new in Beta 2.5
 
-Beta 2.5 is the current release line. It adds a controlled way for memory to
+Beta 2.5 is the preceding foundation release. It adds a controlled way for memory to
 improve between verified tasks without turning “self-improvement” into silent,
 unreviewable behavior.
 
@@ -283,7 +348,8 @@ validation procedures transferred to unseen variants in that setup.
 
 It does **not** prove that MemCoder universally improves every model, task, or
 repository. Beta 2.5’s automatic Dreaming, sandbox, rollback, contract, and
-host-certification behavior is verified provider-free. A clean real-host
+host-certification behavior, plus Beta 2.6’s frontier and branch gates, are
+verified provider-free. A clean real-host
 baseline-versus-Dreaming comparison is deferred to the 1.0 evidence gate.
 
 | Verified now | Still being measured |

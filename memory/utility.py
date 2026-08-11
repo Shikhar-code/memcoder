@@ -231,3 +231,42 @@ def record_feedback(
         "mute": bool(mute),
         "applicability_correction": applicability_correction if isinstance(applicability_correction, dict) else None,
     })
+
+
+def feedback_summary(memory_id=None, owner=None, environment=None):
+    """Summarize observed intervention outcomes for calibration, without mutating memory."""
+    events = [
+        event for event in _events()
+        if event.get("kind") == "feedback"
+        and (owner is None or event.get("owner") == owner)
+        and (memory_id is None or memory_id in event.get("memory_ids", []))
+        and _comparable(event.get("environment"), environment)
+    ]
+    counts = {rating: 0 for rating in RATINGS}
+    for event in events:
+        rating = event.get("rating")
+        if rating in counts:
+            counts[rating] += 1
+    total = sum(counts.values())
+    delta = round(max(-0.6, min(0.15,
+        counts["helpful"] * 0.05
+        - counts["ignored"] * 0.03
+        - counts["misleading"] * 0.25
+        - counts["harmful"] * 0.50
+    )), 2)
+    if counts["harmful"]:
+        recommendation = "quarantine"
+    elif counts["misleading"] > counts["helpful"]:
+        recommendation = "downrank"
+    elif counts["helpful"]:
+        recommendation = "retain"
+    else:
+        recommendation = "unmeasured"
+    return {
+        "memory_id": memory_id,
+        "owner": owner,
+        "counts": counts,
+        "total": total,
+        "calibration_delta": delta,
+        "recommendation": recommendation,
+    }

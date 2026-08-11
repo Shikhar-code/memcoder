@@ -1,6 +1,6 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 2.5<br>
+**Current line:** Beta 2.6<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
 **Last revised:** 2026-08-11
 
@@ -255,6 +255,7 @@ disabled.
 | **Beta 2.3** | Utility Engine plus Project Cortex. | Useful retrieval, strong abstention, and correct state recovery across sessions. |
 | **Beta 2.4** | Invisible Autopilot, token economy, and Skill Intelligence. | Ordinary prompts, measurable savings, failure prevention, and dependable procedural transfer. |
 | **Beta 2.5** | Dreaming, evaluation, Core hardening, and host certification. | Candidate learning survives adversarial checks and the complete system meets the 9/10 bar. |
+| **Beta 2.6** | Failure Frontiers, causal calibration, Cognitive Branches, and proof-gated Cognitive Diff. | Failures become actionable warnings; alternatives merge only after proof and remain reversible. |
 | **Beta 3** | Memory Studio, Cognitive Git, developer website, cloud continuity, optional Intelligence, and later collective cognition. | Developers can inspect and control cognition; optional product layers preserve Core's trust and privacy boundaries. |
 | **RC** | Promise and contract freeze. | No data-loss, privacy, migration, or silent-learning blocker. |
 | **Core 1.0** | Dependable local cognition layer. | Stable product claim backed by reproducible real-project evidence. |
@@ -402,6 +403,7 @@ by the next.
 2.3 Utility Engine + Project Cortex
 → 2.4 Autopilot + Token Economy + Skill Intelligence
 → 2.5 Dreaming + Evaluation + Core Hardening
+→ 2.6 Failure Frontiers + Calibration + Cognitive Branches
 → Beta 3 Productization
 → Release Candidate
 → Core 1.0
@@ -1018,6 +1020,58 @@ surface rather than a prompt-quality hope.
 
 ---
 
+# Beta 2.6 — Failure Frontiers, Causal Calibration, and Cognitive Branches
+
+> **Engineering status (0.2.6b1): implemented foundation.** Failure Frontier
+> records, utility calibration summaries, branch-local cognition, deterministic
+> diffs, proof obligations, merge gates, rollback, CLI/MCP/API surfaces, and
+> portable snapshot fields are available. Broader real-project evidence remains
+> a release-quality gate.
+
+Beta 2.6 is the compact continuation of the Dreaming work rather than a new
+provider or a multi-agent layer. It makes the most useful research ideas
+operational while preserving the local Core's trust boundary.
+
+### Failure Frontier
+
+- Capture a verified failure trigger, risk, warning, smallest check, and
+  counterexamples as an owner-scoped append-only record.
+- Surface only applicable active or candidate frontiers through Autopilot;
+  stale, rejected, incompatible, or harmful boundaries stay out of guidance.
+- Keep frontier feedback explicit so a misleading boundary is downgraded and a
+  harmful one becomes stale instead of silently teaching the system.
+
+### Causal calibration
+
+- Summarize intervention outcomes separately from semantic memory content.
+- Expose counts, a bounded calibration delta, and a recommendation (`retain`,
+  `downrank`, `quarantine`, or `unmeasured`).
+- Never mutate a trusted record from a single unverified rating.
+
+### Cognitive Branches and Cognitive Diff
+
+- Create isolated, owner-scoped branches for competing hypotheses, decisions,
+  Skill revisions, or project alternatives.
+- Record changes and supporting memory IDs without touching the main memory
+  graph.
+- Attach explicit proof obligations and host evidence; deterministic diffs show
+  changed keys and conflicts without requiring Git or a provider model.
+- Merge only when every obligation passes, no conflict remains, and the branch
+  environment has not drifted. Rollback marks the branch while retaining its
+  full audit history.
+
+### Beta 2.6 release gates
+
+- Provider-free primitive, CLI, MCP, and API tests pass.
+- Autopilot remains fail-open when frontier or branch storage is unavailable.
+- Snapshots preserve frontier and branch manifests without deleting local state.
+- The Codex plugin documents the new boundaries and remains version-aligned with
+  the package.
+- A matched real-project evaluation measures failure prevention, calibration,
+  negative transfer, merge safety, token use, and rollback behavior.
+
+---
+
 # Beta 3 — Productization and collective cognition
 
 Beta 3 turns the proven local cognitive engine into a controllable product. It
@@ -1392,9 +1446,10 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 2.5: Evidence-Gated Dreaming,
-Evaluation, and Core Hardening**. Its engineering foundation is implemented;
-the quantitative release gates remain an evaluation requirement.
+The current implementation line is **Beta 2.6: Failure Frontiers, Causal
+Calibration, and Cognitive Branches**. Its engineering foundation is
+implemented; the quantitative real-project gates remain an evaluation
+requirement.
 
 The first deliverable should be a closed-loop intervention record:
 

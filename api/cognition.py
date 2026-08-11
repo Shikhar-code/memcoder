@@ -54,6 +54,7 @@ def prepare_cognition(
         retrieval_options["environment"] = environment
     results = hierarchical_search(problem, **retrieval_options)
 
+    from memory.failure_frontier import match_frontiers
     response = {
         "problem": problem,
         "include_shared": include_shared,
@@ -66,6 +67,9 @@ def prepare_cognition(
             key: len(results.get(key, []))
             for key in ("skills", "experiences", "mistakes", "principles", "reflections")
         },
+        "failure_frontier": match_frontiers(
+            problem, owner=agent_id, environment=environment, limit=3
+        ),
         "instructions": [
             "Use trusted memories as investigation guidance, not proof.",
             "Start from the compact decision brief; request full detail only when needed.",
@@ -158,6 +162,10 @@ def intervene_cognition(
         environment=environment,
         token_budget=token_budget,
     )
+    from memory.failure_frontier import match_frontiers
+    packet["failure_frontier"] = match_frontiers(
+        problem, owner=agent_id, environment=environment, limit=3
+    )
     from memory.utility import save_receipt
     save_receipt(packet["receipt"], agent_id, environment=environment)
     return packet
@@ -186,6 +194,111 @@ def utility_feedback_cognition(
     )
 
 
+def utility_feedback_summary_cognition(memory_id=None, agent_id=None, environment=None):
+    """Return outcome calibration without changing a trusted record."""
+    from memory.utility import feedback_summary
+    return feedback_summary(memory_id=memory_id, owner=agent_id, environment=environment)
+
+
+def failure_frontier_cognition(
+        action="match",
+        problem=None,
+        trigger=None,
+        risk=None,
+        warning=None,
+        verification=None,
+        owner="automation",
+        environment=None,
+        counterexamples=None,
+        source_memory_ids=None,
+        frontier_id=None,
+        status=None,
+        outcome=None,
+        reason=None,
+        limit=5):
+    """Record, retrieve, and calibrate append-only failure-frontier warnings."""
+    from memory.failure_frontier import (
+        feedback_frontier,
+        list_frontiers,
+        match_frontiers,
+        record_frontier,
+        update_frontier,
+    )
+    if action == "record":
+        return record_frontier(
+            trigger=trigger, risk=risk, warning=warning, verification=verification,
+            owner=owner, environment=environment, counterexamples=counterexamples,
+            source_memory_ids=source_memory_ids, status=status or "active",
+        )
+    if action == "match":
+        return {"matches": match_frontiers(problem, owner=owner, environment=environment, limit=limit)}
+    if action == "list":
+        return {"frontiers": list_frontiers(owner=owner, status=status)}
+    if action == "update":
+        return update_frontier(frontier_id, status, owner=owner, reason=reason)
+    if action == "feedback":
+        return feedback_frontier(frontier_id, outcome, owner=owner, reason=reason)
+    raise ValueError("action must be record, match, list, update, or feedback.")
+
+
+def cognitive_branch_cognition(
+        action="list",
+        branch_id=None,
+        target_branch_id=None,
+        name=None,
+        owner="automation",
+        project_id=None,
+        environment=None,
+        base_environment=None,
+        base_ref=None,
+        kind=None,
+        key=None,
+        before=None,
+        after=None,
+        memory_ids=None,
+        obligation_id=None,
+        obligation_name=None,
+        obligation_kind="test",
+        command=None,
+        passed=None,
+        evidence=None,
+        apply=False,
+        reason=None,
+        status=None):
+    """Manage branch-local cognitive hypotheses and proof-gated merges."""
+    from memory.cognitive_branch import (
+        add_proof_obligation,
+        cognitive_diff,
+        complete_proof_obligation,
+        create_branch,
+        list_branches,
+        merge_branch,
+        record_change,
+        rollback_branch,
+    )
+    if action == "create":
+        return create_branch(name, owner=owner, project_id=project_id,
+                             base_environment=base_environment or environment, base_ref=base_ref)
+    if action == "list":
+        return {"branches": list_branches(owner=owner, status=status)}
+    if action == "change":
+        return record_change(branch_id, kind, key, before=before, after=after,
+                             owner=owner, memory_ids=memory_ids)
+    if action == "obligation":
+        return add_proof_obligation(branch_id, obligation_name, kind=obligation_kind,
+                                    command=command, owner=owner)
+    if action == "verify":
+        return complete_proof_obligation(branch_id, obligation_id, passed, evidence, owner=owner)
+    if action == "diff":
+        return cognitive_diff(branch_id, target_branch_id=target_branch_id, owner=owner)
+    if action == "merge":
+        return merge_branch(branch_id, owner=owner, target_branch_id=target_branch_id,
+                            environment=environment, apply=apply)
+    if action == "rollback":
+        return rollback_branch(branch_id, owner=owner, reason=reason)
+    raise ValueError("action must be create, list, change, obligation, verify, diff, merge, or rollback.")
+
+
 def autopilot_event_cognition(
         event,
         task_id,
@@ -209,6 +322,10 @@ def autopilot_event_cognition(
             context=context,
             action=action,
             environment=environment,
+        )
+        from memory.failure_frontier import match_frontiers
+        decision["failure_frontier"] = match_frontiers(
+            problem, owner=agent_id, environment=environment, limit=3
         )
         intervention = None
         if decision["should_intervene"]:
@@ -250,6 +367,23 @@ def autopilot_event_cognition(
                 "qa": capture_result.get("qa"),
                 "rejected": capture_result.get("rejected", []),
             }
+            feedback = outcome.get("utility_feedback") or outcome.get("feedback")
+            if isinstance(feedback, dict) and intervention:
+                receipt_id = (intervention.get("receipt") or {}).get("id")
+                if receipt_id and feedback.get("rating"):
+                    try:
+                        capture["utility_feedback"] = utility_feedback_cognition(
+                            intervention_id=receipt_id,
+                            rating=feedback["rating"],
+                            agent_id=agent_id,
+                            reason=feedback.get("reason"),
+                            action=feedback.get("action"),
+                            outcome=feedback.get("outcome"),
+                            mute=bool(feedback.get("mute", False)),
+                            applicability_correction=feedback.get("applicability_correction"),
+                        )
+                    except ValueError:
+                        capture["utility_feedback"] = {"recorded": False}
             if capture.get("experience_recorded"):
                 from memory.dreaming import run_dream
                 capture["dream"] = run_dream(owner=agent_id, environment=environment)
@@ -258,6 +392,29 @@ def autopilot_event_cognition(
                     for item in capture["dream"].get("created", [])
                     if item.get("candidate_id")
                 ]
+        if event == "task_failed" and isinstance(outcome, dict):
+            frontier = outcome.get("failure_frontier")
+            if isinstance(frontier, dict):
+                from memory.failure_frontier import record_frontier
+                try:
+                    capture = {
+                        "frontier_recorded": record_frontier(
+                            trigger=frontier.get("trigger", problem),
+                            risk=frontier.get("risk", "Observed task failure."),
+                            warning=frontier.get("warning", problem),
+                            verification=frontier.get(
+                                "verification",
+                                "Reproduce the failure and run the narrowest host check.",
+                            ),
+                            owner=agent_id,
+                            environment=environment,
+                            counterexamples=frontier.get("counterexamples"),
+                            source_memory_ids=frontier.get("source_memory_ids"),
+                            status=frontier.get("status", "active"),
+                        )
+                    }
+                except ValueError as error:
+                    capture = {"frontier_recorded": False, "error": str(error)}
         return finish_event(
             decision,
             intervention=intervention,

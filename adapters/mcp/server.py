@@ -13,6 +13,7 @@ from api.cognition import (
     compile_skill_cognition,
     compose_skills_cognition,
     cognition_contract_cognition,
+    cognitive_branch_cognition,
     dream_cognition,
     intervene_cognition,
     project_accept_cognition,
@@ -29,6 +30,7 @@ from api.cognition import (
     trace_memory_cognition,
     evaluate_cognition,
     evolve_skill_cognition,
+    failure_frontier_cognition,
     prepare_cognition,
     promote_skill_cognition,
     record_cognition,
@@ -39,6 +41,7 @@ from api.cognition import (
     token_ledger_cognition,
     update_memory_validity_cognition,
     utility_feedback_cognition,
+    utility_feedback_summary_cognition,
     verify_cognition,
 )
 
@@ -201,6 +204,81 @@ def memcoder_utility_feedback(
         outcome=outcome,
         mute=mute,
         applicability_correction=applicability_correction,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_utility_summary(
+        memory_id: str | None = None,
+        agent_id: str = "codex",
+        environment: dict | None = None) -> str:
+    """Summarize observed intervention outcomes for calibration without mutating memory."""
+    return json.dumps(utility_feedback_summary_cognition(
+        memory_id=memory_id, agent_id=agent_id, environment=environment
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_failure_frontier(
+        action: str = "match",
+        problem: str | None = None,
+        trigger: str | None = None,
+        risk: str | None = None,
+        warning: str | None = None,
+        verification: str | None = None,
+        owner: str = "codex",
+        environment: dict | None = None,
+        counterexamples: list[str] | None = None,
+        source_memory_ids: list[str] | None = None,
+        frontier_id: str | None = None,
+        status: str | None = None,
+        outcome: str | None = None,
+        reason: str | None = None,
+        limit: int = 5) -> str:
+    """Record or retrieve append-only, evidence-backed failure warnings."""
+    return json.dumps(failure_frontier_cognition(
+        action=action, problem=problem, trigger=trigger, risk=risk,
+        warning=warning, verification=verification, owner=owner,
+        environment=environment, counterexamples=counterexamples,
+        source_memory_ids=source_memory_ids, frontier_id=frontier_id,
+        status=status, outcome=outcome, reason=reason, limit=limit,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_cognitive_branch(
+        action: str = "list",
+        branch_id: str | None = None,
+        target_branch_id: str | None = None,
+        name: str | None = None,
+        owner: str = "codex",
+        project_id: str | None = None,
+        environment: dict | None = None,
+        base_environment: dict | None = None,
+        base_ref: str | None = None,
+        kind: str | None = None,
+        key: str | None = None,
+        before=None,
+        after=None,
+        memory_ids: list[str] | None = None,
+        obligation_id: str | None = None,
+        obligation_name: str | None = None,
+        obligation_kind: str = "test",
+        command: str | None = None,
+        passed: bool | None = None,
+        evidence=None,
+        apply: bool = False,
+        reason: str | None = None,
+        status: str | None = None) -> str:
+    """Create, diff, prove, merge, or roll back branch-local cognition."""
+    return json.dumps(cognitive_branch_cognition(
+        action=action, branch_id=branch_id, target_branch_id=target_branch_id,
+        name=name, owner=owner, project_id=project_id, environment=environment,
+        base_environment=base_environment, base_ref=base_ref, kind=kind,
+        key=key, before=before, after=after, memory_ids=memory_ids,
+        obligation_id=obligation_id, obligation_name=obligation_name,
+        obligation_kind=obligation_kind, command=command, passed=passed,
+        evidence=evidence, apply=apply, reason=reason, status=status,
     ), indent=2)
 
 

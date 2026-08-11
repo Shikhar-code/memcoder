@@ -204,6 +204,7 @@ def finish_event(decision, intervention=None, capture=None, token_budget=450):
             "mode": mode,
         },
         "radar": decision["radar"],
+        "failure_frontier": decision.get("failure_frontier", []),
         "verification_plan": decision["verification_plan"],
         "cognition": intervention,
         "capture": capture,

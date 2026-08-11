@@ -9,6 +9,8 @@ __all__ = [
     "compose_skills_cognition",
     "cognition_contract_cognition",
     "dream_cognition",
+    "failure_frontier_cognition",
+    "cognitive_branch_cognition",
     "evolve_skill_cognition",
     "intervene_cognition",
     "project_accept_cognition",
@@ -25,6 +27,7 @@ __all__ = [
     "token_ledger_cognition",
     "verify_cognition",
     "utility_feedback_cognition",
+    "utility_feedback_summary_cognition",
 ]
 
 

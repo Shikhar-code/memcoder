@@ -14,8 +14,10 @@ from api.cognition import (
     compose_skills_cognition,
     cognition_contract_cognition,
     dream_cognition,
+    cognitive_branch_cognition,
     evaluate_cognition,
     evolve_skill_cognition,
+    failure_frontier_cognition,
     intervene_cognition,
     project_accept_cognition,
     project_handoff_cognition,
@@ -33,6 +35,7 @@ from api.cognition import (
     task_state_cognition,
     token_ledger_cognition,
     utility_feedback_cognition,
+    utility_feedback_summary_cognition,
     verify_cognition,
 )
 from memory.chroma_client import collection
@@ -91,7 +94,7 @@ def load_json_request(input_path):
     """Load one JSON-object request from a file or standard input."""
     try:
         raw = sys.stdin.read() if str(input_path) == "-" else Path(input_path).read_text(
-            encoding="utf-8"
+            encoding="utf-8-sig"
         )
         request = json.loads(raw)
     except (OSError, json.JSONDecodeError) as error:
@@ -198,6 +201,9 @@ def main(argv=None):
             ("skill-evolve", "Create a reviewable next skill version."),
             ("skill-credit", "Record whether a skill actually changed behavior."),
             ("utility-feedback", "Rate the decision utility of one exact intervention."),
+            ("utility-summary", "Summarize observed intervention outcomes for calibration."),
+            ("frontier", "Record or retrieve verified failure-frontier warnings."),
+            ("branch", "Manage proof-gated branch-local cognition and diffs."),
             ("retrieval-debug", "Explain semantic rank, utility rank, and withheld guidance."),
             ("checkpoint", "Save bounded working state without creating memory."),
             ("task-state", "Read the latest owner-scoped working checkpoint."),
@@ -413,6 +419,56 @@ def main(argv=None):
                 outcome=request.get("outcome"),
                 mute=bool(request.get("mute", False)),
                 applicability_correction=request.get("applicability_correction"),
+            )
+        elif arguments.command == "utility-summary":
+            result = utility_feedback_summary_cognition(
+                memory_id=request.get("memory_id"),
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
+            )
+        elif arguments.command == "frontier":
+            result = failure_frontier_cognition(
+                action=request.get("action", "match"),
+                problem=request.get("problem"),
+                trigger=request.get("trigger"),
+                risk=request.get("risk"),
+                warning=request.get("warning"),
+                verification=request.get("verification"),
+                owner=request.get("owner", request.get("agent_id", "automation")),
+                environment=environment,
+                counterexamples=request.get("counterexamples"),
+                source_memory_ids=request.get("source_memory_ids"),
+                frontier_id=request.get("frontier_id"),
+                status=request.get("status"),
+                outcome=request.get("outcome"),
+                reason=request.get("reason"),
+                limit=request.get("limit", 5),
+            )
+        elif arguments.command == "branch":
+            result = cognitive_branch_cognition(
+                action=request.get("action", "list"),
+                branch_id=request.get("branch_id"),
+                target_branch_id=request.get("target_branch_id"),
+                name=request.get("name"),
+                owner=request.get("owner", request.get("agent_id", "automation")),
+                project_id=request.get("project_id"),
+                environment=environment,
+                base_environment=request.get("base_environment"),
+                base_ref=request.get("base_ref"),
+                kind=request.get("kind"),
+                key=request.get("key"),
+                before=request.get("before"),
+                after=request.get("after"),
+                memory_ids=request.get("memory_ids"),
+                obligation_id=request.get("obligation_id"),
+                obligation_name=request.get("obligation_name"),
+                obligation_kind=request.get("obligation_kind", "test"),
+                command=request.get("command"),
+                passed=request.get("passed"),
+                evidence=request.get("evidence"),
+                apply=bool(request.get("apply", False)),
+                reason=request.get("reason"),
+                status=request.get("status"),
             )
         elif arguments.command == "retrieval-debug":
             result = retrieval_debug_cognition(

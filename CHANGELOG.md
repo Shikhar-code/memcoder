@@ -2,6 +2,28 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.2.6b1 — Beta 2.6
+
+### Added
+
+- Added a provider-free Failure Frontier that records observed triggers,
+  risks, verification obligations, counterexamples, and calibrated outcomes
+  without promoting warnings into trusted memory.
+- Added causal utility summaries so helpful, ignored, misleading, and harmful
+  intervention outcomes produce an inspectable calibration signal.
+- Added reversible Cognitive Branches for hypotheses, branch-local changes,
+  deterministic Cognitive Diffs, proof obligations, conflict detection, and
+  merge/rollback gates.
+- Exposed Beta 2.6 through the Python API, CLI, MCP server, portable snapshots,
+  and the local Codex plugin.
+
+### Changed
+
+- Lifecycle Autopilot now surfaces applicable Failure Frontier warnings and can
+  record host-supplied failure-frontier evidence fail-open.
+- Branch and frontier state remain append-only and owner-scoped; no trusted
+  memory is silently overwritten or deleted.
+
 ## 0.2.5b1 — Beta 2.5
 
 ### Added

@@ -21,6 +21,8 @@ def storage_status():
     records = list_records()
     from memory.dreaming import snapshot_candidates
     dream_candidates = snapshot_candidates()
+    from memory.failure_frontier import list_frontiers
+    from memory.cognitive_branch import list_branches
     by_state = {}
     by_type = {}
     for record in records:
@@ -39,6 +41,8 @@ def storage_status():
         "provenance_edges": len(list_edges()),
         "plan_audits": len(list_audit_entries()),
         "dream_candidates": len(dream_candidates),
+        "failure_frontiers": len(list_frontiers()),
+        "cognitive_branches": len(list_branches()),
     }
 
 
@@ -46,6 +50,8 @@ def build_snapshot():
     from memory.audit_store import list_audit_entries
     from memory.record_store import list_edges, list_records
     from memory.dreaming import snapshot_candidates
+    from memory.failure_frontier import list_frontiers
+    from memory.cognitive_branch import list_branches
 
     return {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
@@ -54,6 +60,8 @@ def build_snapshot():
         "provenance_edges": list_edges(),
         "plan_audits": list_audit_entries(),
         "dream_candidates": snapshot_candidates(),
+        "failure_frontiers": list_frontiers(),
+        "cognitive_branches": list_branches(),
     }
 
 
@@ -104,6 +112,9 @@ def _load_snapshot(input_path):
     for field in ("records", "provenance_edges", "plan_audits"):
         if not isinstance(snapshot.get(field), list):
             raise ValueError(f"backup snapshot field '{field}' must be a list")
+    for field in ("failure_frontiers", "cognitive_branches"):
+        if field in snapshot and not isinstance(snapshot[field], list):
+            raise ValueError(f"backup snapshot field '{field}' must be a list")
     return snapshot
 
 
@@ -138,6 +149,10 @@ def restore_snapshot(input_path, collection=None, embedder=None):
     audits_merged = merge_audit_entries(snapshot["plan_audits"])
     from memory.dreaming import restore_candidates
     dream_candidates_merged = restore_candidates(snapshot.get("dream_candidates", []))
+    from memory.failure_frontier import restore_frontiers
+    frontier_merged = restore_frontiers(snapshot.get("failure_frontiers", []))
+    from memory.cognitive_branch import restore_branches
+    branches_merged = restore_branches(snapshot.get("cognitive_branches", []))
     if collection is None or embedder is None:
         from memory.chroma_client import collection as active_collection
         from memory.embedder import embed
@@ -150,5 +165,7 @@ def restore_snapshot(input_path, collection=None, embedder=None):
         "provenance_edges_merged": edges_merged,
         "plan_audits_merged": audits_merged,
         "dream_candidates_merged": dream_candidates_merged,
+        "failure_frontiers_merged": frontier_merged,
+        "cognitive_branches_merged": branches_merged,
         "index": index,
     }
