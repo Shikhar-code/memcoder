@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 390" width="1200" height="390" role="img" aria-labelledby="title desc">
-  <title id="title">MemCoder Beta 2.4</title>
+  <title id="title">MemCoder Beta 2.5</title>
   <desc id="desc">A local cognition layer that retrieves verified experience, decides when it is useful, and preserves project continuity.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -40,11 +40,11 @@
   <g class="fade">
     <rect x="66" y="49" width="284" height="34" rx="17" fill="#142443" stroke="#72a7ff" stroke-opacity=".55"/>
     <circle class="breathe" cx="88" cy="66" r="5" fill="#61e6bd" filter="url(#glow)"/>
-    <text x="103" y="71" fill="#dce8ff" font-size="12" font-weight="700" letter-spacing="1.35">BETA 2.4 / LOCAL / PROVIDER-FREE</text>
+    <text x="103" y="71" fill="#dce8ff" font-size="12" font-weight="700" letter-spacing="1.35">BETA 2.5 / LOCAL / EVIDENCE-GATED</text>
   </g>
   <text class="fade d1" x="64" y="158" fill="#f6f8ff" font-size="70" font-weight="800" letter-spacing="-2.5">MemCoder</text>
-  <text class="fade d2" x="68" y="204" fill="#d0dcf3" font-size="24" font-weight="600">Cognition that knows when to speak.</text>
-  <text class="fade d2" x="68" y="241" fill="#93a8ce" font-size="18">Verified memory. Safe transfer. Autopilot with proof.</text>
+  <text class="fade d2" x="68" y="204" fill="#d0dcf3" font-size="24" font-weight="600">Cognition that earns its memory.</text>
+  <text class="fade d2" x="68" y="241" fill="#93a8ce" font-size="18">Verified context. Safe transfer. Dreaming with proof.</text>
 
   <g class="fade d3">
     <rect x="68" y="283" width="150" height="39" rx="12" fill="#12243f" stroke="#72a7ff" stroke-opacity=".55"/>
@@ -73,8 +73,8 @@
       <rect width="344" height="68" rx="17" fill="#211b43" stroke="#b89cff" stroke-opacity=".6"/>
       <circle cx="35" cy="34" r="15" fill="#352661" stroke="#b89cff"/>
       <path d="M28 38V30M35 38V25M42 38V32" stroke="#d2c1ff" stroke-width="2" stroke-linecap="round"/>
-      <text x="64" y="28" fill="#f1edff" font-size="15" font-weight="700">PROJECT CORTEX</text>
-      <text x="64" y="49" fill="#9d8fc1" font-size="11">state, decisions, drift, resurrection, handoff</text>
+      <text x="64" y="28" fill="#f1edff" font-size="15" font-weight="700">SAFE DREAMING</text>
+      <text x="64" y="49" fill="#9d8fc1" font-size="11">candidates, sandbox proof, reversible promotion</text>
     </g>
 
     <path d="M200 133V145" stroke="url(#brand)" stroke-width="2" stroke-dasharray="3 4"/>
