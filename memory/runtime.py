@@ -267,7 +267,7 @@ def build_cognitive_packet(problem, results, environment=None, token_budget=DEFA
             "smallest_safe_action": "Reuse existing behavior when verified; otherwise make the smallest scoped change.",
         },
         "guidance": build_decision_brief(problem, results),
-        "plan": build_action_plan(problem, results) if intervention["mode"] == "plan" else None,
+        "plan": build_action_plan(problem, results, environment=environment) if intervention["mode"] == "plan" else None,
         "decision_frame": frame_decision(problem, environment=environment),
         "receipt": build_receipt(problem, results, environment=environment),
         "retrieval_debug": results.get("utility_diagnostic", {"selected": [], "withheld": []}),

@@ -1,6 +1,6 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 2.3<br>
+**Current line:** Beta 2.4<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
 **Last revised:** 2026-08-11
 
@@ -409,7 +409,7 @@ by the next.
 
 ---
 
-## Beta 2.3 — Utility Engine and Project Cortex — current
+## Beta 2.3 — Utility Engine and Project Cortex — completed foundation
 
 **Outcome:** MemCoder surfaces cognition because it changes the next developer
 decision—not because two pieces of text look similar—and maintains enough
@@ -594,6 +594,13 @@ verified decisions and events rather than generated as an unsupported summary.
 ---
 
 ## Beta 2.4 — Invisible Autopilot, Token Economy, and Skill Intelligence
+
+> **Engineering status (0.2.4b1): implemented.** The lifecycle contract,
+> fail-open attention governor, failure radar, verification planner, token
+> ledger, reversible QA capture, versioned Skill contract, transfer compiler,
+> composition checks, evolution candidates, and causal credit are implemented
+> across Python, CLI, MCP, and the local Codex plugin. The quantitative release
+> gates below still require the documented real-project evaluation runs.
 
 **Outcome:** developers use ordinary prompts while MemCoder quietly prevents
 known mistakes, returns more context than it consumes, and turns repeated
@@ -1308,10 +1315,9 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 2.3: Utility Engine and Project
-Cortex**. Its engineering foundation is implemented; focused and real-project
-evaluation now determines whether it is ready to close. The next build phase is
-**Beta 2.4: Invisible Autopilot, Token Economy, and Skill Intelligence**.
+The current implementation line is **Beta 2.4: Invisible Autopilot, Token
+Economy, and Skill Intelligence**. Its engineering foundation is implemented;
+the quantitative release gates remain an evaluation requirement.
 
 The first deliverable should be a closed-loop intervention record:
 

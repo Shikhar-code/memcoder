@@ -1,7 +1,12 @@
 """Lazy public exports for MemCoder's provider-free cognition API."""
 
 __all__ = [
+    "autopilot_control_cognition",
+    "autopilot_event_cognition",
     "checkpoint_cognition",
+    "compile_skill_cognition",
+    "compose_skills_cognition",
+    "evolve_skill_cognition",
     "intervene_cognition",
     "project_accept_cognition",
     "project_handoff_cognition",
@@ -12,7 +17,9 @@ __all__ = [
     "record_cognition",
     "retrieval_debug_cognition",
     "start_cognition",
+    "skill_credit_cognition",
     "task_state_cognition",
+    "token_ledger_cognition",
     "verify_cognition",
     "utility_feedback_cognition",
 ]

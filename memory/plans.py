@@ -14,8 +14,11 @@ def _text(value):
     return " ".join(str(value or "").split())
 
 
-def _skill_plan(problem, skill, definition):
-    procedure = definition.get("steps", [])[:MAX_PROCEDURE_STEPS]
+def _skill_plan(problem, skill, definition, environment=None):
+    from memory.skill_intelligence import compile_transfer
+
+    transfer = compile_transfer(definition, problem, environment=environment)
+    procedure = transfer.get("reusable_steps", [])[:MAX_PROCEDURE_STEPS]
     steps = [
         {
             "order": index,
@@ -46,6 +49,7 @@ def _skill_plan(problem, skill, definition):
             "health": skill.get("health"),
         },
         "inputs": definition.get("inputs", []),
+        "transfer": transfer,
         "steps": steps,
         "replan_if": [
             "The current project contradicts a skill assumption.",
@@ -100,7 +104,7 @@ def _with_plan_id(plan):
     return plan
 
 
-def build_action_plan(problem, results):
+def build_action_plan(problem, results, environment=None):
     """Use a retrieved promoted skill or return a transparent fallback plan.
 
     The function deliberately does not invent procedures with an LLM. A
@@ -109,5 +113,5 @@ def build_action_plan(problem, results):
     for skill in results.get("skills", []):
         definition = skill_definition(skill)
         if isinstance(definition, dict) and definition.get("name") and definition.get("steps"):
-            return _with_plan_id(_skill_plan(problem, skill, definition))
+            return _with_plan_id(_skill_plan(problem, skill, definition, environment=environment))
     return _with_plan_id(_foundation_plan(problem))

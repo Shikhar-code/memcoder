@@ -6,7 +6,11 @@ from fastmcp import FastMCP
 
 from memory.markdown_import import import_markdown, import_markdown_file
 from api.cognition import (
+    autopilot_control_cognition,
+    autopilot_event_cognition,
     checkpoint_cognition,
+    compile_skill_cognition,
+    compose_skills_cognition,
     intervene_cognition,
     project_accept_cognition,
     project_handoff_cognition,
@@ -21,12 +25,15 @@ from api.cognition import (
     resolve_contradiction_cognition,
     trace_memory_cognition,
     evaluate_cognition,
+    evolve_skill_cognition,
     prepare_cognition,
     promote_skill_cognition,
     record_cognition,
     skill_health_cognition,
+    skill_credit_cognition,
     start_cognition,
     task_state_cognition,
+    token_ledger_cognition,
     update_memory_validity_cognition,
     utility_feedback_cognition,
     verify_cognition,
@@ -34,6 +41,86 @@ from api.cognition import (
 
 
 mcp = FastMCP("memcoder")
+
+
+@mcp.tool()
+def memcoder_autopilot(
+        event: str,
+        task_id: str,
+        problem: str,
+        agent_id: str = "codex",
+        include_shared: bool = True,
+        environment: dict | None = None,
+        context: dict | None = None,
+        action: str | None = None,
+        outcome: dict | None = None,
+        token_budget: int = 450) -> str:
+    """Handle one host lifecycle boundary; failures never block host work."""
+    return json.dumps(autopilot_event_cognition(
+        event=event,
+        task_id=task_id,
+        problem=problem,
+        agent_id=agent_id,
+        include_shared=include_shared,
+        environment=environment,
+        context=context,
+        action=action,
+        outcome=outcome,
+        token_budget=token_budget,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_autopilot_control(
+        action: str,
+        agent_id: str = "codex",
+        task_id: str | None = None) -> str:
+    """Pause, resume, inspect, or roll back automatic cognition."""
+    return json.dumps(autopilot_control_cognition(action, agent_id, task_id), indent=2)
+
+
+@mcp.tool()
+def memcoder_token_ledger(agent_id: str = "codex", task_id: str | None = None) -> str:
+    """Inspect measured lifecycle cognition token accounting."""
+    return json.dumps(token_ledger_cognition(agent_id, task_id), indent=2)
+
+
+@mcp.tool()
+def memcoder_compile_skill(
+        definition: dict,
+        problem: str,
+        environment: dict | None = None) -> str:
+    """Compile reusable and adaptation steps for safe current-context transfer."""
+    return json.dumps(compile_skill_cognition(definition, problem, environment), indent=2)
+
+
+@mcp.tool()
+def memcoder_compose_skills(definitions: list[dict]) -> str:
+    """Compose compatible skills and refuse conflicting mutations."""
+    return json.dumps(compose_skills_cognition(definitions), indent=2)
+
+
+@mcp.tool()
+def memcoder_evolve_skill(
+        definition: dict,
+        changes: dict,
+        project_id: str | None = None) -> str:
+    """Create a reviewable next skill version without overwriting history."""
+    return json.dumps(evolve_skill_cognition(definition, changes, project_id), indent=2)
+
+
+@mcp.tool()
+def memcoder_skill_credit(
+        skill_id: str,
+        outcome: str,
+        influence: str,
+        agent_id: str = "codex",
+        changed_steps: list[str] | None = None,
+        warning: str | None = None) -> str:
+    """Record causal skill influence separately from mere presence."""
+    return json.dumps(skill_credit_cognition(
+        skill_id, outcome, influence, agent_id, changed_steps, warning
+    ), indent=2)
 
 
 @mcp.tool()
@@ -353,7 +440,16 @@ def memcoder_promote_skill(
         supporting_experience_ids: list[str],
         supporting_principle_ids: list[str] | None = None,
         agent_id: str = "antigravity",
-        human_approved: bool = False) -> str:
+        human_approved: bool = False,
+        purpose: str | None = None,
+        preconditions: list[str] | None = None,
+        decision_points: list[str] | None = None,
+        expected_observations: list[str] | None = None,
+        failure_handling: list[str] | None = None,
+        rollback: list[str] | None = None,
+        applicability_limits: list[str] | None = None,
+        state_mutations: list[str] | None = None,
+        resources: list[str] | None = None) -> str:
     """Promote one skill from QA-approved supporting experiences only."""
 
     return json.dumps(
@@ -367,6 +463,15 @@ def memcoder_promote_skill(
             supporting_principle_ids=supporting_principle_ids,
             agent_id=agent_id,
             human_approved=human_approved,
+            purpose=purpose,
+            preconditions=preconditions,
+            decision_points=decision_points,
+            expected_observations=expected_observations,
+            failure_handling=failure_handling,
+            rollback=rollback,
+            applicability_limits=applicability_limits,
+            state_mutations=state_mutations,
+            resources=resources,
         ),
         indent=2
     )

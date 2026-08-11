@@ -16,6 +16,14 @@ def skill_health(skill_id, agent_id="automation"):
         for entry in outcomes_for_skill(skill_id, agent_id)
     ]
 
+    from memory.skill_intelligence import causal_summary
+    causal = causal_summary(skill_id, agent_id)
+    if causal["present"]:
+        statuses = (
+            ["succeeded"] * causal["successful_influence"]
+            + ["failed"] * causal["failed_influence"]
+        )
+
     succeeded = statuses.count("succeeded")
     failed = statuses.count("failed")
     unverified = statuses.count("unverified")
@@ -38,6 +46,7 @@ def skill_health(skill_id, agent_id="automation"):
         "unverified": unverified,
         "success_rate": round(succeeded / completed, 2) if completed else None,
         "automatic_retrieval_allowed": state != "review_required",
+        "causal_credit": causal,
     }
 
 

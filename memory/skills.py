@@ -5,7 +5,8 @@ import json
 from memory.records import record_id
 
 
-SKILL_SCHEMA_VERSION = 1
+SKILL_SCHEMA_VERSION = 2
+SUPPORTED_SKILL_SCHEMA_VERSIONS = {1, 2}
 
 
 def _required_text(value, field, minimum_words=1):
@@ -35,7 +36,7 @@ def is_valid_skill_definition(definition):
     """Return whether stored Skill metadata is safe to expose as a procedure."""
     if not isinstance(definition, dict):
         return False
-    if definition.get("schema_version") != SKILL_SCHEMA_VERSION:
+    if definition.get("schema_version") not in SUPPORTED_SKILL_SCHEMA_VERSIONS:
         return False
     if not isinstance(definition.get("name"), str) or len(definition["name"].split()) < 2:
         return False
@@ -52,6 +53,19 @@ def is_valid_skill_definition(definition):
         return False
     if any(not isinstance(value, str) or not value.strip() for value in principle_ids):
         return False
+    if definition.get("schema_version") == 2:
+        if not isinstance(definition.get("purpose"), str) or not definition["purpose"].strip():
+            return False
+        for field in (
+                "preconditions", "decision_points", "expected_observations",
+                "failure_handling", "rollback", "applicability_limits",
+                "state_mutations", "resources", "version_history"):
+            if not isinstance(definition.get(field), list):
+                return False
+        if not isinstance(definition.get("project_overlays"), dict):
+            return False
+        if not isinstance(definition.get("health"), str):
+            return False
     return (
         isinstance(definition.get("human_approved"), bool)
         and isinstance(definition.get("version"), int)
@@ -121,7 +135,16 @@ def promote_skill(
         supporting_experience_ids,
         supporting_principle_ids=None,
         agent_id="automation",
-        human_approved=False):
+        human_approved=False,
+        purpose=None,
+        preconditions=None,
+        decision_points=None,
+        expected_observations=None,
+        failure_handling=None,
+        rollback=None,
+        applicability_limits=None,
+        state_mutations=None,
+        resources=None):
     """Promote a procedure only when its supporting evidence is trustworthy."""
     name = _required_text(name, "name", minimum_words=2)
     when_to_use = _required_text(when_to_use, "when_to_use", minimum_words=3)
@@ -134,6 +157,26 @@ def promote_skill(
         "supporting_principle_ids",
     )
     human_approved = bool(human_approved)
+    purpose = _required_text(purpose or name, "purpose")
+    preconditions = _optional_string_list(
+        preconditions if preconditions is not None else [when_to_use], "preconditions"
+    )
+    decision_points = _optional_string_list(decision_points, "decision_points")
+    expected_observations = _optional_string_list(
+        expected_observations, "expected_observations"
+    )
+    failure_handling = _optional_string_list(
+        failure_handling if failure_handling is not None
+        else ["Stop and investigate when an expected observation is absent."],
+        "failure_handling",
+    )
+    rollback = _optional_string_list(
+        rollback if rollback is not None else ["Revert the skill's current-project changes."],
+        "rollback",
+    )
+    applicability_limits = _optional_string_list(applicability_limits, "applicability_limits")
+    state_mutations = _optional_string_list(state_mutations, "state_mutations")
+    resources = _optional_string_list(resources, "resources")
 
     supporting, rejected = _supporting_experiences(support_ids, agent_id)
     if rejected:
@@ -158,6 +201,18 @@ def promote_skill(
         "supporting_principle_ids": principle_ids,
         "human_approved": human_approved,
         "version": 1,
+        "purpose": purpose,
+        "preconditions": preconditions,
+        "decision_points": decision_points,
+        "expected_observations": expected_observations,
+        "failure_handling": failure_handling,
+        "rollback": rollback,
+        "applicability_limits": applicability_limits,
+        "state_mutations": state_mutations,
+        "resources": resources,
+        "version_history": [],
+        "project_overlays": {},
+        "health": "unproven",
     }
     if not is_valid_skill_definition(definition):
         raise ValueError("Skill promotion produced an invalid skill definition.")

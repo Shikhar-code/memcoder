@@ -1,144 +1,105 @@
 <div align="center">
 
-<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder Beta 2.3 — cognition that knows when to speak" width="100%" />
+<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder - verified cognition for coding agents" width="100%" />
 
 <br />
 
-<a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=for-the-badge&label=PyPI&color=6D9EFF" alt="PyPI release" /></a>
-<a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=for-the-badge&color=63D7C5" alt="Supported Python versions" /></a>
+<a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=for-the-badge&label=PyPI&color=6D9EFF" alt="PyPI" /></a>
+<a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=for-the-badge&color=63D7C5" alt="Python 3.10+" /></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-BFA1FF?style=for-the-badge" alt="MIT license" /></a>
-<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.3-FFB86B?style=for-the-badge" alt="Beta 2.3" /></a>
+<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.4-FFB86B?style=for-the-badge" alt="Beta 2.4" /></a>
 
-### Memory is easy. Knowing what deserves to influence the next decision is harder.
+### Persistent cognition for agents that have to be right twice.
 
-**MemCoder is a local, provider-independent cognition layer for AI agents.**
+**MemCoder is local, provider-independent memory for coding agents.**
 
-It retrieves verified experience, suppresses low-utility guidance, preserves project decisions, and learns only from evidence.
+It brings back verified evidence only when it can improve the next decision,
+then learns only after the host proves the result.
 
-<sub>Local-first · evidence-gated · utility-aware · token-bounded · host-agnostic</sub>
+<sub>Local-first | evidence-gated | token-aware | host-agnostic</sub>
 
 <br />
 
-<a href="#start-in-60-seconds"><strong>Install</strong></a>
-· <a href="#connect-a-host"><strong>Connect a host</strong></a>
-· <a href="#beta-23-the-important-new-parts"><strong>Beta 2.3</strong></a>
-· <a href="#trust-boundaries"><strong>Safety</strong></a>
-· <a href="#architecture"><strong>Architecture</strong></a>
-· <a href="docs/roadmap.md"><strong>Roadmap</strong></a>
+<a href="#quick-start"><strong>Quick start</strong></a>
+&nbsp;|&nbsp; <a href="#what-it-actually-does"><strong>What it does</strong></a>
+&nbsp;|&nbsp; <a href="#beta-24"><strong>Beta 2.4</strong></a>
+&nbsp;|&nbsp; <a href="#connect-your-host"><strong>Connect a host</strong></a>
+&nbsp;|&nbsp; <a href="#proof-not-promises"><strong>Evidence</strong></a>
 
 </div>
 
 ---
 
+> **Most agent memory remembers things. MemCoder makes reuse accountable.**
+>
+> It can stay silent, flag a known failure, offer a compact brief, or compile a
+> bounded plan. Either way, the host still owns the code, tools, and proof.
+
 <table>
 <tr>
 <td width="33%" valign="top">
 
-### 01 / Remember proof
+### Remember proof
 
-Store verified outcomes, not chat transcripts. Every durable Experience keeps its task, solution, files, and evidence.
+Keep verified outcomes, not raw conversations. An Experience carries the task,
+solution, files, and evidence that made it trustworthy.
 
 </td>
 <td width="33%" valign="top">
 
-### 02 / Spend attention wisely
+### Spend attention
 
-Return `none`, one risk, a compact brief, or a Skill-backed plan. Trusted-but-useless guidance is withheld.
+Related is not enough. MemCoder checks utility, risk, provenance, and token
+cost before it interrupts a task.
 
 </td>
 <td width="34%" valign="top">
 
-### 03 / Continue the project
+### Get better safely
 
-Recover active state, constraints, decisions, rationale, risks, and next actions without replaying an entire conversation.
+Turn repeated, verified work into Skills with preconditions, verification,
+rollback, version history, and causal credit.
 
 </td>
 </tr>
 </table>
 
-> **MemCoder is not a bigger prompt and not a transcript archive.**
->
-> It is a control plane for deciding what prior evidence should affect the current task.
-
-## See it in one minute
+## What it actually does
 
 <p align="center">
-  <img src="assets/memcoder-cognition-rail.svg" alt="MemCoder utility-aware cognition and project continuity" width="100%" />
+  <img src="assets/memcoder-cognition-rail.svg" alt="Task to utility gate to guidance to verification to learning" width="100%" />
 </p>
 
-The host model still reads files, writes code, and runs tests. MemCoder does three narrower jobs:
+The host does the work. MemCoder controls the cognitive context around it.
 
-1. **Before work:** decide whether previous evidence is useful enough to surface.
-2. **After proof:** admit only verified learning into durable memory.
-3. **Across sessions:** preserve bounded project state and rationale without storing raw chat.
-
-If nothing is useful, MemCoder stays silent. If verification fails, MemCoder does not learn a success.
-
-## Beta 2.3: the important new parts
-
-Beta 2.3 adds two control systems above the original memory foundation.
-
-### Utility Engine — relevance is necessary, not sufficient
-
-Semantic similarity can retrieve something related that still does not help the next decision. The Utility Engine adds a second gate.
-
-| New behavior | What it changes |
-| --- | --- |
-| **Decision framing** | Identifies the decision the host is actually trying to make, not only matching words. |
-| **Utility veto** | Withholds evidence when its expected value does not justify distraction or token cost. |
-| **Evidence diversity** | Avoids filling a packet with near-duplicate memories that all say the same thing. |
-| **Intervention receipts** | Every surfaced packet gets an ID that can be audited and rated later. |
-| **Outcome feedback** | `helpful`, `ignored`, `misleading`, and `harmful` ratings recalibrate future reuse. |
-| **Retrieval diagnostics** | Shows semantic rank, utility rank, and the reason a candidate was withheld. |
-
-The practical difference is restraint: a memory can be trusted and relevant yet still fail the utility gate.
-
-### Project Cortex — continuity without conversational baggage
-
-Project Cortex stores bounded, durable project cognition separately from task memories.
-
-| Project state | Example |
-| --- | --- |
-| **Facts** | “The public API is Python 3.10+.” |
-| **Constraints** | “The core runtime must remain provider-independent.” |
-| **Goals** | “Prove utility on real repositories before production claims.” |
-| **Decisions + rationale** | “Keep raw chat out of semantic memory because it is noisy and hard to validate.” |
-| **Risks** | “Environment drift can invalidate an old implementation decision.” |
-| **Next actions** | “Run the real-project evaluation protocol.” |
-
-On resurrection, MemCoder checks the current environment against the saved one. Drift is reported rather than silently treating stale state as current truth. Handoffs export a bounded cognition capsule; the receiver must revalidate it before acceptance.
-
-### What this means for a developer
-
-```text
-First task       solve normally → verify → record evidence
-Related task     retrieve the smallest useful guidance → verify again
-Long project     save decisions and state → resurrect with drift checks
-Weak guidance    rate the exact receipt → reduce future interference
-```
+| Moment | MemCoder action | Why it matters |
+| --- | --- | --- |
+| Before work | Retrieves only decision-useful verified evidence | No transcript dump, no generic advice flood |
+| Before risk | Surfaces the cheapest check for destructive, migration, dependency, release, or security work | Known failures become preventable |
+| During work | Keeps bounded task and project state | A long project can resume without replaying chat |
+| After proof | Admits only QA-approved evidence | A passing result can compound; a failed claim cannot |
+| Next time | Transfers Skills with assumptions and rollback visible | Reuse is inspectable instead of magical |
 
 <details>
-<summary><strong>Current capability matrix</strong></summary>
+<summary><strong>Show the decision loop</strong></summary>
 
-| Capability | Beta 2.3 status |
-| --- | :---: |
-| Persistent Experience, Principles, Reflections, and Mistakes | Ready |
-| Confidence-, ownership-, validity-, environment-, and provenance-gated retrieval | Ready |
-| `none` / `risk` / `brief` / `plan` intervention modes | Ready |
-| Utility Engine, receipts, feedback, and retrieval diagnostics | Ready |
-| Project state, decisions, resurrection, drift detection, and handoff | Ready |
-| QA admission before durable learning | Ready |
-| Skill promotion, planning, audit history, and health tracking | Ready |
-| Provider-free core runtime | Ready |
-| CLI, Python SDK, and MCP adapters | Ready |
-| Codex Desktop local plugin | Local preview |
-| Broad real-project causal evidence | In evaluation |
+```text
+task_started
+  -> utility gate: none / risk / brief / plan
+  -> host investigates and acts
+  -> focused verification
+  -> QA admission
+  -> durable memory only when proof exists
+```
+
+If no memory changes the next action, MemCoder deliberately returns `none`.
+That restraint is a feature, not an empty result.
 
 </details>
 
-## Start in 60 seconds
+## Quick start
 
-### Option A — install from PyPI (recommended)
+### 1. Install
 
 ```powershell
 pip install memcoder
@@ -146,9 +107,12 @@ memcoder --help
 memcoder storage status
 ```
 
-### Option B — install the newest source
+**Requirements:** Python 3.10+. The first semantic-index run can download a
+local embedding model. The core runtime does not require Ollama, CUDA, or a
+model API key.
 
-Use this for Beta 2.3 development or the local Codex plugin:
+<details>
+<summary><strong>Use the current source instead</strong></summary>
 
 ```powershell
 git clone https://github.com/Shikhar-code/memcoder.git
@@ -157,22 +121,111 @@ python -m pip install --no-build-isolation .
 python -m memcoder --help
 ```
 
-**Requirements:** Python 3.10+. The first semantic-index run may download a local embedding model. The core runtime requires no model API key, Ollama, CUDA, or hosted LLM.
-
-<details>
-<summary><strong>Windows cannot find <code>python</code>?</strong></summary>
-
-Install Python from [python.org](https://www.python.org/downloads/) and select **Add Python to PATH**. If your installation provides the Windows launcher, replace `python` with `py`.
+Use this route for Beta development or the local Codex plugin.
 
 </details>
 
-## Connect a host
+### 2. Let an agent use it
 
-One cognition model, several integration boundaries. Choose the host you already use.
+`lifecycle.json`
 
-### Codex Desktop — automatic development cognition
+```json
+{
+  "event": "task_started",
+  "task_id": "billing-validation-42",
+  "problem": "Fix request validation without changing successful responses.",
+  "agent_id": "billing-api",
+  "environment": {
+    "branch": "main",
+    "available_checks": ["python tests/test_validation.py"]
+  }
+}
+```
 
-The repository includes a local Codex plugin. Its Skill invokes MemCoder automatically for substantive engineering work and records learning only after focused verification passes.
+```powershell
+memcoder autopilot --input lifecycle.json
+```
+
+That one call returns the smallest useful intervention plus a verification
+plan. The host continues normally if MemCoder is unavailable.
+
+## Beta 2.4
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Invisible Autopilot
+
+Normal prompts can trigger provider-neutral lifecycle events:
+
+`task_started` -> `before_edit` -> `before_tool` -> `verification_finished`
+
+The attention governor deduplicates unchanged tasks, chooses the smallest
+intervention, and fails open so cognition never blocks the host.
+
+</td>
+<td width="50%" valign="top">
+
+### Skill Intelligence
+
+Skills are now small, versioned programs rather than saved advice. They carry
+preconditions, steps, expected observations, verification, failure handling,
+rollback, limits, and evidence.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Failure Radar + proof planning
+
+Before high-cost actions, MemCoder names the failure mechanism and the
+cheapest native check. A command passing is not confused with proving the
+requested behavior.
+
+</td>
+<td width="50%" valign="top">
+
+### Token Economy
+
+The lifecycle ledger tracks injected cognition, repeated context avoided, and
+the estimated net token dividend. Context is earned, not assumed.
+
+</td>
+</tr>
+</table>
+
+<details>
+<summary><strong>Open the Beta 2.4 control panel</strong></summary>
+
+| Control | What it gives you |
+| --- | --- |
+| `memcoder autopilot` | One fail-open lifecycle entry point |
+| `memcoder autopilot-control` | `pause`, `resume`, `inspect`, and `rollback` |
+| `memcoder token-ledger` | Per-task cognition and token accounting |
+| `memcoder skill-compile` | Reusable steps vs assumptions requiring adaptation |
+| `memcoder skill-compose` | A compatible composition or explicit conflict |
+| `memcoder skill-evolve` | A reviewable next Skill version with history intact |
+| `memcoder skill-credit` | Influence evidence separate from mere Skill presence |
+
+Automatic capture remains QA-gated and reversible. It never treats a stopped
+host as a successful outcome.
+
+</details>
+
+## Connect your host
+
+Pick the door you already use. The cognition model stays the same.
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### Codex Desktop
+
+The local plugin invokes MemCoder automatically for substantive engineering
+work. No special end-user prompt is required after setup.
 
 ```powershell
 git clone https://github.com/Shikhar-code/memcoder.git
@@ -181,247 +234,72 @@ python -m pip install --no-build-isolation .
 python scripts/configure_codex_plugin.py
 ```
 
-Then:
+Then add `codex-marketplace` as a local marketplace in **Codex > Plugins**,
+install **MemCoder**, and restart Codex.
 
-1. Open **Codex → Plugins**.
-2. Add this repository's `codex-marketplace` directory as a local marketplace.
-3. Install and enable **MemCoder**.
-4. Restart Codex completely.
-5. Start a normal coding task—no special MemCoder prompt is required.
+</td>
+<td width="33%" valign="top">
 
-To make the intervention visible while testing, ask:
-
-```text
-Before you begin, report whether MemCoder intervened and show its intervention mode.
-```
-
-The configuration script binds the plugin to the exact Python installation that contains MemCoder. Published Codex marketplace distribution is future work; the current integration is a local preview.
-
-<details>
-<summary><strong>AGY / Antigravity CLI</strong></summary>
-
-Configure once and restart AGY:
+### AGY / Antigravity
 
 ```powershell
 python -m memcoder setup-agy
 ```
 
-For reliable manual use, separate cognition retrieval from execution.
+Restart AGY. For manual workflows, first retrieve a compact intervention,
+then solve and verify in a follow-up request. See the
+[AGY prompt template](docs/antigravity_prompt_template.md).
 
-**Message 1 — retrieve only**
+</td>
+<td width="34%" valign="top">
 
-```text
-Do not read, list, edit, or run any files or commands.
+### Python, MCP, or automation
 
-Call memcoder_intervene exactly once with:
-- problem: "<your exact task>"
-- agent_id: "<stable project id>"
-- include_shared: false
-
-Print the complete result and stop.
-```
-
-**Message 2 — act and prove**
-
-```text
-Use the MemCoder packet returned immediately above as guidance, not proof.
-Do not call another preparation tool.
-
-Work only inside the current project. Make the smallest correct change, run
-focused verification, and report the changed files and complete output.
-```
-
-See the full [AGY prompt template](docs/antigravity_prompt_template.md).
-
-</details>
-
-<details>
-<summary><strong>Any CLI-capable automation</strong></summary>
-
-Every cognition operation accepts JSON from a file or standard input and returns JSON.
-
-`task.json`
-
-```json
-{
-  "problem": "Fix request validation and run the focused test.",
-  "agent_id": "billing-api",
-  "include_shared": false,
-  "token_budget": 450,
-  "environment": {"branch": "main", "runtime": "python-3.12"}
-}
-```
-
-```powershell
-memcoder intervene --input task.json
-```
-
-After the host proves the result, submit structured evidence:
-
-`outcome.json`
-
-```json
-{
-  "task": "Fix required-field request validation.",
-  "files": ["src/request.py", "tests/test_request.py"],
-  "summary": "Missing values now raise the expected validation error.",
-  "solution": "Validate presence and type before normalization.",
-  "evidence": {
-    "checks": [{
-      "name": "focused request validation",
-      "kind": "test",
-      "status": "passed",
-      "command": "python tests/test_request.py",
-      "output": "PASS: request validation"
-    }]
-  },
-  "agent_id": "billing-api"
-}
-```
-
-```powershell
-memcoder verify --input outcome.json
-memcoder record --input outcome.json
-```
-
-`verify` is read-only. `record` repeats the QA gate and stores nothing when evidence is failed or insufficient.
-
-</details>
-
-<details>
-<summary><strong>Python and MCP hosts</strong></summary>
+Every operation accepts structured JSON through the CLI, Python API, or MCP.
 
 ```python
-from memcoder import intervene_cognition
+from memcoder import autopilot_event_cognition
 
-packet = intervene_cognition(
-    problem="Fix request validation and run the focused test.",
+packet = autopilot_event_cognition(
+    event="task_started",
+    task_id="task-42",
+    problem="Fix request validation safely.",
     agent_id="billing-api",
-    include_shared=False,
-    token_budget=450,
 )
-
-print(packet["intervention"]["mode"])
 ```
 
-MCP-capable hosts use the same operations through `adapters.mcp.server`. See the [MCP integration notes](docs/antigravity_mcp.md).
+</td>
+</tr>
+</table>
 
-</details>
+## The memory contract
 
-## Use the Beta 2.3 controls
+MemCoder stores different things for different jobs. None of them is a raw
+conversation archive.
 
-### Inspect why retrieval did—or did not—intervene
-
-```json
-{
-  "problem": "Fix request validation safely.",
-  "agent_id": "billing-api",
-  "include_shared": false,
-  "environment": {"branch": "main"}
-}
-```
-
-```powershell
-memcoder retrieval-debug --input task.json
-```
-
-The result separates semantic rank from utility rank and explains withheld evidence.
-
-### Rate one exact intervention
-
-Use the `intervention_id` from a returned receipt:
-
-```json
-{
-  "intervention_id": "<receipt id>",
-  "rating": "helpful",
-  "agent_id": "billing-api",
-  "reason": "It changed the validation order and the hidden test passed.",
-  "outcome": "Focused and hidden verification passed."
-}
-```
-
-```powershell
-memcoder utility-feedback --input feedback.json
-```
-
-Valid ratings are `helpful`, `ignored`, `misleading`, and `harmful`. Feedback is tied to the exact intervention, not a vague memory impression.
-
-### Preserve and resurrect project cognition
-
-`project-update.json`
-
-```json
-{
-  "project_id": "billing-api",
-  "agent_id": "billing-api",
-  "environment": {"branch": "main", "runtime": "python-3.12"},
-  "update": {
-    "facts": ["Validation errors are part of the public API."],
-    "constraints": ["Do not change successful response shapes."],
-    "goals": ["Finish the validation hardening release."],
-    "risks": ["Old guidance may predate the Python 3.12 migration."],
-    "next_actions": ["Run the hidden validation matrix."],
-    "decisions": [{
-      "decision": "Validate before normalization.",
-      "rationale": "It produces predictable exceptions for missing and wrong-type values.",
-      "status": "active"
-    }]
-  }
-}
-```
-
-```powershell
-memcoder project-update --input project-update.json
-memcoder project-resurrect --input project-resurrect.json
-memcoder project-handoff --input project-handoff.json
-memcoder project-accept --input project-accept.json
-```
-
-Resurrection is bounded by a token budget. Handoffs contain durable cognition, not unrestricted transcripts or secrets.
-
-## How learning compounds
-
-```text
-verified Experience → Reflection → transferable Principle → promoted Skill → bounded Plan
-```
-
-| Layer | Contains | Never becomes |
+| Layer | It contains | It never becomes |
 | --- | --- | --- |
-| **Experience** | Verified task, solution, files, and evidence | Raw conversation history |
-| **Reflection** | Concise investigation observation from approved work | Unsupported self-critique |
-| **Principle** | Transferable guidance backed by evidence | Generic advice |
-| **Skill** | Procedure promoted from QA-approved support | Untested autonomous behavior |
-| **Plan** | Bounded application of a trusted Skill | Open-ended permission |
-| **Project Cortex** | Durable state, decisions, risks, and next actions | A transcript dump |
+| Experience | Verified task, solution, files, evidence | Unproven narrative |
+| Reflection | Short investigation observation | A fix disguised as self-critique |
+| Principle | Transferable evidence-backed guidance | Generic motivational advice |
+| Skill | A promoted, test-carrying procedure | Open-ended autonomy |
+| Project Cortex | Facts, rationale, risks, and next actions | A full transcript dump |
 
-Checkpoints remain separate, bounded working state and never enter semantic guidance automatically.
+### The rules that keep it honest
+
+- **Local-first:** cognition stays on the machine by default.
+- **Evidence-gated:** durable learning needs inspectable host verification.
+- **Provenance-aware:** guidance keeps its source and current validity state.
+- **Reversible:** contradiction, retention, and automatic capture preserve or
+  deprecate evidence; they do not silently erase history.
+- **Provider-independent:** no generation provider is required for the core.
 
 <details>
-<summary><strong>Skill lifecycle</strong></summary>
+<summary><strong>Import project instructions without polluting Experience memory</strong></summary>
 
-| Operation | Safety boundary |
-| --- | --- |
-| **Promote** | Requires two QA-approved Experiences, or one explicitly human-approved Experience. |
-| **Retrieve** | Matching Skills rank ahead of isolated Experiences. |
-| **Plan** | Every plan remains bounded and linked to its source Skill. |
-| **Audit** | Plan outcomes remain audit history, not task guidance. |
-| **Health** | Repeated failures can mark a Skill `review_required` and withhold it from reuse. |
-
-```powershell
-memcoder skill promote --input skill.json
-memcoder start --input task.json
-memcoder plan-history --input history.json
-memcoder skill-health --input health.json
-```
-
-When no Skill matches, MemCoder says so. It does not manufacture expertise.
-
-</details>
-
-## Import project guidance
-
-MemCoder can preview actionable Principles from `AGENTS.md`, runbooks, and architecture documents. Imported documentation never becomes Experience or Reflection because it is guidance—not lived, verified work.
+MemCoder can preview actionable guidance from `AGENTS.md`, runbooks, and
+architecture Markdown. It imports only approved instructions as Principles;
+documentation does not pretend to be lived, verified Experience.
 
 ```json
 {
@@ -431,112 +309,71 @@ MemCoder can preview actionable Principles from `AGENTS.md`, runbooks, and archi
 }
 ```
 
-Review the preview, then repeat with `approve: true`. Files must be UTF-8 Markdown inside the launched project and no larger than 1 MB. Prompt-injection patterns, placeholders, code blocks, and non-instructional prose are rejected.
-
-## Trust boundaries
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### Before guidance
-
-- owner and shared-memory boundaries
-- semantic relevance and confidence
-- validity and contradiction state
-- environment compatibility
-- provenance and source proof
-- decision utility and diversity
-
-</td>
-<td width="50%" valign="top">
-
-### Before learning
-
-- meaningful task and solution structure
-- host-supplied verification evidence
-- explicit pass or fail status
-- inspectable command or reviewed assertion
-- field-level rejection for weak learning
-- no raw transcript ingestion
-
-</td>
-</tr>
-</table>
-
-Additional guarantees:
-
-- **Local-first:** cognition stays on the user's machine by default.
-- **Non-destructive:** contradiction and retention preserve original evidence.
-- **Proof-carrying:** guidance retains source evidence and provenance.
-- **Token-bounded:** intervention and resurrection expose explicit budgets.
-- **Provider-free:** the core runtime is not coupled to a generation provider.
-
-Set `MEMCODER_DB_PATH` to isolate a project or test database.
-
-<details>
-<summary><strong>Storage operations</strong></summary>
-
-```powershell
-memcoder storage status
-memcoder storage migrate
-memcoder storage rebuild-index
-memcoder storage export --help
-memcoder storage backup --help
-memcoder storage restore --help
-memcoder storage retention-preview --help
-```
-
-Durable records remain the source of truth; the semantic index can be rebuilt.
+Review the preview, then repeat with `approve: true`. Files must be UTF-8
+Markdown inside the launched project and no larger than 1 MB.
 
 </details>
 
-## Architecture
+## Proof, not promises
 
-```mermaid
-flowchart TB
-    HOST["Host agent<br/>Codex · AGY · automation · Python"] --> RUNTIME["Cognitive runtime<br/>attention · budget · transfer · belief"]
-    RUNTIME --> UTILITY["Utility Engine<br/>decision value · veto · receipt"]
-    UTILITY --> RETRIEVE["Trusted retrieval<br/>relevance · validity · provenance"]
-    RUNTIME --> QA["QA admission<br/>host evidence · field validation"]
-    RETRIEVE --> STORE["Durable records<br/>Experience · Reflection · Principle · Skill"]
-    QA --> STORE
-    STORE --> INDEX["Rebuildable semantic index"]
-    STORE --> PLAN["Bounded plans + health tracking"]
-    STORE --> CORTEX["Project Cortex<br/>state · decisions · resurrection · handoff"]
-    PLAN --> RUNTIME
-    CORTEX --> RUNTIME
+In the controlled transfer evaluation, three baseline AGY runs passed visible
+tests but failed private robustness checks. Six valid MemCoder-assisted runs
+passed the same private checks.
 
-    classDef host fill:#142442,stroke:#72a7ff,color:#eaf1ff;
-    classDef core fill:#211b45,stroke:#b89cff,color:#f0ebff;
-    classDef trust fill:#123b38,stroke:#61e6bd,color:#dcfff4;
-    class HOST host;
-    class RUNTIME,UTILITY,CORTEX core;
-    class RETRIEVE,QA,STORE,INDEX,PLAN trust;
-```
+That supports one narrow claim: **verified validation procedures transferred to
+unseen variants in that controlled setup.** It does not prove universal agent
+improvement.
 
-Read the [current architecture PDF](output/pdf/memcoder-current-architecture.pdf) for the component-level view.
-
-## Evidence, honestly stated
-
-In MemCoder's controlled transfer evaluation, three baseline AGY runs passed visible tests but failed private robustness checks. Six valid MemCoder-assisted runs passed the same private checks.
-
-That supports a narrow claim: **verified validation procedures transferred to unseen variants in that controlled setup.** It does not prove universal agent improvement. Beta 2.3 remains a development release while real-project evaluations measure correctness, rework, token consumption, and tool use.
+| Ready now | Still being measured |
+| --- | --- |
+| Provider-free local runtime | Broad real-project causal improvement |
+| QA-gated learning and retrieval safety | Median token and rework reduction |
+| Utility Engine and Project Cortex | Failure interception across diverse repositories |
+| Lifecycle Autopilot and Skill Intelligence | Production-scale latency and cloud operations |
 
 - [Controlled transfer results](docs/beta2_controlled_transfer_results.md)
 - [Evaluation protocol](docs/beta2_evaluation_protocol.md)
 - [Real-project evaluation protocol](docs/beta2_real_project_evaluation.md)
+- [Roadmap](docs/roadmap.md)
 
-## Development
+## For developers who want the wiring
+
+<details>
+<summary><strong>CLI workflow</strong></summary>
+
+```powershell
+memcoder intervene --input task.json
+memcoder verify --input outcome.json
+memcoder record --input outcome.json
+memcoder retrieval-debug --input task.json
+memcoder storage status
+```
+
+`verify` is read-only. `record` reruns the QA gate and stores nothing when
+evidence is failed or insufficient.
+
+</details>
+
+<details>
+<summary><strong>Project continuity</strong></summary>
+
+```powershell
+memcoder project-update --input project-update.json
+memcoder project-resurrect --input project-resurrect.json
+memcoder project-handoff --input project-handoff.json
+memcoder project-accept --input project-accept.json
+```
+
+Project Cortex stores bounded decisions and state. Resurrection reports
+environment drift instead of treating stale state as truth.
+
+</details>
+
+<details>
+<summary><strong>Storage and development checks</strong></summary>
 
 ```powershell
 python -m pip install --no-build-isolation .
-python -m memcoder --help
-```
-
-Provider-free regression checks:
-
-```powershell
 python tests/test_automation_cli.py
 python tests/test_mcp_provider_independence.py
 python tests/test_retrieval_safety.py
@@ -550,24 +387,22 @@ python tests/test_evaluation.py
 python tests/test_utility_engine.py
 python tests/test_project_cortex.py
 python tests/test_beta23_cli.py
+python tests/test_autopilot.py
+python tests/test_skill_intelligence.py
+python tests/test_beta24_cli.py
 ```
+
+</details>
 
 ## Documentation
 
-| Document | Purpose |
+| Document | Use it for |
 | --- | --- |
-| [Roadmap](docs/roadmap.md) | Product direction from Beta 2.3 to production. |
-| [Changelog](CHANGELOG.md) | Release-facing changes and compatibility notes. |
-| [Release checklist](docs/beta2_release_checklist.md) | Pre-release verification. |
-| [AGY prompt template](docs/antigravity_prompt_template.md) | Guarded host workflow for AGY. |
-| [MCP integration](docs/antigravity_mcp.md) | MCP behavior and provider-independence notes. |
-| [Architecture PDF](output/pdf/memcoder-current-architecture.pdf) | Current component architecture. |
-
-## What remains
-
-Beta 2.3 implements the Utility Engine and Project Cortex foundations. The next defensible gate is not another feature count—it is broad evidence that automatic intervention improves real work without correctness, latency, or token regressions.
-
-See the [full roadmap](docs/roadmap.md) for evaluation gates, deeper cognition, cloud synchronization, dreaming, and production hardening.
+| [Roadmap](docs/roadmap.md) | Product direction and quantitative release gates |
+| [Changelog](CHANGELOG.md) | Release-facing changes and compatibility notes |
+| [MCP integration](docs/antigravity_mcp.md) | MCP behavior and provider independence |
+| [AGY prompt template](docs/antigravity_prompt_template.md) | Guarded AGY workflow |
+| [Architecture PDF](output/pdf/memcoder-current-architecture.pdf) | Component-level design |
 
 ## License
 
@@ -575,7 +410,7 @@ Released under the [MIT License](LICENSE).
 
 <div align="center">
 
-### Retrieve precisely. Decide deliberately. Continue intelligently.
+### Retrieve precisely. Decide deliberately. Learn from proof.
 
 <sub>Built by <a href="https://github.com/Shikhar-code">Shikhar-code</a>.</sub>
 

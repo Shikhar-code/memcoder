@@ -95,7 +95,7 @@ def plan_cognition(problem, agent_id="automation", include_shared=True, environm
         "confidence": results["confidence"],
         "retrieval_strategy": results["strategy"],
         "brief": build_decision_brief(problem, results),
-        "plan": build_action_plan(problem, results),
+        "plan": build_action_plan(problem, results, environment=environment),
         "instructions": [
             "Treat the plan as guidance, not proof.",
             "Replan when a listed replan condition occurs.",
@@ -125,7 +125,7 @@ def start_cognition(problem, agent_id="automation", include_shared=True, environ
         "confidence": results["confidence"],
         "retrieval_strategy": results["strategy"],
         "brief": build_decision_brief(problem, results),
-        "plan": build_action_plan(problem, results),
+        "plan": build_action_plan(problem, results, environment=environment),
         "available_detail": {
             key: len(results.get(key, []))
             for key in ("skills", "experiences", "mistakes", "principles", "reflections")
@@ -184,6 +184,147 @@ def utility_feedback_cognition(
         mute=mute,
         applicability_correction=applicability_correction,
     )
+
+
+def autopilot_event_cognition(
+        event,
+        task_id,
+        problem,
+        agent_id="automation",
+        include_shared=True,
+        environment=None,
+        context=None,
+        action=None,
+        outcome=None,
+        token_budget=450):
+    """Handle one host lifecycle boundary; host work always fails open."""
+    try:
+        from memory.autopilot import begin_event, finish_event
+
+        decision = begin_event(
+            event=event,
+            task_id=task_id,
+            owner=agent_id,
+            problem=problem,
+            context=context,
+            action=action,
+            environment=environment,
+        )
+        intervention = None
+        if decision["should_intervene"]:
+            intervention = intervene_cognition(
+                problem=problem,
+                agent_id=agent_id,
+                include_shared=include_shared,
+                environment=environment,
+                token_budget=token_budget,
+            )
+
+        capture = None
+        if event in {"verification_finished", "task_completed"} and isinstance(outcome, dict):
+            capture_result = record_cognition(
+                task=outcome.get("task", problem),
+                files=outcome.get("files", []),
+                summary=outcome.get("summary", ""),
+                solution=outcome.get("solution", ""),
+                reflection=outcome.get("reflection"),
+                principles=outcome.get("principles"),
+                evidence=outcome.get("evidence"),
+                plan_id=outcome.get("plan_id"),
+                applied_skill_id=outcome.get("applied_skill_id"),
+                agent_id=agent_id,
+                environment=environment,
+            )
+            recorded = capture_result.get("recorded", {})
+            record_ids = []
+            experience = recorded.get("experience")
+            if isinstance(experience, dict) and experience.get("id"):
+                record_ids.append(experience["id"])
+            record_ids.extend(
+                item["id"] for item in recorded.get("reflections", [])
+                if isinstance(item, dict) and item.get("id")
+            )
+            capture = {
+                "experience_recorded": capture_result.get("experience_recorded", False),
+                "record_ids": record_ids,
+                "qa": capture_result.get("qa"),
+                "rejected": capture_result.get("rejected", []),
+            }
+        return finish_event(
+            decision,
+            intervention=intervention,
+            capture=capture,
+            token_budget=token_budget,
+        )
+    except Exception as error:  # Lifecycle hooks must never block host work.
+        return {
+            "available": False,
+            "fail_open": True,
+            "event": event,
+            "task_id": task_id,
+            "error": str(error),
+        }
+
+
+def autopilot_control_cognition(action, agent_id="automation", task_id=None):
+    """Pause, inspect, resume, or reversibly deprecate auto-captured records."""
+    from memory.autopilot import control
+
+    result = control(action, agent_id, task_id=task_id)
+    if action != "rollback":
+        return result
+    rolled_back = []
+    for record_id in result.pop("rollback_record_ids", []):
+        try:
+            update_memory_validity_cognition(
+                record_id=record_id,
+                state="deprecated",
+                agent_id=agent_id,
+                reason="Rolled back an automatic lifecycle capture.",
+            )
+            rolled_back.append(record_id)
+        except ValueError:
+            continue
+    return {**result, "rolled_back": rolled_back}
+
+
+def token_ledger_cognition(agent_id="automation", task_id=None):
+    from memory.autopilot import token_ledger
+    return token_ledger(agent_id, task_id=task_id)
+
+
+def compile_skill_cognition(definition, problem, environment=None):
+    from memory.skill_intelligence import compile_transfer
+    return compile_transfer(definition, problem, environment=environment)
+
+
+def compose_skills_cognition(definitions):
+    from memory.skill_intelligence import compose_skills
+    return compose_skills(definitions)
+
+
+def evolve_skill_cognition(definition, changes, project_id=None):
+    from memory.skill_intelligence import evolve_skill
+    return evolve_skill(definition, changes, project_id=project_id)
+
+
+def skill_credit_cognition(
+        skill_id,
+        outcome,
+        influence,
+        agent_id="automation",
+        changed_steps=None,
+        warning=None):
+    from memory.skill_intelligence import record_causal_credit, causal_summary
+    event = record_causal_credit(
+        skill_id,
+        agent_id,
+        outcome,
+        influence,
+        changed_steps=changed_steps,
+        warning=warning,
+    )
+    return {"recorded": event, "summary": causal_summary(skill_id, agent_id)}
 
 
 def retrieval_debug_cognition(
@@ -440,7 +581,8 @@ def promote_skill_cognition(
         supporting_experience_ids,
         supporting_principle_ids=None,
         agent_id="automation",
-        human_approved=False):
+        human_approved=False,
+        **contract):
     """Promote QA-supported experience into one reusable, provider-free skill."""
     from memory.skills import promote_skill
 
@@ -454,4 +596,5 @@ def promote_skill_cognition(
         supporting_principle_ids=supporting_principle_ids,
         agent_id=agent_id,
         human_approved=human_approved,
+        **contract,
     )

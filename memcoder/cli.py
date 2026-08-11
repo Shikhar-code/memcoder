@@ -6,8 +6,13 @@ import sys
 from pathlib import Path
 
 from api.cognition import (
+    autopilot_control_cognition,
+    autopilot_event_cognition,
     checkpoint_cognition,
+    compile_skill_cognition,
+    compose_skills_cognition,
     evaluate_cognition,
+    evolve_skill_cognition,
     intervene_cognition,
     project_accept_cognition,
     project_handoff_cognition,
@@ -20,8 +25,10 @@ from api.cognition import (
     promote_skill_cognition,
     record_cognition,
     skill_health_cognition,
+    skill_credit_cognition,
     start_cognition,
     task_state_cognition,
+    token_ledger_cognition,
     utility_feedback_cognition,
     verify_cognition,
 )
@@ -177,6 +184,13 @@ def main(argv=None):
 
     for command, help_text in (
             ("intervene", "Return the smallest useful cognition packet for a task."),
+            ("autopilot", "Handle one provider-neutral host lifecycle event."),
+            ("autopilot-control", "Pause, inspect, resume, or roll back automatic cognition."),
+            ("token-ledger", "Inspect lifecycle cognition token accounting."),
+            ("skill-compile", "Compile safe skill transfer for the current context."),
+            ("skill-compose", "Check and order a compatible skill composition."),
+            ("skill-evolve", "Create a reviewable next skill version."),
+            ("skill-credit", "Record whether a skill actually changed behavior."),
             ("utility-feedback", "Rate the decision utility of one exact intervention."),
             ("retrieval-debug", "Explain semantic rank, utility rank, and withheld guidance."),
             ("checkpoint", "Save bounded working state without creating memory."),
@@ -315,6 +329,55 @@ def main(argv=None):
             if environment is not None:
                 options["environment"] = environment
             result = intervene_cognition(**options)
+        elif arguments.command == "autopilot":
+            result = autopilot_event_cognition(
+                event=require_text(request, "event"),
+                task_id=require_text(request, "task_id"),
+                problem=require_text(request, "problem"),
+                agent_id=request.get("agent_id", "automation"),
+                include_shared=bool(request.get("include_shared", True)),
+                environment=environment,
+                context=request.get("context"),
+                action=request.get("action"),
+                outcome=request.get("outcome"),
+                token_budget=request.get("token_budget", 450),
+            )
+        elif arguments.command == "autopilot-control":
+            result = autopilot_control_cognition(
+                action=require_text(request, "action"),
+                agent_id=request.get("agent_id", "automation"),
+                task_id=request.get("task_id"),
+            )
+        elif arguments.command == "token-ledger":
+            result = token_ledger_cognition(
+                agent_id=request.get("agent_id", "automation"),
+                task_id=request.get("task_id"),
+            )
+        elif arguments.command == "skill-compile":
+            definition = request.get("definition")
+            if not isinstance(definition, dict):
+                raise ValueError("Request field 'definition' must be an object.")
+            result = compile_skill_cognition(
+                definition,
+                require_text(request, "problem"),
+                environment=environment,
+            )
+        elif arguments.command == "skill-compose":
+            result = compose_skills_cognition(request.get("definitions"))
+        elif arguments.command == "skill-evolve":
+            definition, changes = request.get("definition"), request.get("changes")
+            if not isinstance(definition, dict) or not isinstance(changes, dict):
+                raise ValueError("Request fields 'definition' and 'changes' must be objects.")
+            result = evolve_skill_cognition(definition, changes, project_id=request.get("project_id"))
+        elif arguments.command == "skill-credit":
+            result = skill_credit_cognition(
+                skill_id=require_text(request, "skill_id"),
+                outcome=require_text(request, "outcome"),
+                influence=require_text(request, "influence"),
+                agent_id=request.get("agent_id", "automation"),
+                changed_steps=request.get("changed_steps"),
+                warning=request.get("warning"),
+            )
         elif arguments.command == "utility-feedback":
             result = utility_feedback_cognition(
                 intervention_id=require_text(request, "intervention_id"),
@@ -424,6 +487,11 @@ def main(argv=None):
                 options["environment"] = environment
             result = plan_cognition(**options)
         elif arguments.command == "skill":
+            contract_fields = (
+                "purpose", "preconditions", "decision_points", "expected_observations",
+                "failure_handling", "rollback", "applicability_limits", "state_mutations",
+                "resources",
+            )
             result = promote_skill_cognition(
                 name=require_text(request, "name"),
                 when_to_use=require_text(request, "when_to_use"),
@@ -434,6 +502,7 @@ def main(argv=None):
                 supporting_principle_ids=request.get("supporting_principle_ids"),
                 agent_id=request.get("agent_id", "automation"),
                 human_approved=bool(request.get("human_approved", False)),
+                **{field: request.get(field) for field in contract_fields if field in request},
             )
         else:
             files = request.get("files")

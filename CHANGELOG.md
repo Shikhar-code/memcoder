@@ -2,6 +2,26 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.2.4b1 — Beta 2.4
+
+### Added
+
+- Added a provider-neutral lifecycle autopilot with attention deduplication,
+  fail-open execution, pause/inspect/resume/rollback controls, and reversible
+  QA-gated capture.
+- Added prospective failure radar, risk-scaled verification planning, and a
+  lifecycle token ledger.
+- Added versioned Skill contracts, explicit safe-transfer compilation,
+  composition conflict detection, project overlays, and causal influence credit.
+- Exposed Beta 2.4 through Python, CLI, MCP, and the local Codex plugin.
+
+### Changed
+
+- Codex can now invoke one automatic lifecycle entry point instead of requiring
+  users to write MemCoder-specific prompts.
+- Skill health can distinguish a Skill that changed behavior from one that was
+  merely present.
+
 ## 0.2.3b1 — Beta 2.3
 
 ### Added
