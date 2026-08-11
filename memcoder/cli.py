@@ -8,9 +8,12 @@ from pathlib import Path
 from api.cognition import (
     autopilot_control_cognition,
     autopilot_event_cognition,
+    certify_host_cognition,
     checkpoint_cognition,
     compile_skill_cognition,
     compose_skills_cognition,
+    cognition_contract_cognition,
+    dream_cognition,
     evaluate_cognition,
     evolve_skill_cognition,
     intervene_cognition,
@@ -186,6 +189,9 @@ def main(argv=None):
             ("intervene", "Return the smallest useful cognition packet for a task."),
             ("autopilot", "Handle one provider-neutral host lifecycle event."),
             ("autopilot-control", "Pause, inspect, resume, or roll back automatic cognition."),
+            ("dream", "Run or inspect automatic evidence-gated Dreaming."),
+            ("contract", "Evaluate a deterministic cognition contract."),
+            ("host-certify", "Certify a host lifecycle and QA receipt contract."),
             ("token-ledger", "Inspect lifecycle cognition token accounting."),
             ("skill-compile", "Compile safe skill transfer for the current context."),
             ("skill-compose", "Check and order a compatible skill composition."),
@@ -347,6 +353,25 @@ def main(argv=None):
                 action=require_text(request, "action"),
                 agent_id=request.get("agent_id", "automation"),
                 task_id=request.get("task_id"),
+            )
+        elif arguments.command == "dream":
+            result = dream_cognition(
+                action=request.get("action", "run"),
+                agent_id=request.get("agent_id", "automation"),
+                environment=environment,
+                max_candidates=request.get("max_candidates", 5),
+                candidate_id=request.get("candidate_id"),
+                checks=request.get("checks"),
+                auto_promote=bool(request.get("auto_promote", True)),
+            )
+        elif arguments.command == "contract":
+            contract = request.get("contract")
+            observations = request.get("observations")
+            result = cognition_contract_cognition(contract, observations)
+        elif arguments.command == "host-certify":
+            result = certify_host_cognition(
+                host=require_text(request, "host"),
+                events=request.get("events"),
             )
         elif arguments.command == "token-ledger":
             result = token_ledger_cognition(

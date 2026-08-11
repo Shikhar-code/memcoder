@@ -9,6 +9,8 @@ source_db = workspace / "source.sqlite3"
 source_audit = workspace / "source-audits.jsonl"
 os.environ["MEMCODER_RECORD_DB_PATH"] = str(source_db)
 os.environ["MEMCODER_AUDIT_PATH"] = str(source_audit)
+source_dream = workspace / "source-dreams.jsonl"
+os.environ["MEMCODER_DREAM_PATH"] = str(source_dream)
 
 from memory.audit_store import append_plan_outcome
 from memory.provenance import link
@@ -47,6 +49,15 @@ append_plan_outcome({
 assert storage_status()["records"] == 2
 assert storage_status()["provenance_edges"] == 1
 assert storage_status()["plan_audits"] == 1
+from memory.dreaming import restore_candidates
+assert restore_candidates([{
+    "candidate_id": "dream-storage",
+    "kind": "dream_candidate",
+    "owner": "storage-test",
+    "status": "candidate",
+    "sandbox": {"status": "pending", "checks": []},
+}]) == 1
+assert storage_status()["dream_candidates"] == 1
 
 export_path = workspace / "memcoder-export.json"
 backup_path = workspace / "memcoder-backup.zip"
@@ -57,6 +68,7 @@ destination_db = workspace / "destination.sqlite3"
 destination_audit = workspace / "destination-audits.jsonl"
 os.environ["MEMCODER_RECORD_DB_PATH"] = str(destination_db)
 os.environ["MEMCODER_AUDIT_PATH"] = str(destination_audit)
+os.environ["MEMCODER_DREAM_PATH"] = str(workspace / "destination-dreams.jsonl")
 
 
 class FakeCollection:
@@ -81,6 +93,7 @@ assert restored["mode"] == "merge"
 assert restored["records_merged"] == 2
 assert restored["provenance_edges_merged"] == 1
 assert restored["plan_audits_merged"] == 1
+assert restored["dream_candidates_merged"] == 1
 assert restored["index"]["indexed"] == 2
 assert len(collection.records) == 2
 
@@ -88,5 +101,7 @@ repeated = restore_snapshot(export_path, collection=collection, embedder=lambda 
 assert repeated["records_merged"] == 0
 assert repeated["provenance_edges_merged"] == 0
 assert repeated["plan_audits_merged"] == 0
+assert repeated["dream_candidates_merged"] == 0
 
+os.environ.pop("MEMCODER_DREAM_PATH", None)
 print("PASS: storage status, export, backup, and conservative restore")

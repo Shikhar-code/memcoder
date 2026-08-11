@@ -19,6 +19,8 @@ def storage_status():
     from memory.record_store import list_edges, list_records, storage_path
 
     records = list_records()
+    from memory.dreaming import snapshot_candidates
+    dream_candidates = snapshot_candidates()
     by_state = {}
     by_type = {}
     for record in records:
@@ -36,12 +38,14 @@ def storage_status():
         "records_by_type": by_type,
         "provenance_edges": len(list_edges()),
         "plan_audits": len(list_audit_entries()),
+        "dream_candidates": len(dream_candidates),
     }
 
 
 def build_snapshot():
     from memory.audit_store import list_audit_entries
     from memory.record_store import list_edges, list_records
+    from memory.dreaming import snapshot_candidates
 
     return {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
@@ -49,6 +53,7 @@ def build_snapshot():
         "records": list_records(),
         "provenance_edges": list_edges(),
         "plan_audits": list_audit_entries(),
+        "dream_candidates": snapshot_candidates(),
     }
 
 
@@ -131,6 +136,8 @@ def restore_snapshot(input_path, collection=None, embedder=None):
             continue
 
     audits_merged = merge_audit_entries(snapshot["plan_audits"])
+    from memory.dreaming import restore_candidates
+    dream_candidates_merged = restore_candidates(snapshot.get("dream_candidates", []))
     if collection is None or embedder is None:
         from memory.chroma_client import collection as active_collection
         from memory.embedder import embed
@@ -142,5 +149,6 @@ def restore_snapshot(input_path, collection=None, embedder=None):
         "records_merged": records_merged,
         "provenance_edges_merged": edges_merged,
         "plan_audits_merged": audits_merged,
+        "dream_candidates_merged": dream_candidates_merged,
         "index": index,
     }

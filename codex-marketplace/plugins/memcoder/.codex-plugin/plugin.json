@@ -1,6 +1,6 @@
 {
   "name": "memcoder",
-  "version": "0.2.4-beta.1+codex.20260810193807",
+  "version": "0.2.5-beta.1+codex.20260811184800",
   "description": "Provider-free persistent cognition for Codex development tasks.",
   "author": {
     "name": "Shikhar-code"
@@ -21,7 +21,9 @@
       "Project resurrection",
       "Verified handoff",
       "Lifecycle autopilot",
-      "Safe skill transfer"
+      "Safe skill transfer",
+      "Automatic evidence-gated Dreaming",
+      "Cognition contract tests"
     ],
     "defaultPrompt": [
       "Use MemCoder cognition while completing this development task."

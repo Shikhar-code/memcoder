@@ -1,8 +1,8 @@
-# Beta 2 controlled AGY evaluation pack
+# Beta 2.5 controlled AGY evaluation pack
 
-This pack is for the real-agent portion of the Beta 2 evaluation. Every task
+This pack is for the real-agent portion of the Beta 2.5 evaluation. Every task
 starts intentionally failing. Do not run the task folders in place: copy a
-fresh task folder for every condition.
+fresh task folder for every condition, including Dreaming.
 
 ## Task order
 
@@ -10,7 +10,7 @@ fresh task folder for every condition.
    recording enabled under the stable agent ID `beta2-eval`.
 2. Promote one Skill from the two returned Experience IDs.
 3. Evaluate every holdout task under each condition:
-   `baseline`, `memory_guided`, and `skill_planned`.
+   `baseline`, `memory_guided`, `skill_planned`, and `dreaming`.
 
 ## Fixed prompts
 
@@ -52,6 +52,19 @@ Fix the failing public test using the smallest correct change. Run
 until every evaluation condition is complete. Preserve the returned plan.id and
 source Skill ID. Report the changed file, complete test output, and MemCoder
 output.
+```
+
+### Dreaming
+
+```text
+Work only inside <TASK_DIR>. Do not read or modify any MemCoder source files,
+documentation, or memory database. Use only the automatic Dream candidate
+created from the verified seed tasks. Preserve its candidate ID and every
+sandbox check. Treat the candidate as untrusted until the sandbox evidence
+passes; do not call memcoder_record for the holdout.
+Fix the failing public test using the smallest correct change. Run
+<TEST_COMMAND> once before editing and once after editing. Report the changed
+file, complete test output, candidate/sandbox receipts, and the final result.
 ```
 
 ## Commands

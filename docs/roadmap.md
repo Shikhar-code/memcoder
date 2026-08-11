@@ -1,6 +1,6 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 2.4<br>
+**Current line:** Beta 2.5<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
 **Last revised:** 2026-08-11
 
@@ -254,8 +254,8 @@ disabled.
 | **Beta 2.0–2.2** | Skills, plans, durable evidence, and first cognitive runtime. | Bounded intervention with QA-backed learning. |
 | **Beta 2.3** | Utility Engine plus Project Cortex. | Useful retrieval, strong abstention, and correct state recovery across sessions. |
 | **Beta 2.4** | Invisible Autopilot, token economy, and Skill Intelligence. | Ordinary prompts, measurable savings, failure prevention, and dependable procedural transfer. |
-| **Beta 2.5** | Dreaming, evaluation, and Core hardening. | Candidate learning survives adversarial checks and the complete system meets the 9/10 bar. |
-| **Beta 3** | Memory Studio, cloud continuity, optional Intelligence, and later collective cognition. | Developers can inspect and control cognition; optional product layers preserve Core's trust and privacy boundaries. |
+| **Beta 2.5** | Dreaming, evaluation, Core hardening, and host certification. | Candidate learning survives adversarial checks and the complete system meets the 9/10 bar. |
+| **Beta 3** | Memory Studio, Cognitive Git, developer website, cloud continuity, optional Intelligence, and later collective cognition. | Developers can inspect and control cognition; optional product layers preserve Core's trust and privacy boundaries. |
 | **RC** | Promise and contract freeze. | No data-loss, privacy, migration, or silent-learning blocker. |
 | **Core 1.0** | Dependable local cognition layer. | Stable product claim backed by reproducible real-project evidence. |
 
@@ -814,6 +814,12 @@ test-carrying programs with preconditions and rollback rather than prompt text.
 
 ## Beta 2.5 — Dreaming, Evaluation, and Core Hardening
 
+> **Engineering status (0.2.5b1): foundation implemented.** Automatic local
+> Dreaming, sandbox evidence, deterministic Cognition Contracts, host
+> certification, and matched Dreaming evaluation tooling are available.
+> Quantitative gates and real-project proof remain before calling the beta
+> complete.
+
 **Outcome:** MemCoder improves between tasks through testable candidate learning,
 then proves and hardens the complete local cognitive loop across real developer
 work.
@@ -965,6 +971,8 @@ developer tasks and supported hosts before expansion into cloud and teams.
 
 - Stable Codex Desktop plugin.
 - Stable AGY integration.
+- Stable Claude Code plugin or Skill integration using Claude's supported host
+  extension model at implementation time.
 - Reference MCP configuration.
 - Python middleware and CLI automation kit.
 - Host certification tests for lifecycle, fallback, evidence, and privacy.
@@ -979,6 +987,27 @@ developer tasks and supported hosts before expansion into cloud and teams.
 - Threat model for imported instructions, shared memories, plugins, and cloud.
 - Performance budgets for startup, retrieval, storage, and background work.
 - Opt-in diagnostics with no memory contents by default.
+
+##### Cognition Contract Tests
+
+Make the agent's cognitive behavior testable in the same spirit as application
+behavior. A repository can declare assertions such as:
+
+```text
+given this task family and prior verified failure
+MemCoder must surface the warning before edit
+MemCoder must require this proof before learning
+MemCoder must not reuse this stale or private record
+```
+
+- Run contract tests in CI against fixed memory fixtures.
+- Report missed warnings, harmful interventions, and unexpected learning paths.
+- Version the contract beside code and agent instructions.
+- Make host adapters certify the same behavior across Codex, AGY, Claude Code,
+  MCP, Python, and automation hosts.
+
+This is unusual because it treats agent cognition as a testable engineering
+surface rather than a prompt-quality hope.
 
 #### Evaluation and hardening gate
 
@@ -1010,6 +1039,11 @@ editing database files or writing CLI JSON.
 - Provenance graph and evidence viewer.
 - Retrieval debugger with ranking and gate explanations.
 - Decision timeline and Project Resurrection preview.
+- **Cognitive Diff:** show which beliefs, Skills, risks, and verification
+  obligations change between branches, commits, environments, or project
+  decisions.
+- **Evidence Time Machine:** replay an earlier decision with its evidence,
+  rejected alternatives, later outcome, and current validity state.
 - Skill editor, version diff, health, and outcome history.
 - Dream inbox for candidate approval and rejection.
 - Contradiction resolution and stale-memory review.
@@ -1029,6 +1063,13 @@ editing database files or writing CLI JSON.
 - A developer can diagnose and correct a bad intervention without the CLI.
 - All destructive operations require preview and remain recoverable.
 - Studio works entirely against local Core.
+
+### Why Cognitive Diff is a standout feature
+
+Code review shows what lines changed. Cognitive Diff shows what the agent is
+now allowed to believe, what prior guidance became stale, and which proof must
+be rerun. It turns memory from an opaque retrieval system into something that
+can participate in review and release engineering.
 
 ---
 
@@ -1127,6 +1168,39 @@ cognition and control.
 - Permission and isolation tests prevent unauthorized retrieval.
 - Shared knowledge retains contributor, evidence, and validity history.
 - Multi-agent runs improve throughput without reducing correctness or auditability.
+
+---
+
+## Workstream E - Developer website and public proof
+
+**Outcome:** MemCoder has a public home that makes the product understandable
+in minutes and earns attention through concrete proof rather than inflated AI
+claims.
+
+### Website
+
+- A distinctive landing page with an interactive cognitive-loop demo.
+- A "before / after" decision replay showing what changed, why it mattered,
+  and what proof admitted the learning.
+- Installation and host setup guides for Codex, AGY, Claude Code, MCP, Python,
+  and automation hosts.
+- A public support matrix, privacy model, changelog, architecture overview,
+  and transparent evaluation dashboard.
+- Runnable examples and a small local demo project so developers can see a
+  verified memory influence a related task without supplying their own data.
+
+### Credibility rule
+
+The site should ship a polished developer experience early in Beta 3, but its
+performance claims must link to the reproducible Beta 2.5 evaluation results.
+Visual polish attracts attention; inspectable evidence earns trust.
+
+### Release gate
+
+- A new developer can understand the product, install it, and run a verified
+  example without a sales call or an elaborate prompt.
+- Every capability claim maps to an implementation, test, or published limit.
+- The interactive demo never uploads private project memory by default.
 
 ---
 
@@ -1262,10 +1336,13 @@ current critical path.
 Move beyond “this task resembled that task” toward evidence about which action,
 warning, Skill step, or verification actually caused an outcome.
 
-## Cognitive branching
+## Cognitive Git and branching
 
-Allow agents to explore alternative plans in isolated cognition branches,
-compare verified results, and merge only supported learning.
+Bind cognitive state to Git-aware work: branch-local beliefs, decisions,
+Skills, and proof obligations can diverge safely; a merge produces a
+reviewable Cognitive Diff and admits only evidence that still applies. Agents
+can explore alternative plans in isolated cognition branches, compare verified
+results, and merge only supported learning.
 
 ## Private cross-project pattern learning
 
@@ -1315,8 +1392,8 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 2.4: Invisible Autopilot, Token
-Economy, and Skill Intelligence**. Its engineering foundation is implemented;
+The current implementation line is **Beta 2.5: Evidence-Gated Dreaming,
+Evaluation, and Core Hardening**. Its engineering foundation is implemented;
 the quantitative release gates remain an evaluation requirement.
 
 The first deliverable should be a closed-loop intervention record:

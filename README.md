@@ -7,7 +7,7 @@
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=for-the-badge&label=PyPI&color=6D9EFF" alt="PyPI" /></a>
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=for-the-badge&color=63D7C5" alt="Python 3.10+" /></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-BFA1FF?style=for-the-badge" alt="MIT license" /></a>
-<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.4-FFB86B?style=for-the-badge" alt="Beta 2.4" /></a>
+<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.5-FFB86B?style=for-the-badge" alt="Beta 2.5" /></a>
 
 ### Persistent cognition for agents that have to be right twice.
 
@@ -22,7 +22,7 @@ then learns only after the host proves the result.
 
 <a href="#quick-start"><strong>Quick start</strong></a>
 &nbsp;|&nbsp; <a href="#what-it-actually-does"><strong>What it does</strong></a>
-&nbsp;|&nbsp; <a href="#beta-24"><strong>Beta 2.4</strong></a>
+&nbsp;|&nbsp; <a href="#beta-25"><strong>Beta 2.5</strong></a>
 &nbsp;|&nbsp; <a href="#connect-your-host"><strong>Connect a host</strong></a>
 &nbsp;|&nbsp; <a href="#proof-not-promises"><strong>Evidence</strong></a>
 
@@ -214,6 +214,57 @@ host as a successful outcome.
 
 </details>
 
+## Beta 2.5
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Automatic Dreaming
+
+After a QA-approved task, MemCoder quietly compares verified episodes and
+creates compact candidate insights. No manual Dream command is required.
+Candidates stay local, versioned, and outside trusted retrieval until they
+survive sandbox evidence.
+
+</td>
+<td width="50%" valign="top">
+
+### Cognition Contracts
+
+Hosts can assert cognitive behavior in deterministic tests: require proof,
+abstain without evidence, exclude non-trusted records, and fail open when the
+adapter is unavailable.
+
+</td>
+</tr>
+</table>
+
+```text
+verified outcome
+  -> automatic Dream candidate
+  -> held-out / sandbox checks
+  -> provisional or rejected
+  -> reversible trusted Principle (only after proof)
+```
+
+<details>
+<summary><strong>Open the Beta 2.5 control panel</strong></summary>
+
+| Control | What it gives you |
+| --- | --- |
+| `memcoder dream --input dream.json` | Run or inspect local Dream candidates |
+| `memcoder dream --input request.json` with `action=verify` | Supply sandbox evidence and optionally promote a candidate |
+| `memcoder dream --input request.json` with `action=rollback` | Reversibly roll back a candidate and any promoted record |
+| `memcoder contract` | Evaluate a versioned deterministic cognition contract |
+| `memcoder host-certify` | Check lifecycle, QA, and fail-open host receipts |
+| `memcoder evaluate` with `condition=dreaming` | Compare Dreaming against a matched baseline |
+
+Dreaming is automatic by default. It never silently overwrites trusted memory;
+promotion requires inspectable sandbox evidence and remains reversible.
+
+</details>
+
 ## Connect your host
 
 Pick the door you already use. The cognition model stays the same.
@@ -324,16 +375,25 @@ That supports one narrow claim: **verified validation procedures transferred to
 unseen variants in that controlled setup.** It does not prove universal agent
 improvement.
 
+Beta 2.5 also has provider-free evidence for automatic Dreaming, sandbox
+promotion, rollback, Cognition Contracts, and host certification. A new
+baseline-versus-Dreaming host comparison is intentionally **not** claimed yet:
+the required clean sessions and receipts are not present in this checkout.
+See the [Beta 2.5 evaluation record](docs/beta25_evaluation_results.md) for
+the exact boundary between verified implementation behavior and pending
+developer-outcome evidence.
+
 | Ready now | Still being measured |
 | --- | --- |
 | Provider-free local runtime | Broad real-project causal improvement |
 | QA-gated learning and retrieval safety | Median token and rework reduction |
 | Utility Engine and Project Cortex | Failure interception across diverse repositories |
-| Lifecycle Autopilot and Skill Intelligence | Production-scale latency and cloud operations |
+| Lifecycle Autopilot, Skill Intelligence, and automatic Dreaming safety | Matched baseline/Dreaming host outcomes and production-scale latency |
 
 - [Controlled transfer results](docs/beta2_controlled_transfer_results.md)
 - [Evaluation protocol](docs/beta2_evaluation_protocol.md)
 - [Real-project evaluation protocol](docs/beta2_real_project_evaluation.md)
+- [Beta 2.5 evaluation record](docs/beta25_evaluation_results.md)
 - [Roadmap](docs/roadmap.md)
 
 ## For developers who want the wiring

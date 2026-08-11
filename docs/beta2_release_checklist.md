@@ -1,6 +1,6 @@
-# Beta 2 release checklist
+# Beta 2.5 release checklist
 
-This checklist prepares the next Beta 2 pre-release. It is intentionally
+This checklist prepares the Beta 2.5 pre-release. It is intentionally
 stricter than a source-tree test pass: users install the wheel and configure a
 host separately.
 
@@ -9,6 +9,10 @@ host separately.
 - [x] QA-gated Experience admission, reflection provenance, compact briefs,
   Skills, planning, plan audits, Skill health, and evaluation APIs implemented.
 - [x] Provider-free regression suite passed without an external model provider.
+- [x] Automatic Dream candidates, sandbox evidence, Cognition Contracts, and
+  host certification checks implemented.
+- [x] Dream candidates are included in portable snapshots and reversible
+  rollback controls.
 - [x] Clean source and wheel archive contents verified: release archives omit
   tests, controlled runs, local databases, build output, and auxiliary folders.
 - [x] Package metadata and release notes prepared.
@@ -26,6 +30,11 @@ host separately.
   remaining unseen by the host agent.
 - [ ] Review the README in GitHub's renderer; the animated hero and badges load
   from external public badge/image services.
+- [ ] Run matched `baseline` / `dreaming` holdout evaluations and retain the
+  candidate, sandbox, and promotion receipts.
+- [ ] Publish the resulting matched report beside
+  [`beta25_evaluation_results.md`](beta25_evaluation_results.md); do not mark
+  this gate complete from unit-test results alone.
 
 ## Before publishing to PyPI
 
@@ -41,7 +50,7 @@ host separately.
 
 ## Recommended release notes summary
 
-> MemCoder's next Beta 2 release adds evidence-gated learning, compact cognition
-> briefs, reusable Skills, bounded plans, plan audits, Skill health, a
-> provider-free cognitive runtime, and local Codex integration. The host model
-> still solves and verifies tasks.
+> MemCoder Beta 2.5 adds automatic provider-free Dreaming, sandboxed candidate
+> learning, deterministic Cognition Contracts, host certification, and matched
+> Dreaming evaluation support while preserving QA-gated, reversible memory. The
+> host model still solves and verifies tasks.

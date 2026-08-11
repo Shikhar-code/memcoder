@@ -3,9 +3,12 @@
 __all__ = [
     "autopilot_control_cognition",
     "autopilot_event_cognition",
+    "certify_host_cognition",
     "checkpoint_cognition",
     "compile_skill_cognition",
     "compose_skills_cognition",
+    "cognition_contract_cognition",
+    "dream_cognition",
     "evolve_skill_cognition",
     "intervene_cognition",
     "project_accept_cognition",

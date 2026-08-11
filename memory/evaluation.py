@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 
-VALID_CONDITIONS = {"baseline", "memory_guided", "skill_planned"}
+VALID_CONDITIONS = {"baseline", "memory_guided", "skill_planned", "dreaming"}
 
 
 def _number(value, field, minimum=0):
@@ -20,7 +20,7 @@ def _run(run):
     if not isinstance(task_id, str) or not task_id.strip():
         raise ValueError("Run field 'task_id' must be a non-empty string.")
     if condition not in VALID_CONDITIONS:
-        raise ValueError("Run field 'condition' must be baseline, memory_guided, or skill_planned.")
+        raise ValueError("Run field 'condition' must be baseline, memory_guided, skill_planned, or dreaming.")
     if not isinstance(run.get("passed"), bool):
         raise ValueError("Run field 'passed' must be boolean.")
     normalized = {
@@ -71,6 +71,10 @@ def evaluate_runs(runs):
         task_id for task_id, conditions in by_task.items()
         if "baseline" in conditions and "skill_planned" in conditions
     ]
+    dream_matched = [
+        task_id for task_id, conditions in by_task.items()
+        if "baseline" in conditions and "dreaming" in conditions
+    ]
     paired_changes = []
     for task_id in matched:
         baseline = by_task[task_id]["baseline"]
@@ -81,6 +85,16 @@ def evaluate_runs(runs):
             "skill_planned_passed": planned["passed"],
             "pass_changed": int(planned["passed"]) - int(baseline["passed"]),
         })
+    paired_dream_changes = []
+    for task_id in dream_matched:
+        baseline = by_task[task_id]["baseline"]
+        dreaming = by_task[task_id]["dreaming"]
+        paired_dream_changes.append({
+            "task_id": task_id,
+            "baseline_passed": baseline["passed"],
+            "dreaming_passed": dreaming["passed"],
+            "pass_changed": int(dreaming["passed"]) - int(baseline["passed"]),
+        })
 
     return {
         "schema_version": 1,
@@ -90,6 +104,8 @@ def evaluate_runs(runs):
         },
         "matched_baseline_skill_planned_tasks": len(matched),
         "paired_pass_changes": paired_changes,
+        "matched_baseline_dreaming_tasks": len(dream_matched),
+        "paired_dream_pass_changes": paired_dream_changes,
         "limitations": [
             "Results describe only host-supplied runs and measurements.",
             "A pass-rate difference is not causal proof without matched tasks and sufficient sample size.",

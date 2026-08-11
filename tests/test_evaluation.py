@@ -24,6 +24,14 @@ assert report["matched_baseline_skill_planned_tasks"] == 2
 assert report["paired_pass_changes"][0]["pass_changed"] == 1
 assert "not causal proof" in report["limitations"][1]
 
+dream_report = evaluate_runs([
+    {"task_id": "dream-task", "condition": "baseline", "passed": False},
+    {"task_id": "dream-task", "condition": "dreaming", "passed": True,
+     "retrieval_relevant": True},
+])
+assert dream_report["matched_baseline_dreaming_tasks"] == 1
+assert dream_report["paired_dream_pass_changes"][0]["pass_changed"] == 1
+
 try:
     evaluate_runs([
         {"task_id": "task-1", "condition": "baseline", "passed": True},

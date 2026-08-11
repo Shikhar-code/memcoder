@@ -2,6 +2,31 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.2.5b1 — Beta 2.5
+
+### Added
+
+- Added automatic provider-free Dreaming after QA-approved work. It proposes
+  local candidates from verified episodes without requiring a manual trigger.
+- Added sandbox evidence checks and reversible promotion into Principles;
+  candidates never enter trusted retrieval while unverified.
+- Added deterministic Cognition Contracts and host certification checks for
+  lifecycle, QA-gated learning, and fail-open behavior.
+- Added a `dreaming` evaluation condition for matched baseline experiments.
+- Exposed Dreaming, Cognition Contracts, and host certification through Python,
+  CLI, MCP, and the Codex plugin.
+
+### Changed
+
+- Beta 2.5 keeps trusted memory immutable until candidate evidence passes its
+  sandbox gate; high-impact changes remain inspectable and reversible.
+
+### Documentation
+
+- Added the Beta 2.5 evaluation record, Dreaming holdout instructions, and an
+  explicit boundary between provider-free safety evidence and pending host
+  outcome evidence.
+
 ## 0.2.4b1 — Beta 2.4
 
 ### Added

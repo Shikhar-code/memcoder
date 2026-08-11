@@ -250,6 +250,14 @@ def autopilot_event_cognition(
                 "qa": capture_result.get("qa"),
                 "rejected": capture_result.get("rejected", []),
             }
+            if capture.get("experience_recorded"):
+                from memory.dreaming import run_dream
+                capture["dream"] = run_dream(owner=agent_id, environment=environment)
+                capture["dream_candidate_ids"] = [
+                    item.get("candidate_id")
+                    for item in capture["dream"].get("created", [])
+                    if item.get("candidate_id")
+                ]
         return finish_event(
             decision,
             intervention=intervention,
@@ -285,12 +293,68 @@ def autopilot_control_cognition(action, agent_id="automation", task_id=None):
             rolled_back.append(record_id)
         except ValueError:
             continue
-    return {**result, "rolled_back": rolled_back}
+    from memory.autopilot import lifecycle_events
+    from memory.dreaming import rollback_candidate
+    dream_rolled_back = []
+    dream_ids = set()
+    for event in lifecycle_events(agent_id, task_id=task_id):
+        for candidate_id in (event.get("capture") or {}).get("dream_candidate_ids", []):
+            if candidate_id in dream_ids:
+                continue
+            dream_ids.add(candidate_id)
+            try:
+                dream_rolled_back.append(rollback_candidate(candidate_id, owner=agent_id))
+            except ValueError:
+                continue
+    return {
+        **result,
+        "rolled_back": rolled_back,
+        "dream_rolled_back": dream_rolled_back,
+    }
 
 
 def token_ledger_cognition(agent_id="automation", task_id=None):
     from memory.autopilot import token_ledger
     return token_ledger(agent_id, task_id=task_id)
+
+
+def dream_cognition(action="run", agent_id="automation", environment=None,
+                    max_candidates=5, candidate_id=None, checks=None,
+                    auto_promote=True):
+    """Run automatic Dreaming or inspect/verify one candidate."""
+    from memory.dreaming import (
+        evaluate_candidate,
+        list_candidates,
+        rollback_candidate,
+        run_dream,
+    )
+
+    if action == "run":
+        return run_dream(agent_id, environment=environment, max_candidates=max_candidates)
+    if action == "list":
+        return {"owner": agent_id, "candidates": list_candidates(agent_id)}
+    if action == "verify":
+        return evaluate_candidate(
+            candidate_id=candidate_id,
+            checks=checks,
+            owner=agent_id,
+            auto_promote=auto_promote,
+        )
+    if action == "rollback":
+        return rollback_candidate(candidate_id=candidate_id, owner=agent_id)
+    raise ValueError("action must be run, list, verify, or rollback.")
+
+
+def cognition_contract_cognition(contract, observations):
+    """Evaluate a deterministic cognition contract without storing memory."""
+    from memory.contracts import evaluate_contract
+    return evaluate_contract(contract, observations)
+
+
+def certify_host_cognition(host, events):
+    """Check the minimum lifecycle, QA, and fail-open host contract."""
+    from memory.contracts import certify_host
+    return certify_host(host, events)
 
 
 def compile_skill_cognition(definition, problem, environment=None):

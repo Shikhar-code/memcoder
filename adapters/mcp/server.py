@@ -8,9 +8,12 @@ from memory.markdown_import import import_markdown, import_markdown_file
 from api.cognition import (
     autopilot_control_cognition,
     autopilot_event_cognition,
+    certify_host_cognition,
     checkpoint_cognition,
     compile_skill_cognition,
     compose_skills_cognition,
+    cognition_contract_cognition,
+    dream_cognition,
     intervene_cognition,
     project_accept_cognition,
     project_handoff_cognition,
@@ -83,6 +86,39 @@ def memcoder_autopilot_control(
 def memcoder_token_ledger(agent_id: str = "codex", task_id: str | None = None) -> str:
     """Inspect measured lifecycle cognition token accounting."""
     return json.dumps(token_ledger_cognition(agent_id, task_id), indent=2)
+
+
+@mcp.tool()
+def memcoder_dream(
+        action: str = "run",
+        agent_id: str = "codex",
+        environment: dict | None = None,
+        max_candidates: int = 5,
+        candidate_id: str | None = None,
+        checks: list[dict] | None = None,
+        auto_promote: bool = True) -> str:
+    """Run automatic local Dreaming or verify one candidate for promotion."""
+    return json.dumps(dream_cognition(
+        action=action,
+        agent_id=agent_id,
+        environment=environment,
+        max_candidates=max_candidates,
+        candidate_id=candidate_id,
+        checks=checks,
+        auto_promote=auto_promote,
+    ), indent=2)
+
+
+@mcp.tool()
+def memcoder_cognition_contract(contract: dict, observations: dict) -> str:
+    """Evaluate a deterministic cognition contract without storing memory."""
+    return json.dumps(cognition_contract_cognition(contract, observations), indent=2)
+
+
+@mcp.tool()
+def memcoder_host_certify(host: str, events: list[dict]) -> str:
+    """Certify a host's lifecycle, QA, and fail-open receipts."""
+    return json.dumps(certify_host_cognition(host, events), indent=2)
 
 
 @mcp.tool()

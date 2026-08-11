@@ -47,6 +47,16 @@ def _events():
     return loaded
 
 
+def lifecycle_events(owner, task_id=None):
+    """Return owner-scoped lifecycle receipts for reversible controls."""
+    return [
+        event for event in _events()
+        if event.get("kind") == "lifecycle"
+        and event.get("owner") == owner
+        and (task_id is None or event.get("task_id") == task_id)
+    ]
+
+
 def _append(event):
     path = _path()
     path.parent.mkdir(parents=True, exist_ok=True)
