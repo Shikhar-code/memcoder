@@ -23,9 +23,8 @@ All notable changes to MemCoder are documented here.
 
 ### Documentation
 
-- Added the Beta 2.5 evaluation record, Dreaming holdout instructions, and an
-  explicit boundary between provider-free safety evidence and pending host
-  outcome evidence.
+- Added Dreaming holdout instructions and an explicit boundary between
+  provider-free safety evidence and future host-outcome evidence.
 
 ## 0.2.4b1 — Beta 2.4
 

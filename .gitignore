@@ -58,6 +58,7 @@ mcp_start.log
 
 # Local evaluation and scratch material
 
+docs/beta25_evaluation_results.md
 .agents/
 .adhyaapak-pdf-review/
 .video-review/

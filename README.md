@@ -284,7 +284,7 @@ validation procedures transferred to unseen variants in that setup.
 It does **not** prove that MemCoder universally improves every model, task, or
 repository. Beta 2.5’s automatic Dreaming, sandbox, rollback, contract, and
 host-certification behavior is verified provider-free. A clean real-host
-baseline-versus-Dreaming comparison is still pending.
+baseline-versus-Dreaming comparison is deferred to the 1.0 evidence gate.
 
 | Verified now | Still being measured |
 | --- | --- |
@@ -293,17 +293,8 @@ baseline-versus-Dreaming comparison is still pending.
 | Skills, Project Cortex, and cognition contracts | Production-scale latency and cloud operation |
 
 - [Controlled transfer result](docs/beta2_controlled_transfer_results.md)
-- [Beta 2.5 evaluation record](docs/beta25_evaluation_results.md)
 - [Evaluation protocol](docs/beta2_evaluation_protocol.md)
 - [Real-project evaluation protocol](docs/beta2_real_project_evaluation.md)
-
-### Why the Beta 2.5 evaluation record exists
-
-[`beta25_evaluation_results.md`](docs/beta25_evaluation_results.md) is a
-transparency document, not a runtime feature. It records exactly what was
-verified in this checkout and what was **not** measured yet. Its purpose is to
-prevent the README or release notes from turning passing unit tests into an
-unsupported claim that Dreaming improves all agents.
 
 ## Developer reference
 

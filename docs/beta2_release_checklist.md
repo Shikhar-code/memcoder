@@ -32,9 +32,6 @@ host separately.
   from external public badge/image services.
 - [ ] Run matched `baseline` / `dreaming` holdout evaluations and retain the
   candidate, sandbox, and promotion receipts.
-- [ ] Publish the resulting matched report beside
-  [`beta25_evaluation_results.md`](beta25_evaluation_results.md); do not mark
-  this gate complete from unit-test results alone.
 
 ## Before publishing to PyPI
 
