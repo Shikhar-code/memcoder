@@ -8,12 +8,14 @@ from pathlib import Path
 from api.cognition import (
     autopilot_control_cognition,
     autopilot_event_cognition,
+    capsule_cognition,
     certify_host_cognition,
     checkpoint_cognition,
     compile_skill_cognition,
     compose_skills_cognition,
     cognition_contract_cognition,
     dream_cognition,
+    doctor_cognition,
     cognitive_branch_cognition,
     evaluate_cognition,
     evolve_skill_cognition,
@@ -26,9 +28,11 @@ from api.cognition import (
     retrieval_debug_cognition,
     plan_history_cognition,
     plan_cognition,
+    policy_cognition,
     prepare_cognition,
     promote_skill_cognition,
     record_cognition,
+    replay_cognition,
     skill_health_cognition,
     skill_credit_cognition,
     start_cognition,
@@ -132,6 +136,20 @@ def main(argv=None):
         help="Override AGY's MCP config path."
     )
 
+    setup = subcommands.add_parser(
+        "setup",
+        help="Create or inspect the safe local Beta 3 configuration.",
+    )
+    setup.add_argument("--policy", type=Path, help="Override the local policy path.")
+    subcommands.add_parser("doctor", help="Check local storage, policy, and journal health.")
+    service = subcommands.add_parser("service", help="Run or inspect the localhost cognition service.")
+    service.add_argument("action", choices=("doctor", "serve"), default="doctor")
+    service.add_argument("--host", default="127.0.0.1")
+    service.add_argument("--port", type=int, default=8765)
+    studio = subcommands.add_parser("studio", help="Serve the minimal local Memory Studio.")
+    studio.add_argument("--host", default="127.0.0.1")
+    studio.add_argument("--port", type=int, default=8765)
+
     storage_command = subcommands.add_parser(
         "storage",
         help="Migrate or rebuild MemCoder's local durable memory storage.",
@@ -226,6 +244,17 @@ def main(argv=None):
             help="Path to a JSON request file, or '-' to read standard input."
         )
 
+    for command, help_text in (
+            ("policy", "Inspect or evaluate Memory Firewall rules."),
+            ("capsule", "Create, verify, inspect, or import a cognition capsule."),
+            ("replay", "Compare captured cognition conditions deterministically.")):
+        subcommand = subcommands.add_parser(command, help=help_text)
+        subcommand.add_argument(
+            "--input",
+            required=True,
+            help="Path to a JSON request file, or '-' to read standard input."
+        )
+
     skill_command = subcommands.add_parser(
         "skill",
         help="Promote QA-supported experiences into reusable skills."
@@ -251,6 +280,34 @@ def main(argv=None):
 
         print(f"MemCoder configured for AGY: {config_path}")
         print("Restart AGY. No plugin install command is required.")
+        return 0
+
+    if arguments.command == "setup":
+        from memory.policy import load_policy, save_policy, policy_status
+        target = arguments.policy
+        status = policy_status(target)
+        if not status["exists"]:
+            status["created"] = save_policy(load_policy(target), target)
+        else:
+            status["created"] = None
+        emit_json({"setup": status})
+        return 0
+
+    if arguments.command == "doctor":
+        emit_json(doctor_cognition())
+        return 0
+
+    if arguments.command == "service":
+        if arguments.action == "doctor":
+            emit_json(doctor_cognition())
+        else:
+            from memory.service import run_server
+            run_server(host=arguments.host, port=arguments.port)
+        return 0
+
+    if arguments.command == "studio":
+        from memory.service import run_server
+        run_server(host=arguments.host, port=arguments.port)
         return 0
 
     if arguments.command == "storage":
@@ -547,6 +604,12 @@ def main(argv=None):
         elif arguments.command == "evaluate":
             runs = request.get("runs")
             result = evaluate_cognition(runs)
+        elif arguments.command == "policy":
+            result = policy_cognition(request.get("action", "status"), request)
+        elif arguments.command == "capsule":
+            result = capsule_cognition(request.get("action", "inspect"), request)
+        elif arguments.command == "replay":
+            result = replay_cognition(request.get("action", "compare"), request)
         elif arguments.command == "prepare":
             options = dict(
                 problem=require_text(request, "problem"),

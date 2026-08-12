@@ -28,6 +28,10 @@ __all__ = [
     "verify_cognition",
     "utility_feedback_cognition",
     "utility_feedback_summary_cognition",
+    "policy_cognition",
+    "capsule_cognition",
+    "replay_cognition",
+    "doctor_cognition",
 ]
 
 

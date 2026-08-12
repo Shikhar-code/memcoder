@@ -60,9 +60,23 @@ def lifecycle_events(owner, task_id=None):
 def _append(event):
     path = _path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    stored = {**event, "timestamp": event.get("timestamp") or utc_now()}
+    identity = json.dumps({
+        "kind": event.get("kind"),
+        "owner": event.get("owner"),
+        "task_id": event.get("task_id"),
+        "event": event.get("event"),
+        "fingerprint": event.get("fingerprint"),
+    }, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    event_id = event.get("event_id") or "life_" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+    stored = {**event, "event_id": event_id, "timestamp": event.get("timestamp") or utc_now()}
     with path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(stored, sort_keys=True, ensure_ascii=False) + "\n")
+    try:
+        from memory.events import append_event
+        append_event(stored)
+    except Exception:
+        # The journal is observability only; lifecycle cognition remains fail-open.
+        pass
     return stored
 
 

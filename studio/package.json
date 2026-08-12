@@ -1,0 +1,16 @@
+{
+  "name": "memcoder-studio",
+  "private": true,
+  "version": "0.3.0",
+  "description": "Lightweight desktop control surface for local MemCoder cognition.",
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "dev": "node scripts/sync-assets.mjs && tauri dev",
+    "build": "node scripts/sync-assets.mjs && tauri build --bundles nsis",
+    "build:exe": "node scripts/sync-assets.mjs && tauri build --bundles nsis",
+    "check": "tauri info"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4"
+  }
+}

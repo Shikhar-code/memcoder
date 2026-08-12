@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder Beta 2.6 — local, evidence-gated cognition for coding agents" width="100%" />
+<img src="assets/memcoder-hero-beta2.svg" alt="MemCoder Beta 3.0 — local, evidence-gated cognition for coding agents" width="100%" />
 
 <br />
 
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=for-the-badge&label=PyPI&color=6D9EFF" alt="PyPI" /></a>
 <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=for-the-badge&color=63D7C5" alt="Python 3.10+" /></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-BFA1FF?style=for-the-badge" alt="MIT license" /></a>
-<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%202.6-FFB86B?style=for-the-badge" alt="Beta 2.6" /></a>
+<a href="docs/roadmap.md"><img src="https://img.shields.io/badge/status-Beta%203.0-FFB86B?style=for-the-badge" alt="Beta 3.0" /></a>
 
 ### Persistent cognition for agents that need to be right twice.
 
@@ -21,7 +21,7 @@ after the host supplies proof.
 
 <a href="#start-here"><strong>Start here</strong></a>
 &nbsp;·&nbsp; <a href="#why-memcoder"><strong>Why MemCoder</strong></a>
-&nbsp;·&nbsp; <a href="#whats-new-in-beta-26"><strong>Beta 2.6</strong></a>
+&nbsp;·&nbsp; <a href="#whats-new-in-beta-30"><strong>Beta 3.0</strong></a>
 &nbsp;·&nbsp; <a href="#connect-a-host"><strong>Connect a host</strong></a>
 &nbsp;·&nbsp; <a href="#evidence-not-hype"><strong>Evidence</strong></a>
 
@@ -65,8 +65,13 @@ add—or when MemCoder is temporarily unavailable.
 
 ### Install the published package
 
+Use this path after the Beta 3 package is published to PyPI. Until then, use
+the current-source install below; PyPI may still resolve an earlier beta.
+
 ```powershell
 python -m pip install --pre memcoder
+python -m memcoder setup
+python -m memcoder doctor
 python -m memcoder --help
 python -m memcoder storage status
 ```
@@ -75,7 +80,7 @@ MemCoder requires Python 3.10+. Its core does not require Ollama, CUDA, or a
 generation-model API key. The first semantic-index use may download a local
 embedding model.
 
-### Use the current Beta 2.6 source
+### Use the current Beta 3.0 source
 
 ```powershell
 git clone https://github.com/Shikhar-code/memcoder.git
@@ -161,6 +166,114 @@ resurrection, and safe handoff—never a raw chat archive.
 | Project Cortex | Decisions, constraints, risks, and next actions | A transcript dump |
 
 </details>
+
+## What's new in Beta 3.0
+
+Beta 3.0 makes the local cognition engine inspectable and controllable without
+requiring a provider, cloud account, or raw storage access. It adds a Memory
+Firewall, deterministic replay, portable cognition capsules, an append-only
+host event journal, and a small localhost service for automatic adapters.
+
+```text
+host adapter -> local service -> policy check -> cognition -> verification receipt
+                                      \-> replay / capsule / Studio APIs
+```
+
+| Surface | Use it for |
+| --- | --- |
+| `memcoder setup` / `memcoder doctor` | Initialize and diagnose local Beta 3 state |
+| `memcoder policy --input request.json` | Inspect, save, or evaluate admission rules |
+| `memcoder replay --input request.json` | Compare baseline and MemCoder-assisted runs |
+| `memcoder capsule --input request.json` | Export, verify, inspect, or dry-run import cognition |
+| `memcoder doctor` / `memcoder service doctor` | Check local storage, policy, and journal health |
+| `memcoder studio` | Serve the browser fallback Studio at `http://127.0.0.1:8765` |
+| `memcoder service serve` | Expose the local provider-free adapter endpoint |
+
+All new surfaces fail open for host work, keep imported cognition untrusted until
+verified, and remain local by default.
+
+### Lightweight desktop Studio
+
+Beta 3 also includes a native Tauri shell in `studio/`. It has no frontend
+framework, charting package, cloud dependency, or duplicated memory engine. The
+Python Core remains the source of truth and the shell talks to its localhost
+service.
+
+From a fresh PowerShell session in the repository:
+
+```powershell
+cd studio
+bun install
+
+# Optional when `memcoder` is not on PATH:
+$env:MEMCODER_PYTHON = "C:\path\to\your\python.exe"
+
+bun run dev
+```
+
+Requirements for the desktop shell are Python 3.10+, an installed MemCoder
+environment, Bun, and the Windows Tauri prerequisites (Rust/MSVC and WebView2).
+The browser fallback does not require Tauri:
+
+```powershell
+memcoder studio
+```
+
+To create the Windows installer from the repository:
+
+```powershell
+cd studio
+bun install
+bun run build:exe
+```
+
+The installer is written to
+`studio/src-tauri/target/release/bundle/nsis/`. The generated setup file is
+named `MemCoder Studio_0.3.0_x64-setup.exe`.
+
+The desktop shell starts `memcoder service serve` when the command is available.
+If it cannot find the command, run this once in another terminal and press
+**Retry connection** in Studio:
+
+```powershell
+memcoder service serve
+```
+
+The app exposes useful local views for Overview, Memories, Evidence, Replay Lab,
+Dreaming, and Policy. It intentionally avoids decorative graphs and raw chat
+transcripts.
+
+On a new installation, open **Evidence** or **Dreaming** and select **Load
+Guided Demo**. This creates two isolated, QA-approved example memories and
+their lifecycle evidence under `studio-demo`. It is safe to repeat and does
+not touch your real project memories. In Dreaming, **Find New Connections**
+compares verified memories for the selected Memory Scope and creates only an
+untrusted candidate; it never promotes a memory automatically.
+
+The service endpoints are also available to other hosts:
+
+```text
+GET  /v1/summary
+GET  /v1/records?q=validation&limit=50
+GET  /v1/records/<record_id>
+GET  /v1/events
+GET  /v1/dreams
+GET  /v1/replays
+GET  /v1/policy
+POST /v1/policy/check
+POST /v1/policy/save
+POST /v1/policy/retrieval
+POST /v1/policy/export
+POST /v1/replay
+POST /v1/capsule
+POST /v1/demo
+POST /v1/dream
+POST /v1/storage/backup
+POST /v1/storage/export
+```
+
+The service binds to `127.0.0.1` by default. No model provider, Ollama,
+CUDA, API key, or cloud account is required for this local product slice.
 
 ## What's new in Beta 2.6
 

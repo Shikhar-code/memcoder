@@ -36,6 +36,16 @@ def hierarchical_search(
         environment=None,
         utility_threshold=None):
 
+    from memory.policy import evaluate_retrieval
+    retrieval_policy = evaluate_retrieval(
+        owner=agent_id,
+        project_id=(environment or {}).get("project_id") if isinstance(environment, dict) else None,
+        include_shared=include_shared,
+    )
+    requested_include_shared = include_shared
+    if not retrieval_policy["allowed"]:
+        include_shared = False
+
     query_embedding = embed(problem)
 
     experiences = search_memory(
@@ -141,6 +151,7 @@ def hierarchical_search(
 
         "reflections": reflections,
         "skills": skills,
+        "policy": {"retrieval": retrieval_policy, "requested_include_shared": requested_include_shared},
 
     }
     from memory.utility import apply_utility_policy

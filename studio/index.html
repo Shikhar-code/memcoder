@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10151c" />
+    <title>MemCoder Studio</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><svg class="brand-mark" viewBox="0 0 256 256" role="img" aria-label="MemCoder"><rect x="28" y="28" width="200" height="200" rx="54" fill="#0d1828" stroke="#405a7d" stroke-width="6"/><path d="M70 174V82l58 70 58-70v92" fill="none" stroke="#f4f7fb" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="82" r="9" fill="#65ddb8"/><circle cx="186" cy="82" r="9" fill="#8db8ff"/></svg><span>MemCoder</span></div>
+        <p class="eyebrow">STUDIO</p>
+        <nav id="navigation" aria-label="Studio sections">
+          <button class="nav-item active" data-view="home">Overview</button>
+          <button class="nav-item" data-view="memories">Memories</button>
+          <button class="nav-item" data-view="evidence">Evidence</button>
+          <button class="nav-item" data-view="replay">Replay Lab</button>
+          <button class="nav-item" data-view="dreaming">Dreaming</button>
+          <button class="nav-item" data-view="policy">Policy</button>
+        </nav>
+        <div class="sidebar-foot"><span id="version">Beta 3.0</span><span>local-first</span></div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div><p class="eyebrow">LOCAL COGNITION</p><h1 id="view-title">Overview</h1></div>
+          <div class="service-state"><span class="status-dot" id="status-dot"></span><span id="service-status">Checking...</span></div>
+        </header>
+        <div id="notice" class="notice hidden" role="status"></div>
+        <section id="view" aria-live="polite"></section>
+      </main>
+    </div>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

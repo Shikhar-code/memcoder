@@ -1,6 +1,6 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 2.6<br>
+**Current line:** Beta 3.0<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
 **Last revised:** 2026-08-11
 
@@ -1075,10 +1075,25 @@ operational while preserving the local Core's trust boundary.
 # Beta 3 — Productization and collective cognition
 
 Beta 3 turns the proven local cognitive engine into a controllable product. It
-does not relax the evidence model. The capabilities below are workstreams inside
-one productization phase, not four mandatory standalone releases. Memory Studio
-and personal continuity come first; team and multi-agent cognition remain the
-last workstream.
+does not relax the evidence model. Beta 3.0 is the local product slice: Memory
+Studio foundations, policy control, replay, portable capsules, automatic host
+boundaries, and public proof. Encrypted continuity and collective cognition are
+deferred to Beta 3.1 after the local contracts are stable.
+
+### Beta 3.0 implementation slice
+
+- Localhost service and idempotent lifecycle event journal.
+- Memory Firewall for admission, retrieval scope, retention, and export policy.
+- Deterministic Cognition Replay Lab for baseline-versus-memory comparisons.
+- Checksummed Cognition Capsules with owner filtering and dry-run import.
+- Universal adapter contract, diagnostics, and host certification.
+- Minimal, local-first Tauri Memory Studio built on these stable APIs, with the
+  browser fallback retained for diagnostics.
+
+**Beta 3.0 gate:** a developer can install MemCoder, connect one supported host,
+open the lightweight desktop Studio, inspect and correct an intervention, replay
+the decision, and export or restore selected cognition without editing storage
+files or requiring a model provider.
 
 ## Workstream A — Memory Studio and developer control
 
@@ -1446,10 +1461,11 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 2.6: Failure Frontiers, Causal
-Calibration, and Cognitive Branches**. Its engineering foundation is
-implemented; the quantitative real-project gates remain an evaluation
-requirement.
+The current implementation line is **Beta 3.0: local productization and
+control**. The Beta 2.6 engineering foundation is implemented; Beta 3.0 now
+turns those capabilities into stable local service, policy, replay, capsule,
+and host-adapter surfaces while quantitative real-project gates remain an
+evaluation requirement.
 
 The first deliverable should be a closed-loop intervention record:
 

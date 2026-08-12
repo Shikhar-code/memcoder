@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MemCoder">
+  <rect x="28" y="28" width="200" height="200" rx="54" fill="#0d1828" stroke="#405a7d" stroke-width="6"/>
+  <path d="M70 174V82l58 70 58-70v92" fill="none" stroke="#f4f7fb" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="70" cy="82" r="9" fill="#65ddb8"/>
+  <circle cx="186" cy="82" r="9" fill="#8db8ff"/>
+</svg>

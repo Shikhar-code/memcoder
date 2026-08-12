@@ -23,6 +23,10 @@ from api.cognition import (
     retrieval_debug_cognition,
     plan_cognition,
     plan_history_cognition,
+    policy_cognition,
+    capsule_cognition,
+    replay_cognition,
+    doctor_cognition,
     retention_preview_cognition,
     apply_retention_cognition,
     report_contradiction_cognition,
@@ -648,6 +652,30 @@ def memcoder_record(
     recorded = record_cognition(**options)
 
     return json.dumps(recorded, indent=2)
+
+
+@mcp.tool()
+def memcoder_policy(action: str = "status", request: dict | None = None) -> str:
+    """Inspect or evaluate local admission, retrieval, and export policy."""
+    return json.dumps(policy_cognition(action=action, request=request or {}), indent=2)
+
+
+@mcp.tool()
+def memcoder_replay(action: str = "compare", request: dict | None = None) -> str:
+    """Compare or retrieve deterministic baseline-versus-memory receipts."""
+    return json.dumps(replay_cognition(action=action, request=request or {}), indent=2)
+
+
+@mcp.tool()
+def memcoder_capsule(action: str = "inspect", request: dict | None = None) -> str:
+    """Export, verify, inspect, or dry-run import a checksummed cognition capsule."""
+    return json.dumps(capsule_cognition(action=action, request=request or {}), indent=2)
+
+
+@mcp.tool()
+def memcoder_doctor() -> str:
+    """Return provider-free local storage, policy, and journal diagnostics."""
+    return json.dumps(doctor_cognition(), indent=2)
 
 
 @mcp.tool()

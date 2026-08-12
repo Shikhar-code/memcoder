@@ -729,6 +729,65 @@ def evaluate_cognition(runs):
     return evaluate_runs(runs)
 
 
+def policy_cognition(action="status", request=None):
+    """Inspect or evaluate the local Memory Firewall without a provider."""
+    from memory.policy import (
+        evaluate_admission,
+        evaluate_export,
+        evaluate_retrieval,
+        load_policy,
+        policy_status,
+        save_policy,
+    )
+    request = request or {}
+    if action == "status":
+        return policy_status(request.get("path"))
+    if action == "save":
+        return save_policy(request.get("policy"), request.get("path"))
+    if action == "check":
+        return evaluate_admission(
+            files=request.get("files"),
+            text=request.get("text"),
+            owner=request.get("owner"),
+            project_id=request.get("project_id"),
+            policy=request.get("policy") or load_policy(request.get("path")),
+        )
+    if action == "retrieval":
+        return evaluate_retrieval(
+            owner=request.get("owner"),
+            project_id=request.get("project_id"),
+            include_shared=bool(request.get("include_shared", False)),
+            policy=request.get("policy") or load_policy(request.get("path")),
+        )
+    if action == "export":
+        return evaluate_export(
+            owner=request.get("owner"),
+            project_id=request.get("project_id"),
+            include_shared=bool(request.get("include_shared", False)),
+            approved=bool(request.get("approved", False)),
+            policy=request.get("policy") or load_policy(request.get("path")),
+        )
+    raise ValueError("policy action must be status, save, check, retrieval, or export.")
+
+
+def capsule_cognition(action, request=None):
+    """Create, verify, inspect, or import a portable cognition capsule."""
+    from memory.capsule import capsule_action
+    return capsule_action(action, request or {})
+
+
+def replay_cognition(action, request=None):
+    """Compare captured cognition conditions deterministically."""
+    from memory.replay import replay_action
+    return replay_action(action, request or {})
+
+
+def doctor_cognition():
+    """Return local service, policy, journal, and storage diagnostics."""
+    from memory.service import doctor
+    return doctor()
+
+
 def record_cognition(
         task,
         files,

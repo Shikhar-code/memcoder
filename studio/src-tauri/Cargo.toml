@@ -1,0 +1,16 @@
+[package]
+name = "memcoder-studio"
+version = "0.3.0"
+description = "Lightweight desktop control surface for MemCoder"
+authors = ["Shikhar"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

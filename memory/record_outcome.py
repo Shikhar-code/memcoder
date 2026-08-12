@@ -36,6 +36,17 @@ def record_outcome(
         "rejected": []
     }
 
+    from memory.policy import evaluate_admission
+    admission = evaluate_admission(
+        files=files,
+        text=[task, summary, solution, reflection, *(principles or []), (qa_report or {}).get("evidence")],
+        owner=agent_id,
+        project_id=(environment or {}).get("project_id") if isinstance(environment, dict) else None,
+    )
+    if not admission["allowed"]:
+        recorded["rejected"].append("policy: " + admission["explanation"])
+        return recorded
+
     if plan_id is not None:
         from memory.plan_outcomes import record_plan_outcome
         recorded["plan_outcome"] = record_plan_outcome(

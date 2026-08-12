@@ -2,6 +2,34 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.3.0b1 — Beta 3.0
+
+### Added
+
+- Added the local Memory Firewall with explainable admission rules, secret and
+  sensitive-path blocking, policy persistence, and provider-free diagnostics.
+- Added an idempotent append-only host event journal for local adapter and Studio
+  integrations; journal failures never block lifecycle cognition.
+- Added deterministic Cognition Replay comparisons for baseline, memory-assisted,
+  token, rework, and verification outcomes.
+- Added checksummed Cognition Capsules with owner filtering, provenance-preserving
+  inspection, verification, dry-run import, and reviewed restore.
+- Added a standard-library localhost service with health, doctor, policy-check,
+  records, evidence, policy, replay, storage, and fail-open Autopilot endpoints.
+- Added a lightweight Tauri desktop Memory Studio with Overview, Memories,
+  Evidence, Replay Lab, Dreaming, and Policy views. It has no frontend framework,
+  charting dependency, or duplicate memory engine.
+- Added `memcoder setup`, `doctor`, `policy`, `replay`, and `capsule` CLI surfaces,
+  plus corresponding Python API entry points.
+
+### Changed
+
+- Lifecycle receipts are mirrored into the event journal without changing the
+  existing Autopilot storage contract.
+- Memory admission now applies the local policy before QA-approved records are
+  persisted.
+- Package metadata and public documentation now identify Beta 3.0 (`0.3.0b1`).
+
 ## 0.2.6b1 — Beta 2.6
 
 ### Added

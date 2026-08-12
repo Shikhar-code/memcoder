@@ -16,10 +16,7 @@ def add_memory(
         memory,
         verbose=False):
 
-    # Move existing Chroma-only records into the durable store once before
-    # admitting a new record. Chroma remains a rebuildable retrieval index.
-    migrate_legacy_workspace_storage()
-    migrate_legacy_chroma(collection)
+    from memory.policy import PolicyDenied, evaluate_admission
 
     # -------------------------
     # Defensive defaults
@@ -36,6 +33,19 @@ def add_memory(
 
     if not memory.get("verification"):
         memory["verification"] = ""
+
+    admission = evaluate_admission(
+        files=memory.get("files"),
+        text=[memory.get("task"), memory.get("summary"), memory.get("solution"), memory.get("verification")],
+        owner=memory.get("owner"),
+    )
+    if not admission["allowed"]:
+        raise PolicyDenied(admission["explanation"])
+
+    # Move existing Chroma-only records into the durable store once before
+    # admitting a new record. Chroma remains a rebuildable retrieval index.
+    migrate_legacy_workspace_storage()
+    migrate_legacy_chroma(collection)
 
     # -------------------------
     # Metadata

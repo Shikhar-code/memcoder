@@ -65,7 +65,10 @@ def build_snapshot():
     }
 
 
-def export_snapshot(output_path):
+def export_snapshot(output_path=None):
+    if output_path is None:
+        from memory.record_store import storage_path
+        output_path = storage_path().parent / "exports" / "memcoder-snapshot.json"
     path = Path(output_path)
     if path.suffix.lower() != ".json":
         raise ValueError("export path must end in .json")
