@@ -1,35 +1,29 @@
 # Antigravity prompt template
 
-Copy this at the start of an AGY task and replace the bracketed values.
+Beta 3.3 setup installs this lifecycle automatically through MCP. Use this
+short template only when you need to make the behavior explicit during a
+diagnostic or certification run:
 
 ```text
-Use MemCoder's provider-free cognition workflow for this task.
+Use the configured MemCoder MCP server for this substantive task.
 
-Before inspecting, listing, reading, searching, or editing project files, call
-memcoder_prepare exactly once with:
-- problem: "[describe the task and expected result]"
-- agent_id: "[stable project-specific owner]"
-- include_shared: false
-
-Use returned memories as investigation guidance, never as proof. Do not inspect
-or edit MemCoder's source code, database, MCP configuration, tool manifests,
-or documentation unless the user explicitly asks to debug MemCoder itself.
-
-Solve only the requested project task. Make the smallest correct change and run
-the relevant test, render, or verification command.
-
-Only after verification passes, call memcoder_record once with the actual task,
-changed files, root-cause summary, solution, one genuine debugging-process
-reflection, and reusable principles. Do not record an outcome if verification
-failed.
-
-Finally report the MemCoder prepare result, files changed, verification result,
-and record result.
+1. Send memcoder_autopilot with host="agy", event="task_started", a stable
+   task_id, the task problem, and the current environment.
+2. Treat returned guidance as a hypothesis, not proof. Inspect the project and
+   solve the requested task normally with the smallest correct edit.
+3. Use project resurrection when resuming known work and surface applicable
+   Failure Frontiers before risky changes.
+4. Run the narrowest relevant verification.
+5. Only after successful verification, send memcoder_autopilot with
+   event="verification_finished" and the actual host evidence. Include
+   guidance_used, changed_action, verification_passed, rework_count, and
+   host_tokens when the host can supply them.
+6. Do not record a failed or unverified outcome. If MemCoder is unavailable,
+   continue normally; the host must remain fail-open.
 ```
 
-Use a distinct stable `agent_id` for every project. Keep
-`include_shared: false` for early testing, then enable shared memory only when
-you intentionally want cross-project knowledge.
+Use a distinct stable `agent_id` for every project. The [AGY MCP setup guide](antigravity_mcp.md)
+covers installation and strict host certification.
 
 ## Bootstrap existing project guidance
 

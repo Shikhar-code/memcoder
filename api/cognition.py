@@ -166,6 +166,8 @@ def intervene_cognition(
     packet["failure_frontier"] = match_frontiers(
         problem, owner=agent_id, environment=environment, limit=3
     )
+    from memory.runtime import enforce_token_budget
+    packet = enforce_token_budget(packet, token_budget)
     from memory.utility import save_receipt
     save_receipt(packet["receipt"], agent_id, environment=environment)
     return packet
@@ -198,6 +200,17 @@ def utility_feedback_summary_cognition(memory_id=None, agent_id=None, environmen
     """Return outcome calibration without changing a trusted record."""
     from memory.utility import feedback_summary
     return feedback_summary(memory_id=memory_id, owner=agent_id, environment=environment)
+
+
+def close_intervention_cognition(intervention_id, outcome, agent_id="automation", environment=None):
+    """Close one intervention from an explicit host outcome envelope."""
+    from memory.utility import close_intervention
+    return close_intervention(
+        intervention_id=intervention_id,
+        outcome=outcome,
+        owner=agent_id,
+        environment=environment,
+    )
 
 
 def failure_frontier_cognition(
@@ -309,7 +322,8 @@ def autopilot_event_cognition(
         context=None,
         action=None,
         outcome=None,
-        token_budget=450):
+        token_budget=450,
+        host=None):
     """Handle one host lifecycle boundary; host work always fails open."""
     try:
         from memory.autopilot import begin_event, finish_event
@@ -327,6 +341,7 @@ def autopilot_event_cognition(
         decision["failure_frontier"] = match_frontiers(
             problem, owner=agent_id, environment=environment, limit=3
         )
+        existing_capture = decision.pop("_existing_capture", None)
         intervention = None
         if decision["should_intervene"]:
             intervention = intervene_cognition(
@@ -337,8 +352,11 @@ def autopilot_event_cognition(
                 token_budget=token_budget,
             )
 
-        capture = None
-        if event in {"verification_finished", "task_completed"} and isinstance(outcome, dict):
+        capture = existing_capture
+        if (
+                not decision.get("replayed")
+                and event in {"verification_finished", "task_completed"}
+                and isinstance(outcome, dict)):
             capture_result = record_cognition(
                 task=outcome.get("task", problem),
                 files=outcome.get("files", []),
@@ -368,22 +386,21 @@ def autopilot_event_cognition(
                 "rejected": capture_result.get("rejected", []),
             }
             feedback = outcome.get("utility_feedback") or outcome.get("feedback")
-            if isinstance(feedback, dict) and intervention:
-                receipt_id = (intervention.get("receipt") or {}).get("id")
-                if receipt_id and feedback.get("rating"):
-                    try:
-                        capture["utility_feedback"] = utility_feedback_cognition(
-                            intervention_id=receipt_id,
-                            rating=feedback["rating"],
-                            agent_id=agent_id,
-                            reason=feedback.get("reason"),
-                            action=feedback.get("action"),
-                            outcome=feedback.get("outcome"),
-                            mute=bool(feedback.get("mute", False)),
-                            applicability_correction=feedback.get("applicability_correction"),
-                        )
-                    except ValueError:
-                        capture["utility_feedback"] = {"recorded": False}
+            receipt_id = ((intervention or {}).get("receipt") or {}).get("id")
+            receipt_id = receipt_id or decision.get("prior_intervention_id")
+            if receipt_id and (isinstance(feedback, dict) or any(
+                    field in outcome for field in (
+                        "guidance_used", "changed_action", "verification_passed", "evidence",
+                    ))):
+                try:
+                    capture["outcome_loop"] = close_intervention_cognition(
+                        intervention_id=receipt_id,
+                        outcome=outcome,
+                        agent_id=agent_id,
+                        environment=environment,
+                    )
+                except ValueError as error:
+                    capture["outcome_loop"] = {"recorded": False, "error": str(error)}
             if capture.get("experience_recorded"):
                 from memory.dreaming import run_dream
                 capture["dream"] = run_dream(owner=agent_id, environment=environment)
@@ -420,11 +437,15 @@ def autopilot_event_cognition(
             intervention=intervention,
             capture=capture,
             token_budget=token_budget,
+            host=host or (environment or {}).get("host"),
         )
     except Exception as error:  # Lifecycle hooks must never block host work.
+        from memory.contracts import HOST_ADAPTER_SCHEMA_VERSION
         return {
             "available": False,
             "fail_open": True,
+            "host": host or (environment or {}).get("host") or "automation",
+            "schema_version": HOST_ADAPTER_SCHEMA_VERSION,
             "event": event,
             "task_id": task_id,
             "error": str(error),
@@ -508,10 +529,16 @@ def cognition_contract_cognition(contract, observations):
     return evaluate_contract(contract, observations)
 
 
-def certify_host_cognition(host, events):
+def certify_host_cognition(host, events, strict=False):
     """Check the minimum lifecycle, QA, and fail-open host contract."""
     from memory.contracts import certify_host
-    return certify_host(host, events)
+    return certify_host(host, events, strict=strict)
+
+
+def host_manifest_cognition(host):
+    """Return the provider-free lifecycle contract for one supported host."""
+    from memory.contracts import host_manifest
+    return host_manifest(host)
 
 
 def compile_skill_cognition(definition, problem, environment=None):

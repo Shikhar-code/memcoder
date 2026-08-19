@@ -1,0 +1,5 @@
+{
+  "name": "memcoder",
+  "version": "0.3.3-beta.1",
+  "description": "Provider-free, evidence-gated cognition for Claude Code."
+}

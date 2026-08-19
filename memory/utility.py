@@ -10,6 +10,7 @@ from memory.relevance import query_terms
 
 
 RATINGS = {"helpful", "ignored", "misleading", "harmful"}
+OUTCOME_SCHEMA_VERSION = 1
 THRESHOLDS = {
     "skill": 0.62,
     "experience": 0.56,
@@ -17,6 +18,76 @@ THRESHOLDS = {
     "principle": 0.50,
     "reflection": 0.58,
 }
+
+
+def normalize_outcome(outcome):
+    """Normalize an explicit host outcome without inferring proof from success alone."""
+    if not isinstance(outcome, dict):
+        raise ValueError("outcome must be an object.")
+
+    normalized = {"schema_version": OUTCOME_SCHEMA_VERSION}
+    for field in ("guidance_used", "changed_action", "verification_passed"):
+        value = outcome.get(field)
+        if value is not None and not isinstance(value, bool):
+            raise ValueError(f"outcome.{field} must be boolean when provided.")
+        if value is not None:
+            normalized[field] = value
+    for field in ("rework_count", "host_tokens"):
+        value = outcome.get(field)
+        if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
+            raise ValueError(f"outcome.{field} must be a non-negative integer when provided.")
+        if value is not None:
+            normalized[field] = value
+
+    evidence = outcome.get("evidence", outcome.get("verification"))
+    if evidence is not None and not isinstance(evidence, (dict, list, str)):
+        raise ValueError("outcome.evidence must be an object, list, or string when provided.")
+    normalized["evidence_present"] = evidence not in (None, {}, [], "")
+    normalized["evidence"] = evidence
+
+    supplied = outcome.get("utility_feedback") or outcome.get("feedback")
+    if supplied is not None and not isinstance(supplied, dict):
+        raise ValueError("outcome.feedback must be an object when provided.")
+    explicit_rating = supplied.get("rating") if isinstance(supplied, dict) else None
+    if explicit_rating is not None and explicit_rating not in RATINGS:
+        raise ValueError("outcome.feedback.rating must be helpful, ignored, misleading, or harmful.")
+
+    if explicit_rating in {"misleading", "harmful"} and not normalized["evidence_present"]:
+        rating = None
+    elif explicit_rating:
+        rating = explicit_rating
+    elif normalized.get("guidance_used") is False:
+        rating = "ignored"
+    elif all(normalized.get(field) is True for field in ("guidance_used", "changed_action", "verification_passed")):
+        rating = "helpful"
+    else:
+        rating = None
+
+    normalized["rating"] = rating
+    normalized["prediction_status"] = {
+        "helpful": "confirmed",
+        "ignored": "ignored",
+        "misleading": "contradicted",
+        "harmful": "contradicted",
+    }.get(rating, "inconclusive")
+    normalized["reason"] = " ".join(str((supplied or {}).get("reason", "")).split())[:280]
+    normalized["action"] = " ".join(str((supplied or {}).get("action", "")).split())[:280]
+    normalized["outcome"] = " ".join(str((supplied or {}).get("outcome", "")).split())[:280]
+    normalized["mute"] = bool((supplied or {}).get("mute", False))
+    correction = (supplied or {}).get("applicability_correction")
+    normalized["applicability_correction"] = correction if isinstance(correction, dict) else None
+    return normalized
+
+
+def _evidence_summary(evidence):
+    """Keep outcome receipts privacy-safe; detailed proof stays in the QA record."""
+    if evidence in (None, {}, [], ""):
+        return {"provided": False}
+    if isinstance(evidence, dict):
+        return {"provided": True, "kind": "object"}
+    if isinstance(evidence, list):
+        return {"provided": True, "kind": "list", "items": len(evidence)}
+    return {"provided": True, "kind": "text"}
 
 
 def _path():
@@ -115,19 +186,18 @@ def apply_utility_policy(results, problem, owner="automation", threshold=None, e
             archetype_match = classify_task(candidate.get("task", "")) == query_archetype
             semantic = max(0.0, min(1.0, float(candidate.get("relevance_score", 0.0))))
             feedback = _feedback_adjustment(candidate.get("id", ""), owner, environment)
-            score = round(
+            score = round(max(0.0, min(1.0,
                 semantic * 0.55
                 + (0.16 if archetype_match else 0.0)
                 + min(overlap, 3) * 0.05
                 + min(float(candidate.get("verification_strength", 0.0)), 0.10)
-                + feedback,
-                2,
-            )
+                + feedback
+            )), 2)
             memory_type = candidate.get("type", key.rstrip("s"))
             required = float(threshold) if threshold is not None else THRESHOLDS.get(memory_type, 0.56)
             reasons = []
-            if not overlap and not archetype_match:
-                reasons.append("no decision or action alignment")
+            if not overlap and candidate.get("applicability") != "match":
+                reasons.append("no action-specific overlap or verified environment match")
             if feedback <= -0.25:
                 reasons.append("comparable feedback marked this guidance misleading or harmful")
             if score < required:
@@ -233,6 +303,135 @@ def record_feedback(
     })
 
 
+def close_intervention(intervention_id, outcome, owner="automation", environment=None):
+    """Close one intervention with explicit host evidence, once and only once."""
+    receipt = next((
+        event for event in reversed(_events())
+        if event.get("kind") == "receipt"
+        and event.get("id") == intervention_id
+        and event.get("owner") == owner
+    ), None)
+    if receipt is None:
+        raise ValueError("intervention receipt was not found for this agent.")
+
+    prior = next((
+        event for event in reversed(_events())
+        if event.get("kind") == "outcome"
+        and event.get("intervention_id") == intervention_id
+        and event.get("owner") == owner
+    ), None)
+    if prior is not None:
+        prior_feedback = next((
+            event for event in reversed(_events())
+            if event.get("kind") == "feedback"
+            and event.get("intervention_id") == intervention_id
+            and event.get("owner") == owner
+        ), None)
+        return {
+            "schema_version": OUTCOME_SCHEMA_VERSION,
+            "intervention_id": intervention_id,
+            "outcome_id": prior.get("id"),
+            "rating": prior.get("rating"),
+            "prediction_status": prior.get("prediction_status", "inconclusive"),
+            "calibrated": prior_feedback is not None,
+            "deduplicated": True,
+        }
+
+    normalized = normalize_outcome(outcome)
+    material = json.dumps({
+        "intervention_id": intervention_id,
+        "owner": owner,
+        "outcome": normalized,
+    }, sort_keys=True, ensure_ascii=False)
+    outcome_id = "outcome_" + hashlib.sha256(material.encode("utf-8")).hexdigest()[:20]
+    prediction = {
+        "expected_value": receipt.get("expected_value", 0.0),
+        "decision_changed": receipt.get("decision_changed"),
+        "verification": receipt.get("verification"),
+        "status": normalized["prediction_status"],
+    }
+    stored = _append({
+        "kind": "outcome",
+        "schema_version": OUTCOME_SCHEMA_VERSION,
+        "id": outcome_id,
+        "intervention_id": intervention_id,
+        "owner": owner,
+        "memory_ids": receipt.get("memory_ids", []),
+        "environment": environment if isinstance(environment, dict) else receipt.get("environment", {}),
+        "rating": normalized["rating"],
+        "prediction_status": normalized["prediction_status"],
+        "prediction": prediction,
+        "guidance_used": normalized.get("guidance_used"),
+        "changed_action": normalized.get("changed_action"),
+        "verification_passed": normalized.get("verification_passed"),
+        "evidence_summary": _evidence_summary(normalized.get("evidence")),
+        "rework_count": normalized.get("rework_count"),
+        "host_tokens": normalized.get("host_tokens"),
+    })
+
+    feedback = None
+    if normalized["rating"] in RATINGS:
+        feedback = record_feedback(
+            intervention_id=intervention_id,
+            rating=normalized["rating"],
+            owner=owner,
+            reason=normalized["reason"],
+            action=normalized["action"],
+            outcome=normalized["outcome"],
+            mute=normalized["mute"],
+            applicability_correction=normalized["applicability_correction"],
+        )
+        stored["feedback_id"] = feedback.get("id")
+    return {
+        "schema_version": OUTCOME_SCHEMA_VERSION,
+        "intervention_id": intervention_id,
+        "outcome_id": stored["id"],
+        "rating": stored["rating"],
+        "prediction_status": stored["prediction_status"],
+        "calibrated": feedback is not None,
+        "deduplicated": False,
+        "feedback_id": stored.get("feedback_id"),
+    }
+
+
+def outcome_summary(memory_id=None, owner=None, environment=None, limit=20):
+    """Summarize prediction closure without exposing raw evidence by default."""
+    events = [
+        event for event in _events()
+        if event.get("kind") == "outcome"
+        and (owner is None or event.get("owner") == owner)
+        and (memory_id is None or memory_id in event.get("memory_ids", []))
+        and _comparable(event.get("environment"), environment)
+    ]
+    counts = {"confirmed": 0, "ignored": 0, "contradicted": 0, "inconclusive": 0}
+    for event in events:
+        status = event.get("prediction_status", "inconclusive")
+        counts[status if status in counts else "inconclusive"] += 1
+    recent = []
+    for event in reversed(events[-max(1, min(int(limit), 100)):]):
+        recent.append({
+            "id": event.get("id"),
+            "intervention_id": event.get("intervention_id"),
+            "owner": event.get("owner"),
+            "rating": event.get("rating"),
+            "prediction_status": event.get("prediction_status", "inconclusive"),
+            "guidance_used": event.get("guidance_used"),
+            "changed_action": event.get("changed_action"),
+            "verification_passed": event.get("verification_passed"),
+            "rework_count": event.get("rework_count"),
+            "host_tokens": event.get("host_tokens"),
+            "timestamp": event.get("timestamp"),
+        })
+    return {
+        "schema_version": OUTCOME_SCHEMA_VERSION,
+        "owner": owner,
+        "memory_id": memory_id,
+        "total": len(events),
+        "counts": counts,
+        "recent": recent,
+    }
+
+
 def feedback_summary(memory_id=None, owner=None, environment=None):
     """Summarize observed intervention outcomes for calibration, without mutating memory."""
     events = [
@@ -269,4 +468,5 @@ def feedback_summary(memory_id=None, owner=None, environment=None):
         "total": total,
         "calibration_delta": delta,
         "recommendation": recommendation,
+        "outcomes": outcome_summary(memory_id=memory_id, owner=owner, environment=environment),
     }

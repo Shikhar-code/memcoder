@@ -16,6 +16,8 @@ def build_config():
                 "command": sys.executable,
                 "args": ["-m", "adapters.mcp.server"],
                 "cwd": str(ROOT),
+                "startup_timeout_sec": 60,
+                "tool_timeout_sec": 120,
             }
         }
     }

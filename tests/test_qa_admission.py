@@ -65,6 +65,18 @@ unsupported = evaluate_outcome_qa(**OUTCOME, evidence={
 })
 assert unsupported["verdict"] == "insufficient_evidence"
 
+normalized = evaluate_outcome_qa(**OUTCOME, evidence={
+    "checks": [{
+        "name": "installed package diagnostic",
+        "kind": "assertion",
+        "passed": True,
+        "command": "python -c print_version",
+        "output": "0.3.1b1",
+    }]
+})
+assert normalized["verdict"] == "approved"
+assert normalized["evidence_summary"]["check_kinds"] == ["diagnostic"]
+
 
 captures = []
 capture = types.ModuleType("memory.capture")

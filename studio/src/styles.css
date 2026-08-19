@@ -42,6 +42,11 @@ p { margin: 0; }
 .muted { color: #8592a5; }
 .hint { color: #8592a5; font-size: 13px; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.host-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.host-card { padding: 15px; }
+.host-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.host-version { color: #8290a3; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.host-card .muted { margin-top: 8px; font-size: 11px; }
 .metric, .panel { border: 1px solid #293442; border-radius: 9px; background: #141b24; }
 .metric { padding: 16px; }
 .metric-value { display: block; color: #f3f6fb; font-size: 25px; font-weight: 650; letter-spacing: -.04em; }
@@ -93,6 +98,6 @@ pre { padding: 14px; border: 1px solid #293442; border-radius: 7px; font: 12px/1
 .comparison-label { color: #8fc3aa; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
 .comparison strong { color: #eef8f2; font-size: 14px; }
 .callout { padding: 14px; border-left: 2px solid #8db8ff; color: #aeb9c9; background: #151f2b; }
-@media (max-width: 1000px) { body { min-width: 0; } .app-shell { grid-template-columns: 188px 1fr; } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .detail { grid-template-columns: 1fr; } .case-grid, .comparison { grid-template-columns: 1fr 1fr; } .dream-head { grid-template-columns: 1fr; } .dream-actions { justify-items: start; } .dream-actions .toolbar { justify-content: flex-start; flex-wrap: wrap; } .dream-help { text-align: left; } }
+@media (max-width: 1000px) { body { min-width: 0; } .app-shell { grid-template-columns: 188px 1fr; } .grid, .host-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .detail { grid-template-columns: 1fr; } .case-grid, .comparison { grid-template-columns: 1fr 1fr; } .dream-head { grid-template-columns: 1fr; } .dream-actions { justify-items: start; } .dream-actions .toolbar { justify-content: flex-start; flex-wrap: wrap; } .dream-help { text-align: left; } }
 @media (max-width: 680px) { .case-grid, .comparison { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

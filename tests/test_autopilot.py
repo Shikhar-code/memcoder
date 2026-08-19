@@ -26,6 +26,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert result["attention"]["mode"] == "brief"
     assert result["ledger"]["net_token_dividend"] == 210
 
+    repeated = finish_event(first, intervention={
+        "intervention": {"mode": "brief"},
+        "receipt": {"id": "intervention-test"},
+        "budget": {"estimated_tokens": 120},
+    }, token_budget=450)
+    assert repeated["ledger"] == result["ledger"]
+    assert len(token_ledger("tester", "task-1")["events"]) == 1
+
     duplicate = begin_event(
         "before_plan",
         "task-1",

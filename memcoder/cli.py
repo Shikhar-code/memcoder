@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from api.cognition import (
     autopilot_event_cognition,
     capsule_cognition,
     certify_host_cognition,
+    host_manifest_cognition,
     checkpoint_cognition,
     compile_skill_cognition,
     compose_skills_cognition,
@@ -64,21 +66,43 @@ def default_agy_config_path():
     return Path.home() / ".gemini" / "antigravity" / "mcp_config.json"
 
 
+def default_claude_config_path():
+    """Return Claude Code's project-scoped MCP configuration path."""
+    return Path.cwd() / ".mcp.json"
+
+
+def _load_mcp_config(config_path, host):
+    config_path = Path(config_path)
+    if not config_path.exists():
+        return config_path, {}
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"Cannot update invalid JSON configuration: {config_path}") from error
+    if not isinstance(config, dict):
+        raise ValueError(f"{host} MCP configuration must contain a JSON object.")
+    return config_path, config
+
+
+def _write_mcp_config(config_path, config):
+    config_path = Path(config_path)
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    new_text = json.dumps(config, indent=2) + "\n"
+    old_text = config_path.read_text(encoding="utf-8") if config_path.exists() else None
+    if old_text == new_text:
+        return {"path": str(config_path), "changed": False, "backup": None}
+    backup = None
+    if old_text is not None:
+        backup_path = config_path.with_suffix(config_path.suffix + ".bak")
+        backup_path.write_text(old_text, encoding="utf-8")
+        backup = str(backup_path)
+    config_path.write_text(new_text, encoding="utf-8")
+    return {"path": str(config_path), "changed": True, "backup": backup}
+
+
 def configure_agy(config_path, python_executable):
     """Add or update MemCoder without disturbing other MCP servers."""
-    config_path = Path(config_path)
-    config = {}
-
-    if config_path.exists():
-        try:
-            config = json.loads(config_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as error:
-            raise ValueError(
-                f"Cannot update invalid JSON configuration: {config_path}"
-            ) from error
-
-    if not isinstance(config, dict):
-        raise ValueError("AGY MCP configuration must contain a JSON object.")
+    config_path, config = _load_mcp_config(config_path, "AGY")
 
     servers = config.setdefault("mcpServers", {})
     if not isinstance(servers, dict):
@@ -89,9 +113,59 @@ def configure_agy(config_path, python_executable):
         "args": ["-m", "adapters.mcp.server"]
     }
 
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+    _write_mcp_config(config_path, config)
     return config_path
+
+
+def configure_claude(config_path, python_executable):
+    """Add or update MemCoder in Claude Code's project MCP configuration."""
+    config_path, config = _load_mcp_config(config_path, "Claude Code")
+    servers = config.setdefault("mcpServers", {})
+    if not isinstance(servers, dict):
+        raise ValueError("Claude Code MCP configuration field 'mcpServers' must be an object.")
+    servers["memcoder"] = {
+        "command": str(Path(python_executable).resolve()),
+        "args": ["-m", "adapters.mcp.server"],
+    }
+    return _write_mcp_config(config_path, config)
+
+
+CLAUDE_INSTRUCTIONS = """<!-- memcoder:start -->
+## MemCoder cognition
+
+For substantive development tasks, use the configured MemCoder MCP server's
+`memcoder_autopilot` lifecycle. Start with `task_started`, treat returned
+guidance as a hypothesis, verify the host's work normally, and send the actual
+verification result at `verification_finished`. Use project resurrection when
+resuming known work. MemCoder is provider-free, fail-open, and must never be
+treated as proof without current host verification. Do not record an outcome
+when the fix or verification failed.
+At `verification_finished`, include explicit outcome fields when available:
+`guidance_used`, `changed_action`, `verification_passed`, `evidence`,
+`rework_count`, and `host_tokens`. MemCoder calibrates only from this
+host-supplied proof.
+<!-- memcoder:end -->
+"""
+
+
+def install_claude_instructions(project_path):
+    """Install one idempotent project instruction block for Claude Code."""
+    project_path = Path(project_path).resolve()
+    target = project_path / "CLAUDE.md"
+    existing = target.read_text(encoding="utf-8") if target.exists() else ""
+    start = "<!-- memcoder:start -->"
+    end = "<!-- memcoder:end -->"
+    if start in existing and end in existing:
+        prefix, _, remainder = existing.partition(start)
+        _, _, suffix = remainder.partition(end)
+        updated = prefix + CLAUDE_INSTRUCTIONS.rstrip() + suffix
+        if updated == existing:
+            return {"path": str(target), "changed": False}
+        target.write_text(updated, encoding="utf-8")
+        return {"path": str(target), "changed": True, "updated": True}
+    separator = "\n\n" if existing.strip() else ""
+    target.write_text(existing.rstrip() + separator + CLAUDE_INSTRUCTIONS + "\n", encoding="utf-8")
+    return {"path": str(target), "changed": True}
 
 
 def load_json_request(input_path):
@@ -135,13 +209,35 @@ def main(argv=None):
         default=default_agy_config_path(),
         help="Override AGY's MCP config path."
     )
+    setup_claude = subcommands.add_parser(
+        "setup-claude",
+        help="Configure Claude Code's project MCP server and lifecycle instructions."
+    )
+    setup_claude.add_argument(
+        "--config",
+        type=Path,
+        default=default_claude_config_path(),
+        help="Override Claude Code's .mcp.json path."
+    )
+    setup_claude.add_argument(
+        "--project",
+        type=Path,
+        default=Path.cwd(),
+        help="Project root where CLAUDE.md instructions are installed."
+    )
 
     setup = subcommands.add_parser(
         "setup",
         help="Create or inspect the safe local Beta 3 configuration.",
     )
     setup.add_argument("--policy", type=Path, help="Override the local policy path.")
-    subcommands.add_parser("doctor", help="Check local storage, policy, and journal health.")
+    doctor = subcommands.add_parser("doctor", help="Check local storage, policy, and journal health.")
+    doctor.add_argument("--host", choices=("codex", "agy", "claude"))
+    doctor.add_argument("--config", type=Path, help="Override the selected host's config path.")
+    host_manifest = subcommands.add_parser(
+        "host-manifest", help="Show the canonical lifecycle contract for a supported host."
+    )
+    host_manifest.add_argument("--host", required=True, choices=("codex", "agy", "claude"))
     service = subcommands.add_parser("service", help="Run or inspect the localhost cognition service.")
     service.add_argument("action", choices=("doctor", "serve"), default="doctor")
     service.add_argument("--host", default="127.0.0.1")
@@ -282,6 +378,16 @@ def main(argv=None):
         print("Restart AGY. No plugin install command is required.")
         return 0
 
+    if arguments.command == "setup-claude":
+        try:
+            config = configure_claude(arguments.config, sys.executable)
+            instructions = install_claude_instructions(arguments.project)
+        except ValueError as error:
+            parser.error(str(error))
+        emit_json({"host": "claude", "mcp": config, "instructions": instructions})
+        print("Restart Claude Code in the configured project.")
+        return 0
+
     if arguments.command == "setup":
         from memory.policy import load_policy, save_policy, policy_status
         target = arguments.policy
@@ -294,7 +400,36 @@ def main(argv=None):
         return 0
 
     if arguments.command == "doctor":
-        emit_json(doctor_cognition())
+        result = doctor_cognition()
+        if arguments.host:
+            config_path = arguments.config
+            if config_path is None:
+                config_path = {
+                    "agy": default_agy_config_path(),
+                    "claude": default_claude_config_path(),
+                    "codex": Path("codex-marketplace/plugins/memcoder/.mcp.json"),
+                }[arguments.host]
+            try:
+                path, config = _load_mcp_config(config_path, arguments.host)
+                server = (config.get("mcpServers") or {}).get("memcoder")
+                command = server.get("command") if isinstance(server, dict) else None
+                result["host"] = {
+                    "name": arguments.host,
+                    "config": str(path),
+                    "configured": isinstance(server, dict)
+                    and server.get("args") == ["-m", "adapters.mcp.server"]
+                    and bool(command)
+                    and (Path(command).exists() or shutil.which(command)),
+                    "command": command,
+                    "manifest": host_manifest_cognition(arguments.host),
+                }
+            except ValueError as error:
+                result["host"] = {"name": arguments.host, "configured": False, "error": str(error)}
+        emit_json(result)
+        return 0
+
+    if arguments.command == "host-manifest":
+        emit_json(host_manifest_cognition(arguments.host))
         return 0
 
     if arguments.command == "service":
@@ -410,6 +545,7 @@ def main(argv=None):
                 action=request.get("action"),
                 outcome=request.get("outcome"),
                 token_budget=request.get("token_budget", 450),
+                host=request.get("host"),
             )
         elif arguments.command == "autopilot-control":
             result = autopilot_control_cognition(
@@ -435,6 +571,7 @@ def main(argv=None):
             result = certify_host_cognition(
                 host=require_text(request, "host"),
                 events=request.get("events"),
+                strict=bool(request.get("strict", False)),
             )
         elif arguments.command == "token-ledger":
             result = token_ledger_cognition(

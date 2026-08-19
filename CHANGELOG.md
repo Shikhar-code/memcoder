@@ -2,6 +2,83 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.3.3b1 — Beta 3.3
+
+### Added
+
+- Added explicit host outcome normalization for intervention use, changed
+  action, verification, rework, and token measurements.
+- Added prediction receipts that close exactly once at verification and remain
+  privacy-safe by storing proof summaries rather than raw evidence.
+- Added bounded environment-aware outcome calibration and strict host checks for
+  outcome closure and prediction receipts.
+- Added closed-loop outcome summaries to the local service and lightweight
+  Studio evidence view.
+- Added deterministic proof-loop regression coverage.
+
+### Changed
+
+- Autopilot now connects prior intervention receipts to later verification
+  events even when the host's task wording changes slightly.
+- Ambiguous outcomes remain unmeasured; passing work alone never implies that
+  retrieved guidance was helpful.
+- Package, Studio, Codex plugin, and Claude bundle metadata now identify
+  `0.3.3b1` / Beta 3.3.
+
+### Boundary
+
+- Beta 3.3 remains local, provider-free, fail-open, and single-user. It does
+  not add cloud sync, team cognition, multi-agent coordination, or automatic
+  mutation of trusted memories.
+
+## 0.3.2b1 — Beta 3.2
+
+### Added
+
+- Added a versioned provider-free host manifest for Codex, AGY, and Claude Code.
+- Added strict host certification for schema, identity, event IDs, token
+  budgets, QA admission, privacy, and fail-open receipts.
+- Added `memcoder setup-claude`, Claude Code MCP configuration, and an
+  idempotent `CLAUDE.md` lifecycle block.
+- Added `memcoder host-manifest` and host-aware `memcoder doctor` diagnostics.
+- Added a portable Claude Code skill and MCP example under `plugins/claude/`.
+- Added deterministic Beta 3.2 host-parity fixtures and setup tests.
+
+### Changed
+
+- AGY setup now preserves other servers, backs up changed configuration, and
+  remains safe to rerun.
+- Codex, AGY, and Claude documentation now describe the same Autopilot lifecycle
+  and provider-free trust boundary.
+- Package, Studio, and Codex plugin metadata are aligned to `0.3.2`.
+
+### Boundary
+
+- Beta 3.2 does not add cloud sync, team memory, multi-agent cognition, or
+  provider-powered intelligence.
+
+## 0.3.1b1 — Beta 3.1
+
+### Changed
+
+- Deferred semantic-index initialization until retrieval or an approved
+  Markdown import actually needs it, reducing MCP import startup to about three
+  seconds on the Windows development host.
+- Enforced host-declared cognition token budgets, including final packet
+  metadata and Failure Frontier additions; undersized budgets now abstain.
+- Withheld archetype-only retrieval matches unless action-specific overlap or a
+  verified environment match supports transfer.
+- Normalized common diagnostic and boolean-pass verification evidence while
+  preserving inspectable-proof requirements and actionable QA rejection detail.
+- Made repeated completion lifecycle events reuse the original capture instead
+  of learning twice after retries or restarts.
+
+### Host integration
+
+- Refreshed the Codex plugin metadata for Beta 3.1 and retained explicit MCP
+  startup and tool timeouts.
+- Kept AGY / Antigravity and Claude Code parity as required pre-1.0 host gates.
+
 ## 0.3.0b1 — Beta 3.0
 
 ### Added

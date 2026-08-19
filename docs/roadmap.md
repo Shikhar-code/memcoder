@@ -1,6 +1,6 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 3.0<br>
+**Current line:** Beta 3.3<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
 **Last revised:** 2026-08-11
 
@@ -256,7 +256,9 @@ disabled.
 | **Beta 2.4** | Invisible Autopilot, token economy, and Skill Intelligence. | Ordinary prompts, measurable savings, failure prevention, and dependable procedural transfer. |
 | **Beta 2.5** | Dreaming, evaluation, Core hardening, and host certification. | Candidate learning survives adversarial checks and the complete system meets the 9/10 bar. |
 | **Beta 2.6** | Failure Frontiers, causal calibration, Cognitive Branches, and proof-gated Cognitive Diff. | Failures become actionable warnings; alternatives merge only after proof and remain reversible. |
-| **Beta 3** | Memory Studio, Cognitive Git, developer website, cloud continuity, optional Intelligence, and later collective cognition. | Developers can inspect and control cognition; optional product layers preserve Core's trust and privacy boundaries. |
+| **Beta 3.0–3.1** | Memory Studio, local control, and a hardened automatic cognition path. | Developers can inspect cognition; supported hosts start quickly, abstain correctly, respect token budgets, and learn idempotently. |
+| **Beta 3.2** | Codex, AGY, and Claude host parity before optional cloud, Intelligence, or collective cognition. | Certified hosts preserve the same lifecycle, proof, privacy, token, and fail-open contracts. |
+| **Beta 3.3** | Adaptive Proof Loop: prediction receipts, verified outcome closure, and bounded environment-aware calibration. | A host can prove whether guidance mattered, and the next comparable task is calibrated without mutating trusted memory. |
 | **RC** | Promise and contract freeze. | No data-loss, privacy, migration, or silent-learning blocker. |
 | **Core 1.0** | Dependable local cognition layer. | Stable product claim backed by reproducible real-project evidence. |
 
@@ -1077,8 +1079,8 @@ operational while preserving the local Core's trust boundary.
 Beta 3 turns the proven local cognitive engine into a controllable product. It
 does not relax the evidence model. Beta 3.0 is the local product slice: Memory
 Studio foundations, policy control, replay, portable capsules, automatic host
-boundaries, and public proof. Encrypted continuity and collective cognition are
-deferred to Beta 3.1 after the local contracts are stable.
+boundaries, and public proof. Beta 3.1 hardens the local automatic path before
+encrypted continuity or collective cognition expands the trust boundary.
 
 ### Beta 3.0 implementation slice
 
@@ -1094,6 +1096,131 @@ deferred to Beta 3.1 after the local contracts are stable.
 open the lightweight desktop Studio, inspect and correct an intervention, replay
 the decision, and export or restore selected cognition without editing storage
 files or requiring a model provider.
+
+### Beta 3.1 reliability and precision slice
+
+- Lazy MCP startup that does not initialize the semantic index before a tool
+  actually needs retrieval or persistence.
+- Hard cognition token ceilings with safe abstention when the requested budget
+  cannot carry verified guidance.
+- Applicability-first utility gating that withholds archetype-only matches
+  unless a verified environment match supports transfer.
+- Host-friendly evidence normalization without weakening QA proof requirements.
+- Idempotent lifecycle completion capture across retries and host restarts.
+- Actionable diagnostics for malformed verification evidence.
+
+**Beta 3.1 gate:** the supported automatic host path starts quickly, stays
+within its declared context budget, abstains on weak transfer, and never admits
+the same completion twice.
+
+### Beta 3.2 host parity and portable Autopilot
+
+Beta 3.2 makes the automatic path consistent across Codex, AGY, and Claude
+Code. It reuses the existing provider-free MCP server and Autopilot runtime;
+host adapters remain thin configuration and instruction layers.
+
+#### Canonical host contract
+
+- Publish one versioned host manifest covering lifecycle events, token budgets,
+  privacy-safe receipts, fail-open behavior, and idempotent capture.
+- Expose the manifest through Python, CLI, and MCP.
+- Add strict certification checks for schema version, host identity, event IDs,
+  token budgets, QA admission, and privacy boundaries.
+- Keep legacy certification behavior readable for existing integrations.
+
+#### AGY parity
+
+- Replace the legacy prepare/record setup guidance with the Autopilot lifecycle.
+- Make `setup-agy` idempotent, Python-environment-bound, config-preserving, and
+  backup-aware.
+- Add host diagnostics and certification fixtures for AGY.
+
+#### Claude Code parity
+
+- Add a supported Claude Code MCP/Skill integration bundle.
+- Add `setup-claude` to configure project `.mcp.json` and an idempotent
+  `CLAUDE.md` lifecycle block without overwriting user content.
+- Certify Claude against the same lifecycle, QA, privacy, token, and fail-open
+  fixtures used by Codex and AGY.
+
+#### Release gates
+
+- Ordinary prompts work after one setup command on all three supported hosts.
+- Host outages remain fail-open and never create unverified memory.
+- Retries never duplicate lifecycle capture.
+- Clean setup, repair, and wrong-environment diagnostics are tested on Windows.
+- The Core remains provider-free; host model credentials never enter MemCoder.
+
+Beta 3.2 explicitly does not add cloud sync, team memory, multi-agent
+cognition, provider-powered intelligence, or a Studio redesign.
+
+### Beta 3.3 adaptive proof loop and closed-loop calibration
+
+Beta 3.3 turns an intervention into a measurable, reversible prediction. It
+reuses the existing Autopilot, Utility Engine, Replay, service, and Studio
+surfaces; no new database or provider is required.
+
+#### Outcome contract
+
+- Normalize host-supplied `guidance_used`, `changed_action`, and
+  `verification_passed` fields, with optional evidence, rework, and token data.
+- Treat `helpful` as confirmed only when guidance was used, changed the action,
+  and verification passed.
+- Keep ambiguous outcomes unmeasured; never infer helpfulness from task success
+  alone.
+- Require explicit evidence before accepting misleading or harmful feedback.
+
+#### Prediction closure
+
+- Persist a privacy-safe prediction receipt linked to the exact intervention.
+- Record the expected decision change, cheapest proof, and final prediction
+  status: confirmed, ignored, contradicted, or inconclusive.
+- Close a receipt exactly once across retries, host restarts, and repeated
+  lifecycle events.
+- Keep detailed proof in the existing QA record; outcome receipts store only a
+  compact evidence summary.
+
+#### Bounded adaptive attention
+
+- Apply feedback only to comparable project, runtime, language, and task
+  contexts.
+- Modestly promote repeatedly helpful guidance and downrank ignored guidance.
+- Quarantine harmful or misleading guidance for comparable contexts.
+- Keep raw trusted records immutable and make calibration append-only and
+  reversible.
+
+#### Host and Studio surfaces
+
+- Require outcome closure and prediction receipts in strict Codex, AGY, and
+  Claude certification.
+- Expose closed-loop summaries through the existing CLI, MCP, service, and
+  lightweight Studio evidence view.
+- Show why an intervention appeared, whether it was used, what proof closed it,
+  and how future ranking changed.
+
+#### Beta 3.3 release gates
+
+- One ordinary task can complete the full prediction → verification → closure
+  loop on every supported host.
+- No outcome, feedback, or learning is duplicated on retry.
+- No ambiguous or unverified result changes retrieval.
+- Harmful guidance is withheld only in comparable contexts and never rewrites
+  the original evidence.
+- Host token budgets, fail-open behavior, privacy boundaries, and startup
+  latency do not regress.
+- Matched evaluation reports pass rate, negative transfer, retrieval precision,
+  rework, token dividend, and ignored interventions—including negative results.
+
+Beta 3.3 does not add cloud sync, team cognition, multi-agent coordination,
+provider-powered intelligence, or automatic mutation of trusted memories.
+
+### Required host ecosystem before Core 1.0
+
+- Stable Codex Desktop plugin with automatic lifecycle use.
+- Stable AGY / Antigravity MCP plugin and one-command setup.
+- Stable Claude Code plugin or supported Skill integration using the same
+  lifecycle, QA, fail-open, and token-budget contract.
+- Host certification receipts proving equivalent behavior across all three.
 
 ## Workstream A — Memory Studio and developer control
 
@@ -1461,11 +1588,12 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 3.0: local productization and
-control**. The Beta 2.6 engineering foundation is implemented; Beta 3.0 now
-turns those capabilities into stable local service, policy, replay, capsule,
-and host-adapter surfaces while quantitative real-project gates remain an
-evaluation requirement.
+The current implementation line is **Beta 3.3: Adaptive Proof Loop and closed-loop calibration**.
+Beta 3.0 established local service, policy, replay, capsule, Studio, and adapter
+surfaces. Beta 3.1 hardens startup, token enforcement, abstention, verification
+evidence, and lifecycle idempotence. Beta 3.2 completes the supported Codex,
+AGY, and Claude host contract. Beta 3.3 closes the evidence loop before cloud
+or collective cognition expands.
 
 The first deliverable should be a closed-loop intervention record:
 

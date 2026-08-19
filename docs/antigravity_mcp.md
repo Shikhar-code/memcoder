@@ -1,52 +1,41 @@
 # Antigravity MCP setup (provider-free)
 
-Install MemCoder into the Python environment Antigravity uses. For this
-unpublished Beta-1 repository, install the checked-out project rather than the
-older PyPI package:
+Beta 3.3 uses the same automatic lifecycle as Codex and Claude Code and closes
+verified intervention outcomes. Install
+MemCoder into the Python environment Antigravity will launch, then run:
 
-```bash
-python -m pip install .
+```powershell
+python -m pip install --no-build-isolation .
+python -m memcoder setup-agy
+python -m memcoder doctor --host agy
 ```
 
-Then configure Antigravity to start the installed MCP server:
+`setup-agy` updates only the `memcoder` entry in Antigravity's MCP config and
+preserves other servers. If the file changes, the previous file is kept beside
+it with a `.bak` suffix. Run the command again safely after changing Python
+environments.
 
-```json
-{
-  "mcpServers": {
-    "memcoder": {
-      "command": "<python-with-memcoder-installed>",
-      "args": ["-m", "adapters.mcp.server"]
-    }
-  }
-}
-```
-
-MemCoder provides two tools:
-
-- `memcoder_prepare(problem, agent_id)` retrieves only trusted memories and
-  returns investigation guidance.
-- `memcoder_record(task, files, summary, solution, reflection, principles,
-  agent_id)` validates and persists the result of a successful fix.
-
-Neither tool invokes an LLM or an Ollama server. Antigravity performs the
-reasoning with its own model. A host-agent instruction can therefore enforce
-the complete cognition loop without giving the MCP server model-provider
-credentials:
+The host lifecycle is:
 
 ```text
-For each coding task, call memcoder_prepare exactly once before inspecting or
-editing project files. Use only its returned trusted memories as guidance; do
-not inspect MemCoder's implementation, database, or configuration files unless
-the user explicitly asks to debug MemCoder itself. Solve the assigned project
-task normally, make the smallest necessary edit, and run the relevant test.
-Only after that test passes, call memcoder_record exactly once with the actual
-task, changed files, root-cause summary, implemented solution, one concise
-reflection about your debugging process (if justified), and any reusable
-principles. Do not record an outcome when the fix or test failed.
+task_started
+→ optional project_resurrected
+→ risk/checkpoint boundaries when needed
+→ host work and verification
+→ verification_finished or task_failed
+→ QA-gated capture, explicit outcome closure, and utility feedback
 ```
 
-Use a stable `agent_id` such as `antigravity` for continuity across tasks.
+Use `python -m memcoder host-manifest --host agy` to inspect the canonical
+contract and `host-certify` with `strict: true` to validate a receipt set.
+MemCoder returns guidance, not proof; Antigravity remains responsible for
+inspection and verification. If the MCP server is unavailable, Antigravity
+continues normally and no outcome is recorded.
 
-For the current step-by-step installation, plugin setup, and hardened task
-prompt, see the [README](../README.md) and
-[Antigravity prompt template](antigravity_prompt_template.md).
+At `verification_finished`, include `guidance_used`, `changed_action`, and
+`verification_passed` when known, plus compact `evidence`, `rework_count`, and
+`host_tokens`. MemCoder uses these fields to close the prediction receipt; it
+does not infer helpfulness from a passing task alone.
+
+Neither the Core nor the MCP server invokes an LLM or requires Ollama, CUDA, or
+an API key. Antigravity supplies the reasoning model.

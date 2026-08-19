@@ -13,7 +13,7 @@ from memory.quality import (
 
 
 QA_SCHEMA_VERSION = 1
-CHECK_KINDS = {"test", "build", "lint", "assertion", "manual_review"}
+CHECK_KINDS = {"test", "build", "lint", "assertion", "diagnostic", "manual_review"}
 CHECK_STATUSES = {"passed", "failed", "skipped"}
 
 
@@ -28,13 +28,31 @@ def _text(value, minimum_words=1):
 def _check_has_proof(check):
     """Return whether one passed check contains inspectable host evidence."""
     kind = check.get("kind")
-    if kind in {"test", "build", "lint"}:
+    if kind in {"test", "build", "lint", "diagnostic"}:
         return _text(check.get("command"), 1) and _text(check.get("output"), 1)
     if kind == "assertion":
         return _text(check.get("assertion"), 2) and _text(check.get("actual"), 1)
     if kind == "manual_review":
         return _text(check.get("reviewer"), 1) and _text(check.get("notes"), 2)
     return False
+
+
+def _normalize_check(check):
+    """Accept common host evidence shapes without weakening proof requirements."""
+    if not isinstance(check, dict):
+        return check
+    normalized = dict(check)
+    aliases = {"review": "manual_review", "manual": "manual_review"}
+    normalized["kind"] = aliases.get(normalized.get("kind"), normalized.get("kind"))
+    if normalized.get("status") is None and isinstance(normalized.get("passed"), bool):
+        normalized["status"] = "passed" if normalized["passed"] else "failed"
+    if (
+            normalized.get("kind") == "assertion"
+            and not normalized.get("assertion")
+            and normalized.get("command")
+            and normalized.get("output")):
+        normalized["kind"] = "diagnostic"
+    return normalized
 
 
 def evaluate_outcome_qa(
@@ -86,20 +104,30 @@ def evaluate_outcome_qa(
 
     normalized_checks = []
     malformed = False
-    for check in checks:
+    for index, raw_check in enumerate(checks):
+        check = _normalize_check(raw_check)
         if not isinstance(check, dict):
             malformed = True
+            field_rejections.append(f"evidence.checks[{index}]: expected an object")
             continue
         kind = check.get("kind")
         status = check.get("status")
         name = check.get("name")
         if kind not in CHECK_KINDS or status not in CHECK_STATUSES or not _text(name, 1):
             malformed = True
+            field_rejections.append(
+                f"evidence.checks[{index}]: use a named {sorted(CHECK_KINDS)} check "
+                f"with status passed, failed, or skipped"
+            )
             continue
         normalized_checks.append(check)
 
     if malformed:
-        gates.append(_gate("verification_schema", "failed", "Each check needs a name, supported kind, and status."))
+        gates.append(_gate(
+            "verification_schema",
+            "failed",
+            "Fix the indexed evidence.checks entries listed in field_rejections.",
+        ))
     else:
         gates.append(_gate("verification_schema", "passed", "Verification checks use the supported schema."))
 
@@ -112,7 +140,12 @@ def evaluate_outcome_qa(
     elif not passed:
         gates.append(_gate("verification_result", "missing", "No verification check passed."))
     elif unsupported:
-        gates.append(_gate("verification_proof", "missing", "Each passed check needs inspectable command/output, assertion/actual, or reviewer/notes evidence."))
+        gates.append(_gate(
+            "verification_proof",
+            "missing",
+            "Passed tests/builds/lints/diagnostics need command+output; assertions need "
+            "assertion+actual; manual reviews need reviewer+notes.",
+        ))
     else:
         gates.append(_gate("verification_result", "passed", "At least one verification check passed with inspectable evidence."))
 
@@ -132,7 +165,7 @@ def _report(verdict, gates, field_rejections, checks):
         if check.get("status") != "passed":
             continue
         item = {"name": check["name"], "kind": check["kind"]}
-        if check["kind"] in {"test", "build", "lint"}:
+        if check["kind"] in {"test", "build", "lint", "diagnostic"}:
             item["command"] = check.get("command", "")
         elif check["kind"] == "assertion":
             item["assertion"] = check.get("assertion", "")

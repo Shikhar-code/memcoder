@@ -2,7 +2,9 @@
   "mcpServers": {
     "memcoder": {
       "command": "python",
-      "args": ["-m", "adapters.mcp.server"]
+      "args": ["-m", "adapters.mcp.server"],
+      "startup_timeout_sec": 60,
+      "tool_timeout_sec": 120
     }
   }
 }

@@ -23,7 +23,7 @@ const $=s=>document.querySelector(s);let summary={};
 async function get(path){const r=await fetch(path);if(!r.ok)throw Error(await r.text());return r.json()}
 function draw(records){const q=($('#search').value||'').toLowerCase();const rows=records.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q)).slice(0,20);$('#records').innerHTML=rows.length?'<table><thead><tr><th>Type</th><th>Task</th><th>State</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.type||'memory')+'</td><td><strong>'+esc(x.task||x.summary||'Untitled')+'</strong><br><span class="muted">'+esc(x.summary||'')+'</span></td><td>'+esc(x.record_state||'trusted')+'</td></tr>').join('')+'</tbody></table>':'<span class="muted">No memories match this search.</span>'}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function refresh(){try{summary=await get('/v1/summary');const s=summary.storage||{};$('#health').textContent=summary.doctor.healthy?'local service healthy':'attention required';$('#cards').innerHTML=[['Records',s.records||0,'durable memories'],['Events',summary.events?.events||0,'host receipts'],['Dream candidates',s.dream_candidates||0,'sandboxed only'],['Provider','none','provider-free core']].map(x=>'<div class="card"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+' · '+esc(x[2])+'</span></div>').join('');draw(await get('/v1/records?limit=100'));$('#raw').textContent=JSON.stringify(summary,null,2)}catch(e){$('#health').textContent='service unavailable';$('#raw').textContent=String(e)}}
+async function refresh(){try{summary=await get('/v1/summary');const s=summary.storage||{};$('#health').textContent=summary.doctor.healthy?'local service healthy':'attention required';$('#cards').innerHTML=[['Records',s.records||0,'durable memories'],['Events',summary.events?.events||0,'host receipts'],['Outcomes',summary.outcomes?.total||0,'closed-loop receipts'],['Dream candidates',s.dream_candidates||0,'sandboxed only'],['Provider','none','provider-free core']].map(x=>'<div class="card"><strong>'+esc(x[1])+'</strong><span>'+esc(x[0])+' · '+esc(x[2])+'</span></div>').join('');draw(await get('/v1/records?limit=100'));$('#raw').textContent=JSON.stringify(summary,null,2)}catch(e){$('#health').textContent='service unavailable';$('#raw').textContent=String(e)}}
 $('#search').addEventListener('input',async()=>draw(await get('/v1/records?limit=100')));refresh();
 </script></main></body></html>"""
 
@@ -41,7 +41,7 @@ def doctor():
     checks.append({"name": "event_journal", **journal_status()})
     return {
         "service": "memcoder",
-        "version": "3.0",
+        "version": "3.3",
         "provider_free": True,
         "offline_capable": True,
         "healthy": all(item.get("parent_exists", True) for item in checks),
@@ -102,14 +102,38 @@ def summary():
     from memory.events import journal_status, list_events
     from memory.policy import policy_status
     from memory.storage_ops import storage_status
+    from memory.utility import outcome_summary
 
     return {
         "doctor": doctor(),
         "events": journal_status(),
         "recent_events": list_events(limit=8),
+        "hosts": host_summary(),
+        "outcomes": outcome_summary(),
         "policy": policy_status(),
         "storage": storage_status(),
     }
+
+
+def host_summary():
+    """Return lightweight host-contract and local receipt activity."""
+    from memory.contracts import host_manifest
+    from memory.events import list_events
+
+    events = list_events(limit=200)
+    hosts = []
+    for name in ("codex", "agy", "claude"):
+        manifest = host_manifest(name)
+        receipts = [item for item in events if item.get("host") == name]
+        hosts.append({
+            "host": name,
+            "schema_version": manifest["schema_version"],
+            "provider_free": manifest["provider_free"],
+            "receipt_count": len(receipts),
+            "last_event": receipts[-1].get("event") if receipts else None,
+            "last_timestamp": receipts[-1].get("timestamp") if receipts else None,
+        })
+    return hosts
 
 
 def _read_request(handler):
@@ -304,13 +328,24 @@ def make_handler():
                 _html(self, STUDIO_HTML)
                 return
             if path == "/health":
-                _json(self, 200, {"ok": True, "service": "memcoder", "version": "3.0"})
+                _json(self, 200, {"ok": True, "service": "memcoder", "version": "3.3"})
                 return
             if path == "/v1/doctor":
                 _json(self, 200, doctor())
                 return
             if path == "/v1/summary":
                 _json(self, 200, summary())
+                return
+            if path == "/v1/hosts":
+                _json(self, 200, {"hosts": host_summary()})
+                return
+            if path == "/v1/outcomes":
+                from memory.utility import outcome_summary
+                _json(self, 200, outcome_summary(
+                    owner=query.get("owner"),
+                    memory_id=query.get("memory_id"),
+                    limit=_limit(query.get("limit")),
+                ))
                 return
             if path == "/v1/records":
                 records = _records(query)

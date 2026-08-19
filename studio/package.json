@@ -1,7 +1,7 @@
 {
   "name": "memcoder-studio",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.3.3",
   "description": "Lightweight desktop control surface for local MemCoder cognition.",
   "scripts": {
     "sync-assets": "node scripts/sync-assets.mjs",

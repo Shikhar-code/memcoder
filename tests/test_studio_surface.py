@@ -22,5 +22,6 @@ app = (root / "src" / "app.js").read_text(encoding="utf-8")
 assert "Find New Connections" in app
 assert "Memory Scope" in app
 assert "No new connections found" in app
+assert "Outcome Receipts" in app
 
 print("PASS: lightweight Studio surface")

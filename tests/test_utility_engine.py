@@ -42,6 +42,7 @@ with tempfile.TemporaryDirectory() as directory:
         owner="codex",
     )
     assert useful["experiences"][0]["utility_score"] >= 0.56
+    assert useful["experiences"][0]["utility_score"] <= 1.0
     assert useful["utility_diagnostic"]["selected"]
 
     irrelevant = apply_utility_policy(
@@ -51,7 +52,15 @@ with tempfile.TemporaryDirectory() as directory:
     )
     assert irrelevant["experiences"] == []
     assert irrelevant["strategy"] == "normal_reasoning"
-    assert "no decision or action alignment" in irrelevant["utility_diagnostic"]["withheld"][0]["reasons"]
+    assert "no action-specific overlap" in irrelevant["utility_diagnostic"]["withheld"][0]["reasons"][0]
+
+    archetype_only = apply_utility_policy(
+        results([candidate("Publish a Python wheel dependency.")]),
+        "Install the Codex MCP adapter.",
+        owner="codex",
+    )
+    assert archetype_only["experiences"] == []
+    assert archetype_only["strategy"] == "normal_reasoning"
 
     receipt = build_receipt("Fix required request field validation.", useful)
     save_receipt(receipt, "codex")

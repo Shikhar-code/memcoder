@@ -51,8 +51,16 @@ assert brief_packet["transfer_delta"]["required_verification"][0].startswith("Ru
 assert brief_packet["prediction"]["falsifiers"]
 assert brief_packet["belief_state"]["verified_facts"]
 assert brief_packet["budget"]["within_budget"]
+assert brief_packet["budget"]["estimated_tokens"] <= brief_packet["budget"]["token_budget"]
 assert brief_packet["reuse_check"]["required_before_edit"]
 assert build_cognitive_packet("Fix a video render.", empty)["task_archetype"] == "rendering"
+
+tight_packet = build_cognitive_packet(
+    "Fix required field validation.", guided, token_budget=80
+)
+assert tight_packet["budget"]["within_budget"]
+assert tight_packet["budget"]["estimated_tokens"] <= 80
+assert tight_packet["receipt"]["id"]
 
 skill = memory("skill")
 skill["skill_definition"] = json.dumps({

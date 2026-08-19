@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "memcoder": {
+      "command": "<python-with-memcoder-installed>",
+      "args": ["-m", "adapters.mcp.server"]
+    }
+  }
+}

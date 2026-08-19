@@ -68,6 +68,13 @@ def _append(event):
         "fingerprint": event.get("fingerprint"),
     }, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     event_id = event.get("event_id") or "life_" + hashlib.sha256(identity.encode("utf-8")).hexdigest()[:20]
+    if event.get("kind") == "lifecycle":
+        existing = next((
+            item for item in reversed(_events())
+            if item.get("event_id") == event_id
+        ), None)
+        if existing is not None:
+            return {**existing, "deduplicated": True}
     stored = {**event, "event_id": event_id, "timestamp": event.get("timestamp") or utc_now()}
     with path.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(stored, sort_keys=True, ensure_ascii=False) + "\n")
@@ -146,14 +153,29 @@ def begin_event(event, task_id, owner, problem, context=None, action=None, envir
         raise ValueError("task_id must be a non-empty string.")
     state = _latest_control(owner)
     fingerprint = _fingerprint(problem, context=context, action=action)
-    prior = [
+    history = [
         item for item in _events()
         if item.get("kind") == "lifecycle"
         and item.get("owner") == owner
         and item.get("task_id") == task_id
         and item.get("fingerprint") == fingerprint
-        and item.get("intervened")
     ]
+    task_history = [
+        item for item in _events()
+        if item.get("kind") == "lifecycle"
+        and item.get("owner") == owner
+        and item.get("task_id") == task_id
+    ]
+    prior = [
+        item for item in history
+        if item.get("intervened")
+    ]
+    prior_intervention_id = next(
+        (item.get("intervention_id") for item in reversed(task_history)
+         if item.get("intervened") and item.get("intervention_id")),
+        None,
+    )
+    replay = next((item for item in reversed(history) if item.get("event") == event), None)
     radar = failure_radar(problem, action=action)
     should_intervene = (
         state == "running"
@@ -167,14 +189,20 @@ def begin_event(event, task_id, owner, problem, context=None, action=None, envir
         "state": state,
         "fingerprint": fingerprint,
         "should_intervene": should_intervene,
-        "deduplicated": bool(prior) and not should_intervene,
+        "deduplicated": (bool(prior) and not should_intervene) or replay is not None,
+        "replayed": replay is not None,
+        "prior_intervention_id": prior_intervention_id,
+        "_existing_capture": replay.get("capture") if replay else None,
         "radar": radar,
         "verification_plan": verification_plan(problem, environment=environment, radar=radar),
     }
 
 
-def finish_event(decision, intervention=None, capture=None, token_budget=450):
+def finish_event(decision, intervention=None, capture=None, token_budget=450, host=None):
     """Persist a compact lifecycle receipt and token-dividend estimate."""
+    from memory.contracts import HOST_ADAPTER_SCHEMA_VERSION
+
+    host = host or "automation"
     transfer = (intervention or {}).get("transfer_delta") or {}
     verified_risks = [risk for risk in transfer.get("risks", []) if risk]
     if verified_risks:
@@ -192,9 +220,15 @@ def finish_event(decision, intervention=None, capture=None, token_budget=450):
     budget = (intervention or {}).get("budget", {})
     injected = int(budget.get("estimated_tokens", 0) or 0)
     avoided = max(0, int(token_budget) - injected) if intervention else 0
+    public_decision = {
+        key: value for key, value in decision.items() if not key.startswith("_")
+    }
     stored = _append({
         "kind": "lifecycle",
-        **decision,
+        "schema_version": HOST_ADAPTER_SCHEMA_VERSION,
+        "host": host,
+        **public_decision,
+        "token_budget": int(token_budget),
         "intervened": intervention is not None,
         "intervention_id": (intervention or {}).get("receipt", {}).get("id"),
         "mode": mode,
@@ -209,7 +243,12 @@ def finish_event(decision, intervention=None, capture=None, token_budget=450):
     return {
         "available": True,
         "fail_open": False,
+        "schema_version": HOST_ADAPTER_SCHEMA_VERSION,
+        "host": host,
+        "event_id": stored["event_id"],
         "event": decision["event"],
+        "timestamp": stored["timestamp"],
+        "token_budget": int(token_budget),
         "task_id": decision["task_id"],
         "attention": {
             "state": decision["state"],

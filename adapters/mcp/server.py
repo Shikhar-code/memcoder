@@ -9,6 +9,7 @@ from api.cognition import (
     autopilot_control_cognition,
     autopilot_event_cognition,
     certify_host_cognition,
+    host_manifest_cognition,
     checkpoint_cognition,
     compile_skill_cognition,
     compose_skills_cognition,
@@ -64,8 +65,9 @@ def memcoder_autopilot(
         context: dict | None = None,
         action: str | None = None,
         outcome: dict | None = None,
-        token_budget: int = 450) -> str:
-    """Handle one host lifecycle boundary; failures never block host work."""
+        token_budget: int = 450,
+        host: str = "codex") -> str:
+    """Handle one host lifecycle boundary and close explicit outcomes; fail open."""
     return json.dumps(autopilot_event_cognition(
         event=event,
         task_id=task_id,
@@ -77,6 +79,7 @@ def memcoder_autopilot(
         action=action,
         outcome=outcome,
         token_budget=token_budget,
+        host=host,
     ), indent=2)
 
 
@@ -123,9 +126,18 @@ def memcoder_cognition_contract(contract: dict, observations: dict) -> str:
 
 
 @mcp.tool()
-def memcoder_host_certify(host: str, events: list[dict]) -> str:
-    """Certify a host's lifecycle, QA, and fail-open receipts."""
-    return json.dumps(certify_host_cognition(host, events), indent=2)
+def memcoder_host_manifest(host: str) -> str:
+    """Return the provider-free lifecycle contract for a supported host."""
+    return json.dumps(host_manifest_cognition(host), indent=2)
+
+
+@mcp.tool()
+def memcoder_host_certify(
+        host: str,
+        events: list[dict],
+        strict: bool = False) -> str:
+    """Certify a host's lifecycle, QA, privacy, and optional strict receipts."""
+    return json.dumps(certify_host_cognition(host, events, strict=strict), indent=2)
 
 
 @mcp.tool()
@@ -717,4 +729,4 @@ def memcoder_import_markdown_file(
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(show_banner=False)

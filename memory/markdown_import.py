@@ -3,7 +3,6 @@
 import re
 from pathlib import Path
 
-from memory.principle_capture import capture_principles
 from memory.quality import is_valid_principle
 
 
@@ -148,6 +147,8 @@ def import_markdown(markdown, source_name, agent_id="human", approve=False):
 
     principles = [candidate["task"] for candidate in preview["candidates"]]
     if principles:
+        # Persistence loads the semantic index; previews and MCP startup do not need it.
+        from memory.principle_capture import capture_principles
         capture_principles(
             principles,
             owner=agent_id,

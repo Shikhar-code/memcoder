@@ -232,6 +232,90 @@ def _compact_packet(packet, token_budget):
     return packet
 
 
+def _with_budget(packet, token_budget):
+    """Attach stable accounting that includes its own serialized cost."""
+    result = dict(packet)
+    estimated = 0
+    for _ in range(3):
+        result["budget"] = {
+            "estimated_tokens": estimated,
+            "token_budget": token_budget,
+            "within_budget": estimated <= token_budget,
+        }
+        updated = _estimate_tokens(result)
+        if updated == estimated:
+            break
+        estimated = updated
+    result["budget"] = {
+        "estimated_tokens": estimated,
+        "token_budget": token_budget,
+        "within_budget": estimated <= token_budget,
+    }
+    return result
+
+
+def enforce_token_budget(packet, token_budget=DEFAULT_TOKEN_BUDGET):
+    """Return a useful packet that never exceeds the host's declared budget."""
+    token_budget = max(80, int(token_budget))
+    fitted = _with_budget(_compact_packet(dict(packet), token_budget), token_budget)
+    if fitted["budget"]["within_budget"]:
+        return fitted
+
+    receipt = packet.get("receipt") or {}
+    prediction = packet.get("prediction") or {}
+    guidance = packet.get("guidance") or {}
+    plan = packet.get("plan") or {}
+    compact = {
+        "schema_version": packet.get("schema_version", 1),
+        "problem": _text(packet.get("problem"), 100),
+        "task_archetype": packet.get("task_archetype", "general"),
+        "intervention": packet.get("intervention", {"mode": "none"}),
+        "guidance": {
+            "recommended_next_action": _text(
+                guidance.get("recommended_next_action"), 120
+            )
+        },
+        "prediction": {
+            "falsifiers": prediction.get("falsifiers", [])[:1],
+            "verification": prediction.get("verification", [])[:1],
+            "confidence": prediction.get("confidence", 0.0),
+        },
+        "receipt": {
+            "id": receipt.get("id"),
+            "memory_ids": receipt.get("memory_ids", [])[:1],
+            "expected_value": receipt.get("expected_value", 0.0),
+            "verification": "Host proof is required before learning.",
+        },
+    }
+    if plan:
+        compact["plan"] = {
+            "id": plan.get("id"),
+            "mode": plan.get("mode"),
+            "next_step": _text(
+                plan.get("next_step") or (plan.get("steps") or [{}])[0].get("action"),
+                100,
+            ),
+            "verification": _text(
+                plan.get("verification")
+                or (plan.get("steps") or [{}])[-1].get("completion_condition"),
+                100,
+            ),
+        }
+    fitted = _with_budget(compact, token_budget)
+    if fitted["budget"]["within_budget"]:
+        return fitted
+
+    # An extremely small budget cannot carry trustworthy guidance. Abstain,
+    # but preserve the receipt so feedback and lifecycle accounting still work.
+    return _with_budget({
+        "intervention": {
+            "mode": "none",
+            "reason": "The host token budget is too small for verified guidance.",
+        },
+        "receipt": {"id": receipt.get("id")},
+    }, token_budget)
+
+
 def build_cognitive_packet(problem, results, environment=None, token_budget=DEFAULT_TOKEN_BUDGET):
     """Compile one bounded host-facing packet from already trusted retrieval results."""
     token_budget = max(80, int(token_budget))
@@ -275,14 +359,7 @@ def build_cognitive_packet(problem, results, environment=None, token_budget=DEFA
     packet["receipt"]["supporting_evidence"] = packet["receipt"].get("memory_ids", [])[:3]
     packet["receipt"]["known_differences"] = (delta or {}).get("differences", [])[:2]
     packet["receipt"]["token_cost_budget"] = token_budget
-    packet = _compact_packet(packet, token_budget)
-    estimated = _estimate_tokens(packet)
-    packet["budget"] = {
-        "estimated_tokens": estimated,
-        "token_budget": token_budget,
-        "within_budget": estimated <= token_budget,
-    }
-    return packet
+    return enforce_token_budget(packet, token_budget)
 
 
 def _state_path():

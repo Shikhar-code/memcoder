@@ -1,6 +1,7 @@
 include LICENSE
 include README.md
 include pyproject.toml
+recursive-include plugins/claude *
 recursive-include studio *.json *.js *.mjs *.css *.html *.md *.rs *.toml *.svg *.png *.ico
 
 # Release archives should not ship local proof fixtures, build products, or
