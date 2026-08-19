@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">One MemCoder lifecycle across coding hosts</title>
+  <desc id="desc">Codex, AGY, Claude Code, and other MCP hosts connect to one local provider-free cognition core.</desc>
+  <style>
+    text { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; }
+  </style>
+  <rect width="1200" height="300" fill="#f3f0e8"/>
+  <text x="48" y="48" fill="#15202b" font-size="23" font-weight="720">Different host. Same rules.</text>
+  <text class="mono" x="48" y="74" fill="#607080" font-size="11" letter-spacing="1.2">HOST PARITY / LOCAL CORE</text>
+  <g transform="translate(48 112)" class="mono" font-size="12" text-anchor="middle">
+    <rect width="178" height="54" fill="#ffffff" stroke="#8e9aa5"/><text x="89" y="33" fill="#15202b">CODEX</text>
+    <rect y="68" width="178" height="54" fill="#ffffff" stroke="#8e9aa5"/><text x="89" y="101" fill="#15202b">AGY</text>
+    <rect y="136" width="178" height="54" fill="#ffffff" stroke="#8e9aa5"/><text x="89" y="169" fill="#15202b">CLAUDE CODE</text>
+  </g>
+  <g stroke="#52687b" stroke-width="2" fill="none">
+    <path d="M226 139H330V207H420"/><path d="M226 207H420"/><path d="M226 275H330V207"/>
+  </g>
+  <g transform="translate(420 132)">
+    <rect width="330" height="150" fill="#111820"/>
+    <text class="mono" x="22" y="29" fill="#78a9ff" font-size="11">VERSIONED LIFECYCLE</text>
+    <text x="22" y="66" fill="#f3f6f8" font-size="18" font-weight="680">attend · retrieve · verify</text>
+    <text x="22" y="95" fill="#f3f6f8" font-size="18" font-weight="680">calibrate · fail open</text>
+    <text class="mono" x="22" y="127" fill="#7f8b98" font-size="10">NO HOST-SPECIFIC TRUST EXCEPTIONS</text>
+  </g>
+  <path d="M750 207H840" stroke="#52687b" stroke-width="2"/>
+  <path d="M832 201L840 207L832 213" fill="none" stroke="#52687b" stroke-width="2"/>
+  <g transform="translate(840 132)">
+    <rect width="312" height="150" fill="#e2ecff" stroke="#78a9ff"/>
+    <text class="mono" x="22" y="29" fill="#345f9e" font-size="11">MEMCODER CORE</text>
+    <text x="22" y="66" fill="#15202b" font-size="18" font-weight="680">memory · policy · evidence</text>
+    <text x="22" y="95" fill="#15202b" font-size="18" font-weight="680">skills · projects · receipts</text>
+    <text class="mono" x="22" y="127" fill="#52687b" font-size="10">LOCAL / PROVIDER-FREE / INSPECTABLE</text>
+  </g>
+</svg>

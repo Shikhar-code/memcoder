@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="title desc">
+  <title id="title">MemCoder proof loop</title>
+  <desc id="desc">A task may receive guidance, but only host-verified evidence can admit a durable memory.</desc>
+  <style>
+    text { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; }
+  </style>
+  <rect width="1200" height="300" fill="#0b0f14"/>
+  <text x="48" y="48" fill="#f3f6f8" font-size="23" font-weight="720">The agent can act on guidance. Memory still waits for proof.</text>
+  <text class="mono" x="48" y="74" fill="#7f8b98" font-size="11" letter-spacing="1.2">AUTOMATIC LIFECYCLE</text>
+  <path d="M88 156H1088" stroke="#344250" stroke-width="2"/>
+  <g class="mono" font-size="11" text-anchor="middle">
+    <g transform="translate(98 156)"><rect x="-50" y="-31" width="100" height="62" fill="#17212b" stroke="#536474"/><text y="4" fill="#f3f6f8">TASK</text></g>
+    <g transform="translate(315 156)"><rect x="-65" y="-31" width="130" height="62" fill="#17212b" stroke="#78a9ff"/><text y="4" fill="#dce8ff">GUIDANCE</text></g>
+    <g transform="translate(550 156)"><rect x="-65" y="-31" width="130" height="62" fill="#17212b" stroke="#536474"/><text y="4" fill="#f3f6f8">HOST WORK</text></g>
+    <g transform="translate(785 156)"><rect x="-65" y="-31" width="130" height="62" fill="#17212b" stroke="#f0bd61"/><text y="4" fill="#ffe6b7">VERIFY</text></g>
+    <g transform="translate(1020 156)"><rect x="-68" y="-31" width="136" height="62" fill="#163229" stroke="#70d6ae"/><text y="4" fill="#d8ffef">ADMIT</text></g>
+  </g>
+  <g fill="none" stroke="#536474" stroke-width="2">
+    <path d="M148 156H250"/><path d="M380 156H485"/><path d="M615 156H720"/><path d="M850 156H952"/>
+  </g>
+  <g fill="#536474"><path d="M242 150L250 156L242 162"/><path d="M477 150L485 156L477 162"/><path d="M712 150L720 156L712 162"/><path d="M944 150L952 156L944 162"/></g>
+  <path d="M785 188V236H1020V188" fill="none" stroke="#70d6ae" stroke-width="2"/>
+  <text class="mono" x="902" y="258" text-anchor="middle" fill="#70d6ae" font-size="11">PASS → DURABLE MEMORY</text>
+  <path d="M785 188V220H550V188" fill="none" stroke="#d36b72" stroke-width="2" stroke-dasharray="5 5"/>
+  <text class="mono" x="667" y="242" text-anchor="middle" fill="#d98288" font-size="11">FAIL / INSUFFICIENT → LEARN NOTHING</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">Anatomy of a MemCoder memory</title>
+  <desc id="desc">A durable memory joins a claim to evidence, environment, applicability, and validity rather than storing a raw conversation.</desc>
+  <style>
+    text { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; }
+  </style>
+  <rect width="1200" height="340" fill="#0b0f14"/>
+  <text x="48" y="48" fill="#f3f6f8" font-size="23" font-weight="720">A memory is a claim attached to its limits.</text>
+  <text class="mono" x="48" y="74" fill="#7f8b98" font-size="11" letter-spacing="1.2">DURABLE RECORD / NOT A TRANSCRIPT</text>
+  <g transform="translate(48 112)">
+    <rect width="1104" height="178" fill="#111820" stroke="#344250"/>
+    <path d="M246 0V178M468 0V178M704 0V178M920 0V178" stroke="#344250"/>
+    <g class="mono" font-size="10" fill="#78a9ff" letter-spacing="1">
+      <text x="20" y="28">CLAIM</text><text x="266" y="28">EVIDENCE</text><text x="488" y="28">ENVIRONMENT</text><text x="724" y="28">APPLICABILITY</text><text x="940" y="28">VALIDITY</text>
+    </g>
+    <g font-size="15" fill="#d7dee5">
+      <text x="20" y="65">What worked</text><text x="20" y="90">or failed</text>
+      <text x="266" y="65">Checks, files,</text><text x="266" y="90">and receipts</text>
+      <text x="488" y="65">Host, project,</text><text x="488" y="90">versions, branch</text>
+      <text x="724" y="65">When to use it</text><text x="724" y="90">and when not to</text>
+      <text x="940" y="65">Trusted, withheld,</text><text x="940" y="90">or superseded</text>
+    </g>
+    <g class="mono" font-size="10" fill="#7f8b98">
+      <text x="20" y="145">CONTENT</text><text x="266" y="145">PROVENANCE</text><text x="488" y="145">FIT</text><text x="724" y="145">BOUNDARY</text><text x="940" y="145">STATE</text>
+    </g>
+  </g>
+  <rect x="48" y="306" width="16" height="4" fill="#70d6ae"/>
+  <text class="mono" x="76" y="312" fill="#9ba7b2" font-size="10">RETRIEVABLE ONLY WHEN TRUST, FIT, AND UTILITY SURVIVE THE CURRENT TASK</text>
+</svg>
