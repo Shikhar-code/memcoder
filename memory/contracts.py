@@ -2,7 +2,7 @@
 
 
 CONTRACT_SCHEMA_VERSION = 1
-HOST_ADAPTER_SCHEMA_VERSION = 2
+HOST_ADAPTER_SCHEMA_VERSION = 3
 SUPPORTED_HOSTS = ("codex", "agy", "claude")
 VALID_ASSERTIONS = {
     "requires_verification",
@@ -47,6 +47,12 @@ def host_manifest(host):
             "outcome_closure",
             "prediction_receipts",
             "adaptive_utility",
+            "bounded_intervention_latency",
+            "fail_open_circuit_breaker",
+            "lifecycle_telemetry",
+            "lexical_failover",
+            "actionable_decision_cards",
+            "retrieval_backend_diagnostics",
         ],
     }
 

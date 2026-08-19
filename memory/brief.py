@@ -4,7 +4,7 @@ import json
 import math
 
 
-BRIEF_TOKEN_BUDGET = 350
+BRIEF_TOKEN_BUDGET = 450
 CARD_TEXT_LIMIT = 180
 
 
@@ -42,6 +42,44 @@ def _card(memory, memory_type):
     }
 
 
+def _decision_card(memory, memory_type):
+    """Project one trusted memory into an action, its limits, and its proof."""
+    if not memory:
+        return None
+    proof = memory.get("proof") if isinstance(memory.get("proof"), dict) else {}
+    evidence = proof.get("evidence", []) if isinstance(proof.get("evidence"), list) else []
+    recommendation = _compact_text(
+        memory.get("solution") or memory.get("summary") or memory.get("task"),
+        200,
+    )
+    return {
+        "memory_id": memory.get("id", ""),
+        "type": memory_type,
+        "recommendation": recommendation,
+        "applies_when": [
+            _compact_text(item, 120) for item in proof.get("conditions", [])[:2]
+        ] or ["The current project matches the retrieved task and environment."],
+        "do_not_apply_when": [
+            _compact_text(item, 120) for item in proof.get("risks", [])[:2]
+        ] or ["Current-project evidence contradicts the retrieved guidance."],
+        "failure_prevented": _compact_text(
+            memory.get("summary") or f"Repeating the verified {memory_type} failure pattern.",
+            150,
+        ),
+        "verification": _compact_text(
+            (proof.get("required_verification") or [
+                "Run the narrowest current-project verification."
+            ])[0],
+            150,
+        ),
+        "evidence_refs": [
+            item.get("record_id") or item.get("value")
+            for item in evidence[:3] if isinstance(item, dict)
+        ] or [memory.get("id", "")],
+        "confidence": memory.get("utility_score", memory.get("retrieval_confidence")),
+    }
+
+
 def _recommended_next_action(results):
     skills = results.get("skills", [])
     experiences = results.get("experiences", [])
@@ -66,6 +104,7 @@ def _recommended_next_action(results):
 def build_decision_brief(problem, results):
     """Return at most one high-value card per memory type plus a token budget."""
     evidence = []
+    primary = None
     for memory_type, key in (
             ("skill", "skills"),
             ("experience", "experiences"),
@@ -74,13 +113,17 @@ def build_decision_brief(problem, results):
             ("reflection", "reflections")):
         memories = results.get(key, [])
         if memories:
+            if primary is None:
+                primary = (memories[0], memory_type)
             evidence.append(_card(memories[0], memory_type))
 
     brief = {
         "problem": _compact_text(problem, limit=280),
         "strategy": results.get("strategy", "normal_reasoning"),
         "recommended_next_action": _recommended_next_action(results),
+        "decision_card": _decision_card(*primary) if primary else None,
         "evidence": evidence,
+        "retrieval": results.get("retrieval", {"backend": "unknown"}),
         "verification_requirement": "Verify the current result with a host test, build, assertion, or documented review before recording learning.",
     }
     estimated_tokens = _estimate_tokens(brief)

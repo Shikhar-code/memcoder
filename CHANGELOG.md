@@ -2,6 +2,68 @@
 
 All notable changes to MemCoder are documented here.
 
+## 0.3.5b1 — Beta 3.5
+
+### Added
+
+- Added a provider-free SQLite FTS5 retrieval path with a bounded SQL fallback
+  when FTS5 is unavailable.
+- Added background semantic prewarming for persistent MCP hosts; one-shot host
+  requests no longer pay a cold embedding-model startup cost.
+- Added decision cards that state the recommendation, applicability boundary,
+  avoided failure, evidence references, and cheapest current-project check.
+- Added `memcoder setup --all` for idempotent AGY and Claude configuration with
+  an explicit Codex plugin handoff.
+- Added `memcoder storage upgrade --dry-run` and an additive upgrade that makes
+  a SQLite rollback copy and verifies record counts.
+- Added release-readiness evaluation gates for matched tasks, relevance,
+  abstention, negative transfer, host blocking, latency, action change, and
+  token dividend.
+
+### Changed
+
+- Retrieval now starts from the durable SQLite source of truth, then uses
+  semantic reranking only when the local model is already warm or explicitly
+  allowed to start cold.
+- Host manifests now advertise lexical failover, decision cards, and retrieval
+  diagnostics through schema version 3.
+- `memcoder doctor` reports lexical backend health and semantic warm state.
+- Closed SQLite handles explicitly on Windows so tests, backups, and temporary
+  stores do not remain locked after use.
+
+### Boundary
+
+- Beta 3.5 is the final beta and 1.0 qualification line. It does not add cloud,
+  team cognition, provider intelligence, a new storage engine, or automatic
+  mutation of trusted evidence.
+
+## 0.3.4b1 — Beta 3.4
+
+### Added
+
+- Added an attention gate that skips retrieval for disabled, empty, or
+  obviously non-actionable lifecycle events.
+- Added a bounded intervention deadline with fail-open fallback and a short
+  per-agent circuit breaker after repeated timeouts.
+- Added lifecycle latency, timeout, and attention telemetry to host receipts.
+- Added a provider-free `memcoder benchmark` command for measuring the
+  automatic boundary without touching the user's memory.
+
+### Changed
+
+- Empty local stores no longer import Chroma or an embedding model on the hot
+  path.
+- Embedding lookups now use a bounded LRU cache instead of unbounded process
+  memory.
+- Chroma paths now honor per-run environment overrides without requiring a
+  module reload.
+
+### Boundary
+
+- Beta 3.4 remains local, provider-free, fail-open, and single-user. It does
+  not add cloud sync, team cognition, multi-agent coordination, or silent
+  mutation of trusted memory.
+
 ## 0.3.3b1 — Beta 3.3
 
 ### Added

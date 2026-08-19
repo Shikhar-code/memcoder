@@ -1,6 +1,7 @@
 """Deterministic reporting for matched MemCoder workflow evaluations."""
 
 from collections import defaultdict
+import math
 
 
 VALID_CONDITIONS = {"baseline", "memory_guided", "skill_planned", "dreaming"}
@@ -28,13 +29,18 @@ def _run(run):
         "condition": condition,
         "passed": run["passed"],
     }
-    for field in ("rework_count", "guidance_tokens"):
+    for field in (
+            "rework_count", "guidance_tokens", "latency_ms", "host_tokens",
+            "estimated_tokens_avoided"):
         if field in run:
             normalized[field] = _number(run[field], field)
-    if "retrieval_relevant" in run:
-        if not isinstance(run["retrieval_relevant"], bool):
-            raise ValueError("Run field 'retrieval_relevant' must be boolean when provided.")
-        normalized["retrieval_relevant"] = run["retrieval_relevant"]
+    for field in (
+            "retrieval_relevant", "abstained", "abstention_correct", "harmful",
+            "host_blocked", "guidance_used", "changed_action"):
+        if field in run:
+            if not isinstance(run[field], bool):
+                raise ValueError(f"Run field '{field}' must be boolean when provided.")
+            normalized[field] = run[field]
     return normalized
 
 
@@ -52,6 +58,71 @@ def _condition_summary(runs):
     relevant = [run["retrieval_relevant"] for run in runs if "retrieval_relevant" in run]
     result["retrieval_precision"] = round(sum(relevant) / len(relevant), 2) if relevant else None
     return result
+
+
+def _rate(values):
+    return round(sum(values) / len(values), 3) if values else None
+
+
+def _percentile(values, fraction):
+    if not values:
+        return None
+    ordered = sorted(values)
+    return round(ordered[min(len(ordered) - 1, math.ceil(len(ordered) * fraction) - 1)], 2)
+
+
+def _release_readiness(by_task, runs):
+    assisted = [run for run in runs if run["condition"] != "baseline"]
+    paired = sum(
+        "baseline" in conditions and any(
+            condition in conditions for condition in ("memory_guided", "skill_planned", "dreaming")
+        )
+        for conditions in by_task.values()
+    )
+    relevance = [run["retrieval_relevant"] for run in assisted if "retrieval_relevant" in run]
+    abstention = [run["abstention_correct"] for run in assisted if "abstention_correct" in run]
+    harmful = [run["harmful"] for run in assisted if "harmful" in run]
+    blocked = [run["host_blocked"] for run in assisted if "host_blocked" in run]
+    latency = [run["latency_ms"] for run in assisted if "latency_ms" in run]
+    dividends = [
+        run["estimated_tokens_avoided"] - run.get("guidance_tokens", 0)
+        for run in assisted if "estimated_tokens_avoided" in run
+    ]
+    changed = [
+        run["changed_action"] for run in assisted
+        if run.get("guidance_used") is True and "changed_action" in run
+    ]
+    metrics = {
+        "paired_tasks": paired,
+        "retrieval_precision": _rate(relevance),
+        "correct_abstention": _rate(abstention),
+        "harmful_transfer_rate": _rate(harmful),
+        "host_blocking_failures": sum(blocked) if blocked else None,
+        "intervention_action_change_rate": _rate(changed),
+        "p95_latency_ms": _percentile(latency, 0.95),
+        "median_token_dividend": _percentile(dividends, 0.50),
+    }
+    definitions = (
+        ("paired_tasks", ">=", 24),
+        ("retrieval_precision", ">=", 0.75),
+        ("correct_abstention", ">=", 0.85),
+        ("harmful_transfer_rate", "<=", 0.03),
+        ("host_blocking_failures", "==", 0),
+        ("intervention_action_change_rate", ">=", 0.40),
+        ("p95_latency_ms", "<=", 1000),
+        ("median_token_dividend", ">", 0),
+    )
+    gates = []
+    for name, operator, target in definitions:
+        value = metrics[name]
+        passed = value is not None and {
+            ">=": lambda: value >= target,
+            "<=": lambda: value <= target,
+            "==": lambda: value == target,
+            ">": lambda: value > target,
+        }[operator]()
+        gates.append({"name": name, "value": value, "operator": operator, "target": target, "passed": passed})
+    return {"ready": all(gate["passed"] for gate in gates), "metrics": metrics, "gates": gates}
 
 
 def evaluate_runs(runs):
@@ -106,6 +177,7 @@ def evaluate_runs(runs):
         "paired_pass_changes": paired_changes,
         "matched_baseline_dreaming_tasks": len(dream_matched),
         "paired_dream_pass_changes": paired_dream_changes,
+        "release_readiness": _release_readiness(by_task, normalized),
         "limitations": [
             "Results describe only host-supplied runs and measurements.",
             "A pass-rate difference is not causal proof without matched tasks and sufficient sample size.",

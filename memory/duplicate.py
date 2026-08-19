@@ -1,5 +1,6 @@
 from memory.memory_hash import memory_hash
 from memory.chroma_client import collection
+import os
 
 
 def find_duplicate(memory):
@@ -11,6 +12,13 @@ def find_duplicate(memory):
     durable = find_durable_duplicate(h, memory.get("owner", "shared"))
     if durable:
         return durable
+
+    if collection.__class__.__name__ == "ChromaCollectionProxy":
+        from memory.embedder import is_warm
+        if not is_warm() and os.environ.get(
+            "MEMCODER_ALLOW_COLD_SEMANTIC", ""
+        ).lower() not in {"1", "true", "yes"}:
+            return None
 
     # Beta 2.0 used this fingerprint as the Chroma ID. Preserve duplicate
     # detection for existing stores while new records use a stable record_id.

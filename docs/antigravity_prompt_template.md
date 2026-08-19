@@ -1,6 +1,6 @@
 # Antigravity prompt template
 
-Beta 3.3 setup installs this lifecycle automatically through MCP. Use this
+Beta 3.5 setup installs this lifecycle automatically through MCP. Use this
 short template only when you need to make the behavior explicit during a
 diagnostic or certification run:
 

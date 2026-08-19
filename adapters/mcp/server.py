@@ -729,4 +729,6 @@ def memcoder_import_markdown_file(
 
 
 if __name__ == "__main__":
+    from memory.embedder import prewarm_async
+    prewarm_async()
     mcp.run(show_banner=False)

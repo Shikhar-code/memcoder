@@ -4,6 +4,8 @@ import hashlib
 import json
 import os
 import re
+import threading
+import time
 from pathlib import Path
 
 from memory.records import utc_now
@@ -21,6 +23,79 @@ HIGH_RISK_PATTERNS = {
     "release": r"\b(release|publish|deploy|upload|production)\b",
     "security": r"\b(secret|token|credential|permission|auth|security)\b",
 }
+
+_CIRCUIT_LOCK = threading.Lock()
+_CIRCUITS = {}
+
+
+def attention_gate(problem, context=None, environment=None):
+    """Reject obviously empty work before loading semantic retrieval."""
+    text = " ".join(str(problem or "").split())
+    context = context if isinstance(context, dict) else {}
+    environment = environment if isinstance(environment, dict) else {}
+    if os.environ.get("MEMCODER_AUTOPILOT_DISABLED", "").lower() in {"1", "true", "yes"}:
+        return {"should_retrieve": False, "reason": "disabled_by_environment"}
+    if context.get("memory_disabled") or environment.get("memory_disabled"):
+        return {"should_retrieve": False, "reason": "disabled_by_host"}
+    try:
+        minimum = max(1, int(os.environ.get("MEMCODER_MIN_PROBLEM_CHARS", "12")))
+    except (TypeError, ValueError):
+        minimum = 12
+    if len(text) < minimum:
+        return {"should_retrieve": False, "reason": "problem_too_short"}
+    return {"should_retrieve": True, "reason": "task_may_change_a_decision"}
+
+
+def circuit_status(owner):
+    """Return the process-local retrieval circuit state."""
+    now = time.monotonic()
+    with _CIRCUIT_LOCK:
+        entry = _CIRCUITS.get(owner, {})
+        until = float(entry.get("open_until", 0.0) or 0.0)
+        if until <= now:
+            if entry:
+                _CIRCUITS.pop(owner, None)
+            return {"open": False, "consecutive_timeouts": 0}
+        return {
+            "open": True,
+            "consecutive_timeouts": int(entry.get("consecutive_timeouts", 0)),
+            "retry_after_ms": max(0, int((until - now) * 1000)),
+        }
+
+
+def note_timeout(owner):
+    """Open a short cooldown after a bounded retrieval times out."""
+    try:
+        cooldown = max(1, int(os.environ.get("MEMCODER_CIRCUIT_COOLDOWN_SECONDS", "30")))
+    except (TypeError, ValueError):
+        cooldown = 30
+    with _CIRCUIT_LOCK:
+        previous = _CIRCUITS.get(owner, {})
+        count = int(previous.get("consecutive_timeouts", 0)) + 1
+        _CIRCUITS[owner] = {
+            "consecutive_timeouts": count,
+            "open_until": time.monotonic() + cooldown,
+        }
+    return circuit_status(owner)
+
+
+def note_success(owner):
+    with _CIRCUIT_LOCK:
+        _CIRCUITS.pop(owner, None)
+
+
+def retrieval_available():
+    """Avoid importing the retrieval stack when local memory is empty."""
+    try:
+        from memory.record_store import has_records
+        if has_records():
+            return True
+        from memory.chroma_client import active_db_path
+        path = active_db_path()
+        return path.exists() and any(path.iterdir())
+    except Exception:
+        # Availability checks are advisory; normal retrieval remains fail-open.
+        return True
 
 
 def _path():
@@ -177,11 +252,17 @@ def begin_event(event, task_id, owner, problem, context=None, action=None, envir
     )
     replay = next((item for item in reversed(history) if item.get("event") == event), None)
     radar = failure_radar(problem, action=action)
+    attention = attention_gate(problem, context=context, environment=environment)
+    circuit = circuit_status(owner)
     should_intervene = (
         state == "running"
         and event in INTERVENTION_EVENTS
+        and attention["should_retrieve"]
+        and not circuit["open"]
         and (not prior or event == "context_changed")
     )
+    if circuit["open"]:
+        attention = {**attention, "should_retrieve": False, "reason": "retrieval_circuit_open"}
     return {
         "event": event,
         "task_id": task_id,
@@ -189,6 +270,7 @@ def begin_event(event, task_id, owner, problem, context=None, action=None, envir
         "state": state,
         "fingerprint": fingerprint,
         "should_intervene": should_intervene,
+        "attention": {**attention, "circuit": circuit},
         "deduplicated": (bool(prior) and not should_intervene) or replay is not None,
         "replayed": replay is not None,
         "prior_intervention_id": prior_intervention_id,
@@ -255,7 +337,10 @@ def finish_event(decision, intervention=None, capture=None, token_budget=450, ho
             "intervened": intervention is not None,
             "deduplicated": decision["deduplicated"],
             "mode": mode,
+            "gate": decision.get("attention", {}),
+            "timed_out": bool(decision.get("timed_out", False)),
         },
+        "latency_ms": decision.get("latency_ms"),
         "radar": decision["radar"],
         "failure_frontier": decision.get("failure_frontier", []),
         "verification_plan": decision["verification_plan"],

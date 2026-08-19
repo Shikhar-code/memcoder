@@ -1,6 +1,6 @@
 [package]
 name = "memcoder-studio"
-version = "0.3.0"
+version = "0.3.5"
 description = "Lightweight desktop control surface for MemCoder"
 authors = ["Shikhar"]
 edition = "2021"

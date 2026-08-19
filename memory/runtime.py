@@ -162,6 +162,7 @@ def _compact_packet(packet, token_budget):
     brief = packet.get("guidance", {})
     packet["guidance"] = {
         "recommended_next_action": _text(brief.get("recommended_next_action"), 160),
+        "decision_card": brief.get("decision_card"),
         "evidence": [
             {
                 "id": card.get("id", ""),
@@ -207,8 +208,15 @@ def _compact_packet(packet, token_budget):
         "proof_need": frame.get("proof_need"),
     }
     if _estimate_tokens(packet) > token_budget:
+        decision_card = packet.get("guidance", {}).get("decision_card") or {}
         packet["guidance"] = {
-            "recommended_next_action": packet.get("guidance", {}).get("recommended_next_action", "")
+            "recommended_next_action": packet.get("guidance", {}).get("recommended_next_action", ""),
+            "decision_card": {
+                "memory_id": decision_card.get("memory_id"),
+                "recommendation": _text(decision_card.get("recommendation"), 120),
+                "do_not_apply_when": decision_card.get("do_not_apply_when", [])[:1],
+                "verification": _text(decision_card.get("verification"), 120),
+            } if decision_card else None,
         }
         receipt = packet.get("receipt", {})
         packet["receipt"] = {
@@ -264,6 +272,7 @@ def enforce_token_budget(packet, token_budget=DEFAULT_TOKEN_BUDGET):
     receipt = packet.get("receipt") or {}
     prediction = packet.get("prediction") or {}
     guidance = packet.get("guidance") or {}
+    decision_card = guidance.get("decision_card") or {}
     plan = packet.get("plan") or {}
     compact = {
         "schema_version": packet.get("schema_version", 1),
@@ -271,14 +280,32 @@ def enforce_token_budget(packet, token_budget=DEFAULT_TOKEN_BUDGET):
         "task_archetype": packet.get("task_archetype", "general"),
         "intervention": packet.get("intervention", {"mode": "none"}),
         "guidance": {
-            "recommended_next_action": _text(
-                guidance.get("recommended_next_action"), 120
-            )
+            "recommended_next_action": _text(guidance.get("recommended_next_action"), 120),
+            "decision_card": {
+                "memory_id": decision_card.get("memory_id"),
+                "recommendation": _text(decision_card.get("recommendation"), 100),
+                "verification": _text(decision_card.get("verification"), 100),
+            } if decision_card else None,
         },
         "prediction": {
             "falsifiers": prediction.get("falsifiers", [])[:1],
             "verification": prediction.get("verification", [])[:1],
             "confidence": prediction.get("confidence", 0.0),
+        },
+        "belief_state": {
+            key: values[:1]
+            for key, values in (packet.get("belief_state") or {}).items()
+        },
+        "transfer_delta": {
+            "required_verification": (packet.get("transfer_delta") or {}).get(
+                "required_verification", []
+            )[:1],
+        } if packet.get("transfer_delta") else None,
+        "reuse_check": {
+            "required_before_edit": True,
+            "smallest_safe_action": (packet.get("reuse_check") or {}).get(
+                "smallest_safe_action"
+            ),
         },
         "receipt": {
             "id": receipt.get("id"),
@@ -303,6 +330,25 @@ def enforce_token_budget(packet, token_budget=DEFAULT_TOKEN_BUDGET):
         }
     fitted = _with_budget(compact, token_budget)
     if fitted["budget"]["within_budget"]:
+        return fitted
+
+    decision_only = {
+        "schema_version": packet.get("schema_version", 1),
+        "intervention": packet.get("intervention", {"mode": "none"}),
+        "decision_card": {
+            "memory_id": decision_card.get("memory_id"),
+            "recommendation": _text(decision_card.get("recommendation"), 100),
+            "do_not_apply_when": decision_card.get("do_not_apply_when", [])[:1],
+            "verification": _text(decision_card.get("verification"), 100),
+            "confidence": decision_card.get("confidence"),
+        } if decision_card else None,
+        "receipt": {
+            "id": receipt.get("id"),
+            "memory_ids": receipt.get("memory_ids", [])[:1],
+        },
+    }
+    fitted = _with_budget(decision_only, token_budget)
+    if decision_card and fitted["budget"]["within_budget"]:
         return fitted
 
     # An extremely small budget cannot carry trustworthy guidance. Abstain,

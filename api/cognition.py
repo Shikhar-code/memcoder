@@ -1,5 +1,41 @@
 """Provider-free cognition operations shared by MCP and automation hosts."""
 
+import os
+import threading
+import time
+
+
+def _intervention_timeout_ms(environment=None):
+    configured = (environment or {}).get("intervention_timeout_ms") if isinstance(environment, dict) else None
+    configured = configured or os.environ.get("MEMCODER_INTERVENTION_TIMEOUT_MS", "1500")
+    try:
+        return max(50, min(10000, int(configured)))
+    except (TypeError, ValueError):
+        return 1500
+
+
+def _bounded_call(function, timeout_ms):
+    """Run optional retrieval with a hard host-facing deadline."""
+    result = {}
+    error = {}
+    finished = threading.Event()
+
+    def run():
+        try:
+            result["value"] = function()
+        except Exception as exc:  # Re-raise on the host thread when it finishes quickly.
+            error["value"] = exc
+        finally:
+            finished.set()
+
+    worker = threading.Thread(target=run, name="memcoder-intervention", daemon=True)
+    worker.start()
+    if not finished.wait(timeout_ms / 1000):
+        return None, True
+    if "value" in error:
+        raise error["value"]
+    return result.get("value"), False
+
 def compact_memory(memory):
     """Return the stable, serializable memory shape exposed to hosts."""
     return {
@@ -147,7 +183,8 @@ def intervene_cognition(
         agent_id="automation",
         include_shared=True,
         environment=None,
-        token_budget=450):
+        token_budget=450,
+        persist_receipt=True):
     """Return the smallest useful, falsifiable cognition intervention."""
     from memory.hierarchical_search import hierarchical_search
     from memory.runtime import build_cognitive_packet
@@ -168,8 +205,9 @@ def intervene_cognition(
     )
     from memory.runtime import enforce_token_budget
     packet = enforce_token_budget(packet, token_budget)
-    from memory.utility import save_receipt
-    save_receipt(packet["receipt"], agent_id, environment=environment)
+    if persist_receipt:
+        from memory.utility import save_receipt
+        save_receipt(packet["receipt"], agent_id, environment=environment)
     return packet
 
 
@@ -325,8 +363,15 @@ def autopilot_event_cognition(
         token_budget=450,
         host=None):
     """Handle one host lifecycle boundary; host work always fails open."""
+    started_at = time.perf_counter()
     try:
-        from memory.autopilot import begin_event, finish_event
+        from memory.autopilot import (
+            begin_event,
+            finish_event,
+            note_success,
+            note_timeout,
+            retrieval_available,
+        )
 
         decision = begin_event(
             event=event,
@@ -343,14 +388,40 @@ def autopilot_event_cognition(
         )
         existing_capture = decision.pop("_existing_capture", None)
         intervention = None
+        timed_out = False
+        if decision["should_intervene"] and not retrieval_available():
+            decision["should_intervene"] = False
+            decision["attention"] = {
+                **decision.get("attention", {}),
+                "should_retrieve": False,
+                "reason": "empty_store",
+            }
         if decision["should_intervene"]:
-            intervention = intervene_cognition(
-                problem=problem,
-                agent_id=agent_id,
-                include_shared=include_shared,
-                environment=environment,
-                token_budget=token_budget,
+            timeout_ms = _intervention_timeout_ms(environment)
+            intervention, timed_out = _bounded_call(
+                lambda: intervene_cognition(
+                    problem=problem,
+                    agent_id=agent_id,
+                    include_shared=include_shared,
+                    environment=environment,
+                    token_budget=token_budget,
+                    persist_receipt=False,
+                ),
+                timeout_ms,
             )
+            if timed_out:
+                decision["timed_out"] = True
+                decision["attention"] = {
+                    **decision.get("attention", {}),
+                    "timed_out": True,
+                    "timeout_ms": timeout_ms,
+                    "fallback": "none",
+                }
+                decision["circuit"] = note_timeout(agent_id)
+            elif intervention:
+                from memory.utility import save_receipt
+                save_receipt(intervention["receipt"], agent_id, environment=environment)
+                note_success(agent_id)
 
         capture = existing_capture
         if (
@@ -432,13 +503,21 @@ def autopilot_event_cognition(
                     }
                 except ValueError as error:
                     capture = {"frontier_recorded": False, "error": str(error)}
-        return finish_event(
+        decision["latency_ms"] = round((time.perf_counter() - started_at) * 1000, 2)
+        result = finish_event(
             decision,
             intervention=intervention,
             capture=capture,
             token_budget=token_budget,
             host=host or (environment or {}).get("host"),
         )
+        result["latency_ms"] = decision["latency_ms"]
+        result["timeout_policy"] = {
+            "timed_out": timed_out,
+            "deadline_ms": _intervention_timeout_ms(environment),
+            "fail_open": True,
+        }
+        return result
     except Exception as error:  # Lifecycle hooks must never block host work.
         from memory.contracts import HOST_ADAPTER_SCHEMA_VERSION
         return {

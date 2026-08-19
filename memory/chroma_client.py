@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import sys
-import chromadb
 
 base_path = Path(__file__).parent.parent
 legacy_workspace_db_path = base_path / "chroma_db"
@@ -25,6 +24,12 @@ db_path = Path(
 )
 
 
+def active_db_path():
+    """Return the environment override without requiring a module reload."""
+    configured = os.environ.get("MEMCODER_DB_PATH")
+    return Path(configured) if configured else db_path
+
+
 def set_db_path(path):
     """Switch the active persistent store for a controlled local run."""
 
@@ -34,7 +39,10 @@ def set_db_path(path):
 
 class ChromaCollectionProxy:
     def _get_col(self):
-        client = chromadb.PersistentClient(path=str(db_path))
+        # Keep the provider-free/empty-store path lightweight. Chroma is only
+        # needed once a real vector lookup is requested.
+        import chromadb
+        client = chromadb.PersistentClient(path=str(active_db_path()))
         return client.get_or_create_collection(name="memories")
 
     def __getattr__(self, name):
@@ -48,9 +56,11 @@ collection = ChromaCollectionProxy()
 
 def legacy_workspace_collection():
     """Return the pre-Beta-2.1 workspace collection when it exists locally."""
-    if os.environ.get("MEMCODER_DB_PATH") or legacy_workspace_db_path == db_path:
+    current_path = active_db_path()
+    if os.environ.get("MEMCODER_DB_PATH") or legacy_workspace_db_path == current_path:
         return None
     if not legacy_workspace_db_path.exists():
         return None
+    import chromadb
     client = chromadb.PersistentClient(path=str(legacy_workspace_db_path))
     return client.get_or_create_collection(name="memories")

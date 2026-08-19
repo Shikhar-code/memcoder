@@ -40,14 +40,14 @@ with TemporaryDirectory() as directory:
     assert json.loads(agy_config.read_text(encoding="utf-8"))["mcpServers"]["memcoder"]
 
 manifest = host_manifest("claude")
-assert manifest["schema_version"] == 2
+assert manifest["schema_version"] == 3
 assert "verification_finished" in manifest["lifecycle"]
 assert "outcome_closure" in manifest["capabilities"]
 assert {item["host"] for item in host_summary()} == {"codex", "agy", "claude"}
 
 events = [
     {
-        "schema_version": 2,
+        "schema_version": 3,
         "host": "claude",
         "event_id": "event-1",
         "event": "task_started",
@@ -56,7 +56,7 @@ events = [
         "privacy_safe": True,
     },
     {
-        "schema_version": 2,
+        "schema_version": 3,
         "host": "claude",
         "event_id": "event-2",
         "event": "verification_finished",

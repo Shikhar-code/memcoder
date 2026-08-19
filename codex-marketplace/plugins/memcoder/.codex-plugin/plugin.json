@@ -1,6 +1,6 @@
 {
   "name": "memcoder",
-  "version": "0.3.3-beta.1+codex.20260819150428",
+  "version": "0.3.5-beta.1+codex.20260819172905",
   "description": "Provider-free persistent cognition for Codex development tasks.",
   "author": {
     "name": "Shikhar-code"
@@ -30,7 +30,10 @@
       "Failure Frontier warnings",
       "Causal utility calibration",
       "Proof-gated Cognitive Branches",
-      "Deterministic Cognitive Diff and rollback"
+      "Deterministic Cognitive Diff and rollback",
+      "Fast SQLite lexical fallback",
+      "Actionable decision cards",
+      "Release-gated evaluation"
     ],
     "defaultPrompt": [
       "Use MemCoder cognition while completing this development task.",

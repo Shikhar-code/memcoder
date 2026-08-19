@@ -145,7 +145,7 @@ with tempfile.TemporaryDirectory() as directory:
     )
     certified = certify_host("claude", lifecycle_events("claude", "task-proof-loop"), strict=True)
     assert certified["certified"] is True
-    assert finished["schema_version"] == 2
+    assert finished["schema_version"] == 3
 
     del os.environ["MEMCODER_AUTOPILOT_PATH"]
     del os.environ["MEMCODER_UTILITY_PATH"]

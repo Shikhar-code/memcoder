@@ -1,6 +1,7 @@
 """Portable, conservative operational controls for local MemCoder storage."""
 
 import json
+import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -16,7 +17,7 @@ def _utc_now():
 
 def storage_status():
     from memory.audit_store import list_audit_entries
-    from memory.record_store import list_edges, list_records, storage_path
+    from memory.record_store import inspect_schema, lexical_status, list_edges, list_records, storage_path
 
     records = list_records()
     from memory.dreaming import snapshot_candidates
@@ -43,6 +44,59 @@ def storage_status():
         "dream_candidates": len(dream_candidates),
         "failure_frontiers": len(list_frontiers()),
         "cognitive_branches": len(list_branches()),
+        "schema": inspect_schema(),
+        "lexical": lexical_status(),
+    }
+
+
+def upgrade_storage(dry_run=False):
+    """Upgrade the additive local schema with a byte-safe SQLite rollback copy."""
+    from memory.record_store import RECORD_STORE_SCHEMA_VERSION, ensure_schema, inspect_schema, storage_path
+
+    before = inspect_schema()
+    plan = {
+        "from_version": before.get("schema_version", 0),
+        "to_version": RECORD_STORE_SCHEMA_VERSION,
+        "records": before.get("records", 0),
+        "changes": ["add or refresh the rebuildable SQLite FTS5 lexical index"],
+        "authoritative_records_changed": False,
+    }
+    if dry_run:
+        return {"dry_run": True, "plan": plan}
+
+    path = storage_path()
+    rollback = None
+    if path.exists():
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        rollback = path.parent / "backups" / f"records-before-v{RECORD_STORE_SCHEMA_VERSION}-{timestamp}.sqlite3"
+        rollback.parent.mkdir(parents=True, exist_ok=True)
+        source, target = sqlite3.connect(path), sqlite3.connect(rollback)
+        try:
+            source.backup(target)
+        finally:
+            source.close()
+            target.close()
+    try:
+        after = ensure_schema()
+        if after["schema_version"] != RECORD_STORE_SCHEMA_VERSION:
+            raise RuntimeError("record store schema verification failed")
+        if after["records"] != before.get("records", 0):
+            raise RuntimeError("record count changed during additive schema upgrade")
+    except Exception:
+        if rollback is not None:
+            source, target = sqlite3.connect(rollback), sqlite3.connect(path)
+            try:
+                source.backup(target)
+            finally:
+                source.close()
+                target.close()
+        raise
+    return {
+        "dry_run": False,
+        "plan": plan,
+        "backup": str(rollback) if rollback else None,
+        "validated": True,
+        "after": after,
     }
 
 

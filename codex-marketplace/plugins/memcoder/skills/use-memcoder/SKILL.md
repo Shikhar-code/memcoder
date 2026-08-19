@@ -12,6 +12,8 @@ description: Use MemCoder's provider-free cognition automatically during substan
    - `risk`: check the named risk, then reason normally.
    - `brief`: investigate the closest evidence first.
    - `plan`: follow the skill plan only while its assumptions match the project.
+   Start from the returned `decision_card`: apply its recommendation only while
+   `applies_when` holds, respect `do_not_apply_when`, and run its verification.
 4. Before a materially risky edit or tool action, call `memcoder_autopilot` at the matching boundary only when the task state changed. Its attention governor deduplicates unchanged requests. Follow the failure radar's cheapest preventive check.
 5. Call `memcoder_checkpoint` only when a long task gains material working state. Call `memcoder_project_update` only for durable project facts, constraints, goals, risks, completed work, next actions, or rationale-bearing decisions. Do not store routine tool output.
 6. At `verification_finished`, call `memcoder_autopilot` with the structured outcome and actual evidence. Include `guidance_used`, `changed_action`, and `verification_passed` when known, plus compact evidence, `rework_count`, and `host_tokens`.
@@ -20,5 +22,8 @@ description: Use MemCoder's provider-free cognition automatically during substan
 9. For competing approaches, use a Cognitive Branch: record changes locally, attach proof obligations, inspect the Cognitive Diff, and merge only after all obligations pass; rollback preserves the audit trail.
 10. Export `memcoder_project_handoff` only when the user requests a handoff. The receiver must revalidate its environment before acting.
 11. If a MemCoder tool is unavailable or returns no guidance, continue the user's task normally. Do not retry it repeatedly or inspect MemCoder's source unless the task concerns MemCoder itself.
+12. A `semantic_cold` or lexical fallback diagnostic is not an error. Use the
+    returned lexical decision card when present; otherwise continue normally
+    while the persistent host warms semantic retrieval in the background.
 
 Do not call `memcoder_intervene`, `memcoder_start`, `memcoder_prepare`, or `memcoder_plan` after `memcoder_autopilot` intervenes for the same unchanged task.

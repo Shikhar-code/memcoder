@@ -1,4 +1,7 @@
+import os
+
 from memory.embedder import embed
+import memory.embedder as embedder_module
 from memory.chroma_client import collection
 from memory.duplicate import find_duplicate
 from memory.importance import score_importance
@@ -42,10 +45,18 @@ def add_memory(
     if not admission["allowed"]:
         raise PolicyDenied(admission["explanation"])
 
-    # Move existing Chroma-only records into the durable store once before
-    # admitting a new record. Chroma remains a rebuildable retrieval index.
-    migrate_legacy_workspace_storage()
-    migrate_legacy_chroma(collection)
+    # Persistent hosts prewarm the rebuildable semantic index. One-shot and
+    # offline hosts admit into the durable lexical store immediately instead
+    # of loading a model or opening Chroma just to record verified work.
+    warm_check = getattr(embedder_module, "is_warm", None)
+    semantic_enabled = collection.__class__.__name__ != "ChromaCollectionProxy" or (
+        bool(warm_check()) if warm_check else True
+    ) or os.environ.get("MEMCODER_ALLOW_COLD_SEMANTIC", "").lower() in {
+        "1", "true", "yes"
+    }
+    if semantic_enabled:
+        migrate_legacy_workspace_storage()
+        migrate_legacy_chroma(collection)
 
     # -------------------------
     # Metadata
@@ -96,6 +107,9 @@ def add_memory(
     # -------------------------
     # Store
     # -------------------------
+
+    if not semantic_enabled:
+        return memory
 
     collection.add(
 

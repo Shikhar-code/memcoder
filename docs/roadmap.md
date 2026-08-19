@@ -1,8 +1,8 @@
 # MemCoder product and research roadmap
 
-**Current line:** Beta 3.3<br>
+**Current line:** Beta 3.5 — final beta and 1.0 qualification<br>
 **North star:** the dependable cognition layer for long-lived AI agents<br>
-**Last revised:** 2026-08-11
+**Last revised:** 2026-08-19
 
 > MemCoder should not merely help an agent remember. It should help the agent
 > notice what matters, recover verified project state, transfer prior learning
@@ -259,6 +259,7 @@ disabled.
 | **Beta 3.0–3.1** | Memory Studio, local control, and a hardened automatic cognition path. | Developers can inspect cognition; supported hosts start quickly, abstain correctly, respect token budgets, and learn idempotently. |
 | **Beta 3.2** | Codex, AGY, and Claude host parity before optional cloud, Intelligence, or collective cognition. | Certified hosts preserve the same lifecycle, proof, privacy, token, and fail-open contracts. |
 | **Beta 3.3** | Adaptive Proof Loop: prediction receipts, verified outcome closure, and bounded environment-aware calibration. | A host can prove whether guidance mattered, and the next comparable task is calibrated without mutating trusted memory. |
+| **Beta 3.4** | Bounded Autopilot: attention gates, empty-store fast paths, hard intervention deadlines, circuit breaking, bounded embedding cache, and lifecycle telemetry. | Memory is useful when available, invisible when empty, and unable to block host work when retrieval is slow. |
 | **RC** | Promise and contract freeze. | No data-loss, privacy, migration, or silent-learning blocker. |
 | **Core 1.0** | Dependable local cognition layer. | Stable product claim backed by reproducible real-project evidence. |
 
@@ -1214,6 +1215,97 @@ surfaces; no new database or provider is required.
 Beta 3.3 does not add cloud sync, team cognition, multi-agent coordination,
 provider-powered intelligence, or automatic mutation of trusted memories.
 
+### Beta 3.4 bounded Autopilot and fast-path reliability
+
+Beta 3.4 makes the automatic lifecycle a dependable host boundary rather than
+an extra source of latency. It keeps retrieval provider-free and preserves the
+same evidence and learning rules while making the common empty-store path
+cheap and the slow-store path bounded.
+
+#### Attention and storage fast paths
+
+- Reject disabled, host-opted-out, too-short, or otherwise non-actionable
+  lifecycle events before semantic retrieval.
+- Skip Chroma and embedding-model startup when neither the durable record store
+  nor a real local index contains memory.
+- Honor per-run database and record-store overrides without requiring a Python
+  module reload, which keeps tests and isolated hosts deterministic.
+- Keep embedding reuse bounded with an LRU cache so a long-lived host cannot
+  grow process memory without limit.
+
+#### Bounded intervention
+
+- Apply a configurable host-facing intervention deadline (default 1.5 seconds,
+  clamped to a safe range).
+- Fail open when retrieval misses the deadline; the host continues normally and
+  no unverified receipt is written by the timed-out worker.
+- Open a short per-agent circuit after a timeout so repeated lifecycle events do
+  not hammer a failing backend; a successful intervention closes it again.
+- Surface attention mode, timeout state, circuit state, and latency in the
+  existing lifecycle receipt without changing trusted-memory semantics.
+
+#### Measurement and release gates
+
+- Provide `memcoder benchmark` to measure the automatic boundary in an isolated
+  temporary store with no provider or user-memory access.
+- The provider-free benchmark reports median, p95, maximum latency, timeout
+  rate, mode, and whether storage was touched.
+- Empty-store runs must remain provider-free and avoid loading Chroma or an
+  embedding model.
+- A retrieval timeout must never block host work, duplicate a receipt, or turn
+  an unverified result into durable learning.
+
+Beta 3.4 does not add cloud sync, team cognition, multi-agent coordination,
+provider-powered intelligence, or silent mutation of trusted memories.
+
+### Beta 3.5 release-grade cognition and 1.0 qualification
+
+Beta 3.5 combines the former release-candidate phase with the final beta. No
+new feature line follows it before 1.0: after feature freeze, only defects,
+documentation, packaging, migrations, and failed release gates may change.
+
+#### Dependable retrieval
+
+- Search the durable SQLite store first through FTS5, with a bounded SQL
+  fallback for Python builds without FTS5.
+- Prewarm semantic retrieval after a persistent MCP host starts; never make a
+  task wait for a cold embedding-model load.
+- Preserve the attention gate, one-second host deadline, fail-open behavior,
+  and circuit breaker.
+- Report the selected backend, cold semantic fallback, latency, and health in
+  normal diagnostics.
+
+#### Actionable intervention
+
+- Project the best trusted result into one decision card: recommendation,
+  applicability, non-applicability, failure prevented, evidence, verification,
+  and confidence.
+- Deduplicate equivalent guidance and abstain when no candidate clears the
+  applicability and utility gates.
+- Keep the four durable memory types and current evidence architecture; the
+  decision card is a host-facing view, not another memory category.
+
+#### Release hardening
+
+- Upgrade 0.3.4 stores additively, create a rollback copy, and verify record
+  counts before declaring success.
+- Keep Codex, AGY, and Claude on one schema-versioned lifecycle and expose one
+  idempotent setup path.
+- Validate wheel, source archive, plugin bundle, Studio executable, clean
+  install, upgrade, backup, and restore before 1.0.
+
+#### Evidence gates
+
+- Evaluate at least 24 matched baseline and assisted tasks.
+- Require retrieval precision of 75% or more, correct abstention of 85% or
+  more, harmful transfer of 3% or less, zero host-blocking failures, a positive
+  median token dividend, and p95 host latency no greater than one second.
+- Publish neutral and negative results. A small or incomplete evaluation cannot
+  mark the release ready.
+
+Release path: `0.3.5b1` → `0.3.5b2` only if necessary → `1.0.0`. There is no
+separate RC feature phase.
+
 ### Required host ecosystem before Core 1.0
 
 - Stable Codex Desktop plugin with automatic lifecycle use.
@@ -1588,12 +1680,14 @@ When priorities conflict, use this order:
 
 ## Immediate next milestone
 
-The current implementation line is **Beta 3.3: Adaptive Proof Loop and closed-loop calibration**.
+The current implementation line is **Beta 3.5: Release-grade cognition and 1.0 qualification**.
 Beta 3.0 established local service, policy, replay, capsule, Studio, and adapter
 surfaces. Beta 3.1 hardens startup, token enforcement, abstention, verification
 evidence, and lifecycle idempotence. Beta 3.2 completes the supported Codex,
-AGY, and Claude host contract. Beta 3.3 closes the evidence loop before cloud
-or collective cognition expands.
+AGY, and Claude host contract. Beta 3.3 closes the evidence loop. Beta 3.4
+keeps the automatic boundary fast and fail-open. Beta 3.5 makes retrieval
+dependable, guidance actionable, upgrades recoverable, and the 1.0 decision
+measurable before cloud or collective cognition expands.
 
 The first deliverable should be a closed-loop intervention record:
 

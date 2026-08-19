@@ -29,23 +29,30 @@ $('#search').addEventListener('input',async()=>draw(await get('/v1/records?limit
 
 
 def doctor():
-    from memory.chroma_client import db_path
+    from memory.chroma_client import active_db_path
     from memory.events import journal_status
     from memory.policy import policy_status
-    from memory.record_store import storage_path
+    from memory.record_store import lexical_status, storage_path
+    from memory.embedder import is_warm
 
     checks = []
-    for name, path in (("record_store", storage_path()), ("semantic_index", db_path)):
+    for name, path in (("record_store", storage_path()), ("semantic_index", active_db_path())):
         checks.append({"name": name, "path": str(path), "parent_exists": path.parent.exists()})
     checks.append({"name": "policy", **policy_status()})
     checks.append({"name": "event_journal", **journal_status()})
     return {
         "service": "memcoder",
-        "version": "3.3",
+        "version": "3.5",
         "provider_free": True,
         "offline_capable": True,
         "healthy": all(item.get("parent_exists", True) for item in checks),
         "checks": checks,
+        "retrieval": {
+            "lexical": lexical_status(),
+            "semantic_warm": is_warm(),
+            "cold_semantic_allowed": False,
+            "fail_open": True,
+        },
     }
 
 
@@ -328,7 +335,7 @@ def make_handler():
                 _html(self, STUDIO_HTML)
                 return
             if path == "/health":
-                _json(self, 200, {"ok": True, "service": "memcoder", "version": "3.3"})
+                _json(self, 200, {"ok": True, "service": "memcoder", "version": "3.5"})
                 return
             if path == "/v1/doctor":
                 _json(self, 200, doctor())

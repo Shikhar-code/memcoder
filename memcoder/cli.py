@@ -56,6 +56,7 @@ from memory.storage_ops import (
     export_snapshot,
     restore_snapshot,
     storage_status,
+    upgrade_storage,
 )
 from memory.retention import apply_retention_preview, retention_preview
 from memory.contradictions import report_contradiction, resolve_contradiction
@@ -144,6 +145,10 @@ At `verification_finished`, include explicit outcome fields when available:
 `guidance_used`, `changed_action`, `verification_passed`, `evidence`,
 `rework_count`, and `host_tokens`. MemCoder calibrates only from this
 host-supplied proof.
+Start from the returned decision card. Apply its recommendation only while its
+applicability conditions hold, respect its non-applicability warning, and run
+its named verification. Lexical fallback is valid guidance; do not retry merely
+to wait for semantic retrieval.
 <!-- memcoder:end -->
 """
 
@@ -231,6 +236,10 @@ def main(argv=None):
         help="Create or inspect the safe local Beta 3 configuration.",
     )
     setup.add_argument("--policy", type=Path, help="Override the local policy path.")
+    setup.add_argument("--all", action="store_true", help="Configure every detected host idempotently.")
+    setup.add_argument("--project", type=Path, default=Path.cwd(), help="Project root for Claude lifecycle instructions.")
+    setup.add_argument("--agy-config", type=Path, default=default_agy_config_path())
+    setup.add_argument("--claude-config", type=Path, default=default_claude_config_path())
     doctor = subcommands.add_parser("doctor", help="Check local storage, policy, and journal health.")
     doctor.add_argument("--host", choices=("codex", "agy", "claude"))
     doctor.add_argument("--config", type=Path, help="Override the selected host's config path.")
@@ -245,6 +254,12 @@ def main(argv=None):
     studio = subcommands.add_parser("studio", help="Serve the minimal local Memory Studio.")
     studio.add_argument("--host", default="127.0.0.1")
     studio.add_argument("--port", type=int, default=8765)
+    benchmark = subcommands.add_parser(
+        "benchmark",
+        help="Measure the provider-free automatic lifecycle without touching user memory.",
+    )
+    benchmark.add_argument("--iterations", type=int, default=5)
+    benchmark.add_argument("--timeout-ms", type=int)
 
     storage_command = subcommands.add_parser(
         "storage",
@@ -265,6 +280,11 @@ def main(argv=None):
         "status",
         help="Show durable-record, provenance, and audit counts without changing data.",
     )
+    storage_upgrade = storage_subcommands.add_parser(
+        "upgrade",
+        help="Back up, apply, and validate the additive local schema upgrade.",
+    )
+    storage_upgrade.add_argument("--dry-run", action="store_true")
     storage_export = storage_subcommands.add_parser(
         "export",
         help="Write a portable JSON export of local MemCoder cognition.",
@@ -396,7 +416,21 @@ def main(argv=None):
             status["created"] = save_policy(load_policy(target), target)
         else:
             status["created"] = None
-        emit_json({"setup": status})
+        result = {"policy": status}
+        if arguments.all:
+            agy = configure_agy(arguments.agy_config, sys.executable)
+            claude = configure_claude(arguments.claude_config, sys.executable)
+            instructions = install_claude_instructions(arguments.project)
+            result["hosts"] = {
+                "agy": {"configured": True, "config": str(agy)},
+                "claude": {"configured": True, "mcp": claude, "instructions": instructions},
+                "codex": {
+                    "configured": None,
+                    "managed_by": "MemCoder Codex marketplace plugin",
+                    "next_action": "Install or refresh the MemCoder plugin, then restart Codex.",
+                },
+            }
+        emit_json({"setup": result})
         return 0
 
     if arguments.command == "doctor":
@@ -445,9 +479,20 @@ def main(argv=None):
         run_server(host=arguments.host, port=arguments.port)
         return 0
 
+    if arguments.command == "benchmark":
+        from memory.benchmark import run_benchmark
+        emit_json({"benchmark": run_benchmark(
+            iterations=arguments.iterations,
+            timeout_ms=arguments.timeout_ms,
+        )})
+        return 0
+
     if arguments.command == "storage":
         if arguments.storage_command == "status":
             emit_json({"storage": storage_status()})
+            return 0
+        if arguments.storage_command == "upgrade":
+            emit_json({"storage_upgrade": upgrade_storage(dry_run=arguments.dry_run)})
             return 0
         if arguments.storage_command == "retention-preview":
             emit_json({"retention": retention_preview(owner=arguments.owner)})

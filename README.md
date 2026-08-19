@@ -6,7 +6,7 @@
   <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/v/memcoder?style=flat-square&label=PyPI&color=3b6fb6" alt="PyPI release" /></a>
   <a href="https://pypi.org/project/memcoder/"><img src="https://img.shields.io/pypi/pyversions/memcoder?style=flat-square&color=287b62" alt="Supported Python versions" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-5b6570?style=flat-square" alt="MIT license" /></a>
-  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/release-0.3.3b1-b06f20?style=flat-square" alt="Beta 3.3" /></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/release-0.3.5b1-b06f20?style=flat-square" alt="Beta 3.5" /></a>
   <a href="#the-trust-model"><img src="https://img.shields.io/badge/core-provider--free-287b62?style=flat-square" alt="Provider-free core" /></a>
 </p>
 
@@ -57,13 +57,14 @@ MemCoder returns nothing and gets out of the way.
 
 ```powershell
 python -m pip install --pre --upgrade memcoder
-memcoder setup
+memcoder setup --all
 memcoder doctor
 ```
 
 MemCoder requires Python 3.10 or newer. Its core does not require a generation
-model, cloud account, Ollama, CUDA, or provider API key. The first semantic
-retrieval may download a local embedding model.
+model, cloud account, Ollama, CUDA, or provider API key. Persistent MCP hosts
+warm the optional local semantic model after startup; task requests use the
+SQLite lexical path immediately and never wait for a cold model download.
 
 ### Current source
 
@@ -194,6 +195,17 @@ provider-free lifecycle. Host adapters cannot weaken the evidence gate.
 | **Claude Code** | `memcoder setup-claude` | `memcoder doctor --host claude` |
 | **Any MCP host** | Run `python -m adapters.mcp.server` | Inspect `memcoder host-manifest` |
 
+Configure every host MemCoder can safely configure from Python with one
+idempotent command:
+
+```powershell
+memcoder setup --all
+```
+
+It preserves unrelated MCP servers, backs up changed JSON configuration,
+installs Claude's lifecycle instructions, and reports that Codex remains
+managed by its marketplace plugin.
+
 ### Codex Desktop
 
 From the cloned repository:
@@ -232,15 +244,32 @@ The command installs a project `.mcp.json` entry and an idempotent lifecycle
 block in `CLAUDE.md`. Existing project instructions and MCP servers are
 preserved. See the [Claude Code guide](docs/claude_code.md).
 
-## What ships in Beta 3.3
+## What ships in Beta 3.5
 
-Beta 3.3 is the combined result of three releases on the automatic path:
+Beta 3.5 is the final beta and the 1.0 qualification line. It retains the
+bounded 3.4 runtime and makes its useful path dependable, actionable, and
+measurable:
 
 | Release | Engineering change | Practical result |
 | --- | --- | --- |
 | **3.1 — Runtime hardening** | Lazy index startup, strict packet budgets, applicability-first retrieval, normalized evidence, idempotent completion | Faster startup, less irrelevant context, no duplicate learning on retry |
 | **3.2 — Host parity** | One lifecycle contract for Codex, AGY, and Claude Code; setup and certification tools | The same trust boundary follows a project across supported hosts |
 | **3.3 — Adaptive proof loop** | Explicit outcome closure, privacy-safe prediction receipts, environment-aware calibration | Retrieval adapts from observed outcomes without rewriting trusted evidence |
+| **3.4 — Bounded Autopilot** | Attention gating, empty-store short-circuiting, hard intervention deadlines, circuit breaking, bounded embedding cache, lifecycle telemetry | Ordinary hosts stay fast and fail open; slow or empty retrieval cannot hijack the task |
+| **3.5 — Release-grade cognition** | SQLite FTS5 retrieval with a bounded SQL fallback, background semantic prewarming, actionable decision cards, additive schema backup and validation, release-gate evaluation | MemCoder returns an applicable action with limits and proof—or abstains quickly without blocking the host |
+
+Measure the provider-free boundary without touching your stored memory:
+
+```powershell
+memcoder benchmark --iterations 5
+memcoder storage upgrade --dry-run
+memcoder storage upgrade
+```
+
+For a host-specific budget, set `MEMCODER_INTERVENTION_TIMEOUT_MS` (default
+1500 ms). `MEMCODER_CIRCUIT_COOLDOWN_SECONDS` controls the timeout cooldown and
+`MEMCODER_EMBED_CACHE_SIZE` bounds the in-process embedding cache; all three
+controls are clamped to safe ranges.
 
 Release history lives in the [changelog](CHANGELOG.md). Product direction and
 release gates live in the [roadmap](docs/roadmap.md).
@@ -249,6 +278,9 @@ release gates live in the [roadmap](docs/roadmap.md).
 
 | Capability | Purpose |
 | --- | --- |
+| **Dependable local retrieval** | Search durable SQLite memory first, use FTS5 when available, and reserve semantic reranking for an already-warm persistent host |
+| **Decision cards** | State the action, applicability limit, avoided failure, evidence, and cheapest verification for the selected memory |
+| **Bounded Autopilot** | Gate attention before retrieval, enforce a host deadline, and fail open through a short circuit cooldown |
 | **Utility-gated retrieval** | Rank trusted evidence by fit, decision value, risk, provenance, and cost; abstain when a packet is not worth injecting |
 | **Project Cortex** | Preserve bounded decisions, rationale, constraints, risks, checkpoints, resurrection, and verified handoff |
 | **Failure Frontiers** | Surface evidence-backed failure mechanisms and the cheapest preventive check before they repeat |
@@ -323,12 +355,14 @@ packet = autopilot_event_cognition(
 
 ```text
 memcoder autopilot          lifecycle entry point
+memcoder benchmark          provider-free latency and timeout check
 memcoder doctor             local and host diagnostics
 memcoder retrieval-debug    ranking, utility, and abstention explanation
 memcoder utility-summary    intervention outcome calibration
 memcoder project-resurrect  bounded project continuation brief
 memcoder project-handoff    privacy-safe cognition capsule
 memcoder storage status     durable record and audit counts
+memcoder storage upgrade    dry-run, back up, apply, and validate the additive schema
 memcoder service serve      localhost adapter service
 memcoder studio             browser Studio
 ```
@@ -358,7 +392,7 @@ Current non-goals:
 - no claim of consciousness or human-equivalent cognition;
 - no silent self-modification of trusted memory;
 - no required cloud account or hosted model in Core;
-- no team or multi-agent memory in Beta 3.3; and
+- no team or multi-agent memory in Beta 3.5; and
 - no claim that a passing task proves an intervention was helpful.
 
 ## Development
@@ -376,6 +410,8 @@ Run the focused Beta 3 regression checks:
 python tests/test_beta31_hardening.py
 python tests/test_beta32_host_parity.py
 python tests/test_beta33_proof_loop.py
+python tests/test_beta34_reliability.py
+python tests/test_beta35_release.py
 python tests/test_mcp_provider_independence.py
 python tests/test_qa_admission.py
 python tests/test_retrieval_safety.py

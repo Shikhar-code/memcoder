@@ -1,6 +1,6 @@
 # Antigravity MCP setup (provider-free)
 
-Beta 3.3 uses the same automatic lifecycle as Codex and Claude Code and closes
+Beta 3.5 uses the same automatic lifecycle as Codex and Claude Code and closes
 verified intervention outcomes. Install
 MemCoder into the Python environment Antigravity will launch, then run:
 
